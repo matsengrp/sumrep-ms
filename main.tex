@@ -14,17 +14,50 @@
 \newcommand{\alphabet}{\mathcal{A}}
 
 
-\title{Template project}
-\author{Erick}
+\title{Comparing generative models for immune repertoires using summary statistics}
+\author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
 
 \begin{document}
+
 \maketitle
+
+\begin{abstract}
+Probabilistic models formalize our understanding of the random process of immune repertoire generation.
+Although many models exist, and the realism of these models can be assessed by comparison of summary statistics, a systematic comparison of models to data using these statistics has not yet been done.
+In this paper we perform a systematic comparison of existing models to data sets through the lens of summary statistics.
+We find regarding the models...
+We find regarding the summary statistics...
+We have an R package.
+\end{abstract}
 
 \section*{Introduction}
 
+Immune repertoires are ...
 
-\subsection*{Questions}
+They are randomly generated, which invites probabilistic modeling.
+
+One way to use models is for simulation.
+Simulation tools can be used for understanding a ``null'' distribution.
+They are also useful for benchmarking the performance of inferential tools.
+Probabilistic models can also be used as the basis for inferential methods.
+
+In order to feel confident in these probabilistic frameworks, and to find ways to improve them, we must compare them to data.
+This is not as easy as a task for repertoires as it is in other fields, where model outputs may be real numbers.
+In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
+
+In such a setting, summary statistics are useful for benchmarking the difference between models and data, and indeed between models and between data sets.
+Luckily, researchers have already derived many means of quantifying important features of repertoires.
+These will be discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
+
+[Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
+
+In this paper, we gather summary statistics on repertoires and use them to compare state of the art simulation tools to real data.
+This can be seen as a way of benchmarking generative models and simulation tools.
+We also investigate the effectiveness of various summary statistics in distinguishing between repertoires and between simulations and data.
+Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
+Also, although summary statistics can be used to do approximate Bayesian inference, we don't do that here either.
+
 
 Cite \cite{Felsenstein1981-zs}
 
