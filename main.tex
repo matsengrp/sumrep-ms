@@ -33,7 +33,7 @@ We have an R package.
 
 \section*{Introduction}
 
-B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification and response to antigen.
+B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification of and response to antigen.
 The sophisticated rearrangement of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
 An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time. 
 
@@ -131,11 +131,11 @@ Sometimes it makes more sense to use other distance metrics, such as the sum of 
 That is, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively, 
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
 \begin{equation}
-u(R_1; v, d, j) = \#\left\{s \in R_1: s_v = v \land s_d = d \land s_j = j\right\},
+u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
 \end{equation}
 then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ takes the form
 \begin{equation}
-d(R_1, R_2) = \sum_{v \in V} \sum_{d \in D} \sum_{j \in J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
+d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
 \end{equation}
 
 
