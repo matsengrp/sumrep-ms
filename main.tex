@@ -33,22 +33,23 @@ We have an R package.
 
 \section*{Introduction}
 
-Immune repertoires are ...
+B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification and response to antigen.
+The sophisticated rearrangement of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
+An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time. 
 
-They are randomly generated, which invites probabilistic modeling.
-
-One way to use models is for simulation.
+The random generation of immune repertoires from gene rearrangements invites probabilistic modeling and in particular model-based simulation.
+% BJO - I'm not really sure what is meant by a ``null'' distribution here.
 Simulation tools can be used for understanding a ``null'' distribution.
 They are also useful for benchmarking the performance of inferential tools.
 Probabilistic models can also be used as the basis for inferential methods.
 
-In order to feel confident in these probabilistic frameworks, and to find ways to improve them, we must compare them to data.
-This is not as easy as a task for repertoires as it is in other fields, where model outputs may be real numbers.
+To build and improve on such probabilistic frameworks, we must compare simulated data to observed repertoire samples.
+This is not as easy as a task for repertoires as it is in other fields, where a model output may simply be a real number.
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
 
-In such a setting, summary statistics are useful for benchmarking the difference between models and data, and indeed between models and between data sets.
+In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between models and data, and indeed between models and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
-These will be discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
+These will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
@@ -57,6 +58,85 @@ This can be seen as a way of benchmarking generative models and simulation tools
 We also investigate the effectiveness of various summary statistics in distinguishing between repertoires and between simulations and data.
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used to do approximate Bayesian inference, we don't do that here either.
+
+\section*{Repertoire Comparison}
+
+Applications of a methodical lymphocyte repertoire comparison tool include:
+\begin{itemize}
+\item Comparing simulated repertoires to observed ones (model selection and validation)
+\item Contrasting repertoires in the context of antigen response or vaccination design and evaluation
+\item Assessing the performance of competing repertoire analysis tools 
+\item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
+\end{itemize}
+
+Table \ref{SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
+\begin{figure}
+\begin{tabular}{c|c|c|c}
+Summary statistic & Annotation required & Clustering required & Phylogeny required
+\\
+\hline \hline
+Pairwise distance matrix & No & No & No \\
+Distance to $k$th closest sequence & No & No & No \\
+GC-content & No & No & No \\
+Hot/cold spot motif frequencies & No & No & No \\
+Nucleotide diversity & No & No & No \\
+$k$mer frequency & No & No & No \\
+\hline
+Distance from naive to mature & Yes & No & No \\
+Distance to $k$th closest V-sequence & Yes & No & No \\
+CDR3 length & Yes & No & No \\
+Joint distribution of germline gene use & Yes & No & No \\
+Levenshtein distance between CDR3s & Yes & No & No \\
+Physiochemical features of CDR3s & Yes & No & No \\
+Per-gene substitution rate & Yes & No & No \\
+Per-gene-per-position substitution rate & Yes & No & No \\
+Base-by-base substitution matrix & Yes & No & No \\
+Transition/transversion rates & Yes & No & No \\
+Positional distance between mutations & Yes & No & No \\
+Distance from naive to mature & Yes & No & No \\
+V/D/J deletion/insertion lengths & Yes & No & No \\
+Transition matrix for insertions & Yes & No & No \\
+\hline
+Cluster size distribution & Yes & Yes & No \\
+Hill numbers (diversity indices) & Yes & Yes & No \\
+Selection estimates & Yes & Yes & No \\
+\hline
+Tree balance & Yes & Yes & Yes \\
+Graph-theoretical features & Yes & Yes & Yes \\
+\end{tabular}
+\label{SummaryStatistics}
+\end{figure}
+
+\section*{Divergence}
+The general approach of \texttt{sumrep} is to get distributions of a given summary statistic for the two repertoires in consideration and compare them via some metric or divergence.
+We elect Jenson-Shannon divergence for most of our comparison functions.
+The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
+\begin{equation}
+\text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
+\end{equation}
+where $M := (P + Q)/2$ and $\text{KLD}(P || M)$ is the usual KL-divergence,
+\begin{equation}
+\text{KLD}\left(P_1 || P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
+\end{equation}
+In the case where $P$ and $Q$ are both discrete distributions, this becomes
+\begin{equation}
+\text{KLD}\left(P_1 || P_2\right) = \sum_{n \in \Omega} p_1(n) \log\left( \frac{p_1(n)}{p_2(n)} \right)
+\end{equation}
+where $\Omega$ is the countable sample space for $P_1$.
+Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
+By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
+Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
+
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, which we use to compare joint V/D/J-gene usage distributions. 
+That is, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively, 
+defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
+\begin{equation}
+u(R_1; v, d, j) = \#\left\{s \in R_1: s_v = v \land s_d = d \land s_j = j\right\},
+\end{equation}
+then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ takes the form
+\begin{equation}
+d(R_1, R_2) = \sum_{v \in V} \sum_{d \in D} \sum_{j \in J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
+\end{equation}
 
 
 Cite \cite{Felsenstein1981-zs}
