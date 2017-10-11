@@ -35,11 +35,10 @@ We have an R package.
 
 B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification of and response to antigen.
 The sophisticated rearrangement of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
-An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time. 
+An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time.
 
 The random generation of immune repertoires from gene rearrangements invites probabilistic modeling and in particular model-based simulation.
-% BJO - I'm not really sure what is meant by a ``null'' distribution here.
-Simulation tools can be used for understanding a ``null'' distribution.
+Simulation tools can be used to generate a ``null'' distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 They are also useful for benchmarking the performance of inferential tools.
 Probabilistic models can also be used as the basis for inferential methods.
 
@@ -50,6 +49,10 @@ In contrast, repertoire models generate sets of nucleotide sequences that are sp
 In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between models and data, and indeed between models and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
 These will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
+Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods.
+For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line.
+On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
+In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
@@ -59,13 +62,15 @@ We also investigate the effectiveness of various summary statistics in distingui
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used to do approximate Bayesian inference, we don't do that here either.
 
-\section*{Repertoire Comparison}
+\section*{Methods}
+
+\subsection*{Repertoire Comparison}
 
 Applications of a methodical lymphocyte repertoire comparison tool include:
 \begin{itemize}
 \item Comparing simulated repertoires to observed ones (model selection and validation)
 \item Contrasting repertoires in the context of antigen response or vaccination design and evaluation
-\item Assessing the performance of competing repertoire analysis tools 
+\item Assessing the performance of competing repertoire analysis tools
 \item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
 \end{itemize}
 
@@ -127,8 +132,8 @@ Because the discrete formulation is much nicer to worth with than the continuous
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
 Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
 
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, which we use to compare joint V/D/J-gene usage distributions. 
-That is, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively, 
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, which we use to compare joint V/D/J-gene usage distributions.
+That is, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
 \begin{equation}
 u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
@@ -139,7 +144,6 @@ d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathc
 \end{equation}
 
 
-Cite \cite{Felsenstein1981-zs}
 
 \bibliographystyle{plain}
 \bibliography{main}
