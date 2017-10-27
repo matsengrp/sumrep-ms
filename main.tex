@@ -23,7 +23,10 @@
 \maketitle
 
 \begin{abstract}
+The adaptive immune system generates an incredible diversity of B cell receptor sequences coding for antibodies that keep dangerous pathogens at bay.
+These sequences arise by a complex process of random naive cell generation then affinity maturation, leaving considerable hidden structure in the distribution of sequences.
 Probabilistic models formalize our understanding of the random process of immune repertoire generation.
+One can compare such complex data sets to each other and to generative models using summary statistics: quantities that summarize some aspect of the repertoires.
 Although many models exist, and the realism of these models can be assessed by comparison of summary statistics, a systematic comparison of models to data using these statistics has not yet been done.
 In this paper we perform a systematic comparison of existing models to data sets through the lens of summary statistics.
 We find regarding the models...
@@ -45,9 +48,20 @@ Probabilistic models can also be used as the basis for inferential methods.
 To build and improve on such probabilistic frameworks, we must compare simulated data to observed repertoire samples.
 This is not as easy as a task for repertoires as it is in other fields, where a model output may simply be a real number.
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
+Immune repertoires are large, complex objects.
 
 In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between models and data, and indeed between models and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
+
+As an analogous setting, BCR repertoires consist of collections of trees.
+Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
+Tree statistics, albeit other ones, have also been a major focus of previous work in BCR sequence analysis \cite{Dunn-Walters2004-hv,Mehr2004-ej,Steiman-Shimony2006-fm,Shahaf2008-cc}.
+
+However, they are more complex, inviting other means of quantifying and comparing them.
+See below for a list of them.
+
+
+
 These will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
 Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods.
 For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line.
@@ -74,8 +88,8 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
 \item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
 \end{itemize}
 
-Table \ref{SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
-\begin{figure}
+Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
+\begin{table}
 \begin{tabular}{c|c|c|c}
 Summary statistic & Annotation required & Clustering required & Phylogeny required
 \\
@@ -109,8 +123,18 @@ Selection estimates & Yes & Yes & No \\
 Tree balance & Yes & Yes & Yes \\
 Graph-theoretical features & Yes & Yes & Yes \\
 \end{tabular}
-\label{SummaryStatistics}
-\end{figure}
+\label{tab:SummaryStatistics}
+\end{table}
+
+Other possible statistics:
+
+\begin{itemize}
+\item Clustered sequences: estimated total diversity reviewed in \cite{Mehr2012-se}
+\item Trees: graph theoretical features \cite{Dunn-Walters2002-cu,Dunn-Walters2004-hv,Mehr2004-ej,Shahaf2008-cc,Budeus2015-ab,Yaari2015-ss}.
+Applied to make inferences about data \cite{Steiman-Shimony2006-fm}.
+\item Trees + sequence level information for selection estimates \cite{Uduman2014-pb}
+\end{itemize}
+
 
 \section*{Divergence}
 The general approach of \texttt{sumrep} is to get distributions of a given summary statistic for the two repertoires in consideration and compare them via some metric or divergence.
@@ -143,6 +167,10 @@ then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_
 d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
 \end{equation}
 
+
+
+\section{Discussion}
+We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
 
 
 \bibliographystyle{plain}
