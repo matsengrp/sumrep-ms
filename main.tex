@@ -24,9 +24,11 @@
 
 \begin{abstract}
 The adaptive immune system generates an incredible diversity of B cell receptor sequences coding for antibodies that keep dangerous pathogens at bay.
-These sequences arise by a complex process of random naive cell generation then affinity maturation, leaving considerable hidden structure in the distribution of sequences.
+These sequences arise by a complex process of random naive cell generation followed by affinity maturation, yielding considerable latent structure underlying the distribution of sequences.
 Probabilistic models formalize our understanding of the random process of immune repertoire generation.
-One can compare such complex data sets to each other and to generative models using summary statistics: quantities that summarize some aspect of the repertoires.
+Model benchmarking often consists of simulating from the true model, performing inference on data derived from the simulation, and assessing the accuracy of the inference.
+Model validation attempts to delineate the discrepancies between the simulations and observed data sets, which is challenging since the full underlying distribution is unknown.
+One can compare such complex data sets to each other and to model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
 Although many models exist, and the realism of these models can be assessed by comparison of summary statistics, a systematic comparison of models to data using these statistics has not yet been done.
 In this paper we perform a systematic comparison of existing models to data sets through the lens of summary statistics.
 We find regarding the models...
@@ -63,8 +65,8 @@ See below for a list of them.
 
 
 These will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
-Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods.
-For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line.
+Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
+For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line, but comparing nonparametric statistics like the empirical mean and range is still sensible.
 On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
 In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
 
