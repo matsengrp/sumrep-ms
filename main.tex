@@ -38,7 +38,7 @@ We have an R package.
 
 \section*{Introduction}
 
-B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification of and response to antigen.
+B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification of and response to antigens.
 The sophisticated rearrangement of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
 An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time.
 
@@ -48,9 +48,9 @@ They are also useful for benchmarking the performance of inferential tools.
 Probabilistic models can also be used as the basis for inferential methods.
 
 To build and improve on such probabilistic frameworks, we must compare simulated data to observed repertoire samples.
-This is not as easy as a task for repertoires as it is in other fields, where a model output may simply be a real number.
+This is not as easy a task for repertoires as it is for other problems, where a model output may simply be a real number.
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
-Immune repertoires are large, complex objects.
+Indeed, immune repertoires are large, complex objects.
 
 In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between models and data, and indeed between models and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
@@ -66,7 +66,7 @@ See below for a list of them.
 
 These will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
 Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
-For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line, but comparing nonparametric statistics like the empirical mean and range is still sensible.
+For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line, but comparing nonparametric statistics like the sample mean or range is still sensible.
 On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
 In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
 
@@ -93,14 +93,13 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
 \begin{table}
 \begin{tabular}{c|c|c|c}
-Summary statistic & Annotation required & Clustering required & Phylogeny required
+Summary statistic & Annotations & Clustering & Phylogeny
 \\
 \hline \hline
 Pairwise distance matrix & No & No & No \\
 Distance to $k$th closest sequence & No & No & No \\
 GC-content & No & No & No \\
 Hot/cold spot motif frequencies & No & No & No \\
-Nucleotide diversity & No & No & No \\
 $k$mer frequency & No & No & No \\
 \hline
 Distance from naive to mature & Yes & No & No \\
@@ -121,6 +120,7 @@ Transition matrix for insertions & Yes & No & No \\
 Cluster size distribution & Yes & Yes & No \\
 Hill numbers (diversity indices) & Yes & Yes & No \\
 Selection estimates & Yes & Yes & No \\
+Transition/transversion rates & Yes & Yes & No \\
 \hline
 Tree balance & Yes & Yes & Yes \\
 Graph-theoretical features & Yes & Yes & Yes \\
@@ -169,7 +169,36 @@ then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_
 d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
 \end{equation}
 
+\section{Results}
+The following notation is used in this section:
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c}
+	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time \\
+	\hline
+    \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
+    \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
+    \texttt{p\_g1} & Observation &     \texttt{partis} & \texttt{partis} & G & 1 hour \\
+    \texttt{i\_f1} & Observation &     \texttt{igblast} & \texttt{partis} & F & 1 hour \\
+    \texttt{i\_f2} & Observation &     \texttt{igblast} & \texttt{partis} & F & 8 days \\
+    \texttt{i\_g1} & Observation &     \texttt{igblast} & \texttt{partis} & G & 1 hour\\
+    \texttt{pi\_f1} & Observation &    \texttt{partis} & \texttt{igblast} & F & 1 hour\\
+    \texttt{pi\_f2} & Observation &    \texttt{partis} & \texttt{igblast} & F & 8 days\\
+    \texttt{pi\_g1} & Observation &    \texttt{partis} & \texttt{igBlast} & G & 1 hour\\
+    \texttt{p\_f1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 1 hour\\
+    \texttt{p\_f2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 8 days\\
+    \texttt{p\_g1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 1 hour\\
+    \texttt{pi\_f1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 1 hour\\
+    \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 8 days\\
+    \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 1 hour\\
+\end{tabular}
+\end{center}
 
+\subsection*{Comparing observations to model simulations per model}
+
+
+\subsection*{Assessing summary statistic replication by model}
+
+\subsection*{Comparing observations to competing model simulations}
 
 \section{Discussion}
 We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
