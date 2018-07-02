@@ -43,19 +43,20 @@ The sophisticated rearrangement of the genes that construct B cell receptors (BC
 An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time.
 
 The random generation of immune repertoires from gene rearrangements invites probabilistic modeling and in particular model-based simulation.
-Simulation tools can be used to generate a ``null'' distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
-They are also useful for benchmarking the performance of inferential tools.
-Probabilistic models can also be used as the basis for inferential methods.
+In particular, it is natural to benchmark model-based inferential tools by applying them to simulations from the assumed model and assessing the performance.
+Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
-To build and improve on such probabilistic frameworks, we must compare simulated data to observed repertoire samples.
+To build and improve on such probabilistic frameworks, we must identify the strengths and limitations of the underlying models.
+We usually perform model validation by comparing features of simulated data to observed repertoire samples and evaluating their concordance (or lack thereof).
 This is not as easy a task for repertoires as it is for other problems, where a model output may simply be a real number.
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
+Moreover, accurate repertoire models incorporate various underyling structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
 Indeed, immune repertoires are large, complex objects.
 
-In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between model simulations and data, and also between simulations and between data sets.
+In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
 
-As an analogous setting, BCR repertoires consist of collections of trees.
+As noted above, BCR repertoires consist of collections of trees.
 Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
 Tree statistics, albeit other ones, have also been a major focus of previous work in BCR sequence analysis \cite{Dunn-Walters2004-hv,Mehr2004-ej,Steiman-Shimony2006-fm,Shahaf2008-cc}.
 
@@ -64,7 +65,7 @@ See below for a list of them.
 
 
 
-These will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
+A hefty collection of summary statistics for repertoires will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
 Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
 For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line, but comparing nonparametric statistics like the sample mean or range is still sensible.
 On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
