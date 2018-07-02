@@ -14,7 +14,7 @@
 \newcommand{\alphabet}{\mathcal{A}}
 
 
-\title{Comparing generative models for immune repertoires using summary statistics}
+\title{Generative model validation for immune receptor repertoires}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
 
@@ -52,7 +52,7 @@ This is not as easy a task for repertoires as it is for other problems, where a 
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
 Indeed, immune repertoires are large, complex objects.
 
-In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between models and data, and indeed between models and between data sets.
+In such a setting, summary statistics are useful (and sometimes sufficient) for benchmarking the difference between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
 
 As an analogous setting, BCR repertoires consist of collections of trees.
@@ -72,11 +72,11 @@ In our linear regression example, comparing the general trends of points can be 
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
-In this paper, we gather summary statistics on repertoires and use them to compare state of the art simulation tools to real data.
-This can be seen as a way of benchmarking generative models and simulation tools.
-We also investigate the effectiveness of various summary statistics in distinguishing between repertoires and between simulations and data.
+In this paper, we gather summary statistics on repertoires and use them to perform model validation for state of the art simulation tools against real data.
+Our methodology also constitutes a systematic means of comparing any two lymphocyte repertoires, whether experimentally observed or artifically generated.
+Furthermore, we investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data.
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
-Also, although summary statistics can be used to do approximate Bayesian inference, we don't do that here either.
+Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
 
 \section*{Methods}
 
