@@ -207,26 +207,47 @@ finally, we append the \texttt{sim} suffix if the dataset was simulated from an 
 We compute each summary statistic listed in table \ref{tab:SummaryStatistics} for each dataset in table \ref{tab:Datasets}.
 The goal of this section is to assess the similarity of an individual's observed repertoire and its corresponding simulated repertoire.
 Figure \ref{SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
-Because the absolute divergence values are sensitive to scale as well as the type of divergence used, we also include divergences for each observation-observation pair as a benchmark.
-The idea here is that a very good simulator should result in low divergence values between its reference repertoire and its simulated repertoire, as opposed to comparing the observed dataset to any other dataset.
-For such a simulator, the diagonal at the bottom of the plots in figure \ref{SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
-In reality, it tends to be the case that observed repertoires are more similar to each other than an observed repertoire is to its simulated counterpart.
-
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
     \caption{Divergences of empirical summary distributions based on three individual observed datasets.}
     \label{SimObs}
 \end{figure}
+Because the absolute divergence values are sensitive to scale as well as the type of divergence used, we also include divergences for each observation-observation pair as a benchmark.
+The idea here is that a very good simulator should result in low divergence values between its reference repertoire and its simulated repertoire, as opposed to comparing the observed dataset to any other dataset.
+For such a simulator, the diagonal at the bottom of the plots in figure \ref{SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
+In reality, it tends to be the case that observed repertoires are more similar to each other than an observed repertoire is to its simulated counterpart.
 
+A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
+To address this, we performed dataset annotation using standalone IgBlast, and compared these to simulations based on \texttt{partis} annotations using the IgBlast germline databases.
+The results are displayed in figure \ref{PartisIgb}.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/partis_igb.pdf}
+    \caption{Comparing divergences for \texttt{igblast} annotations and \texttt{partis} simulations based on the same individual observed repertoires.
+        We use the default germline databases in \texttt{igblast} for consistency.
+    }
+    \label{PartisIgb}
 \end{figure}
+The plots do not suggest any systematic bias in our approach.
 
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/score_plot.pdf}
-\end{figure}
 
 \subsection*{Assessing summary statistic replication by model}
+We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
+One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
+Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
+Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
+\begin{equation}
+    \text{score}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
+    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)} 
+        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right) 
+\end{equation}
+Figure \ref{Scores} displays the LRD scores for the three individuals based on \texttt{partis} simulations.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/score_plot.pdf}
+    \caption{The log relative deviance (LRD) of each statistic based on \texttt{partis} model inference and simulation.
+        A low LRD indicates a well-replicated statistic by the simulations.
+    }
+    \label{Scores}
+\end{figure}
 
 \subsection*{Comparing observations to competing model simulations}
 
