@@ -91,7 +91,6 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
 \item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
 \end{itemize}
 
-Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
 \begin{table}
 \begin{tabular}{c|c|c|c}
 Summary statistic & Annotations & Clustering & Phylogeny
@@ -126,8 +125,11 @@ Transition/transversion rates & Yes & Yes & No \\
 Tree balance & Yes & Yes & Yes \\
 Graph-theoretical features & Yes & Yes & Yes \\
 \end{tabular}
+\caption{Working table of summary statistics as well as their respective levels of assumed post-processing.}
 \label{tab:SummaryStatistics}
 \end{table}
+
+Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
 
 Other possible statistics:
 
@@ -172,7 +174,8 @@ d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathc
 
 \section{Results}
 The following notation is used in this section:
-\begin{center}
+
+\begin{table}
 \begin{tabular}{c|c|c|c|c|c}
 	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time \\
 	\hline
@@ -192,10 +195,36 @@ The following notation is used in this section:
     \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 8 days\\
     \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 1 hour\\
 \end{tabular}
-\end{center}
+\caption{Dataset notation.}
+\label{tab:Datasets}
+\end{table}
+
+In short, a prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default IgBlast germline databases;
+this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
+finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 
 \subsection*{Comparing observations to model simulations per model}
+We compute each summary statistic listed in table \ref{tab:SummaryStatistics} for each dataset in table \ref{tab:Datasets}.
+The goal of this section is to assess the similarity of an individual's observed repertoire and its corresponding simulated repertoire.
+Figure \ref{SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
+Because the absolute divergence values are sensitive to scale as well as the type of divergence used, we also include divergences for each observation-observation pair as a benchmark.
+The idea here is that a very good simulator should result in low divergence values between its reference repertoire and its simulated repertoire, as opposed to comparing the observed dataset to any other dataset.
+For such a simulator, the diagonal at the bottom of the plots in figure \ref{SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
+In reality, it tends to be the case that observed repertoires are more similar to each other than an observed repertoire is to its simulated counterpart.
 
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
+    \caption{Divergences of empirical summary distributions based on three individual observed datasets.}
+    \label{SimObs}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/partis_igb.pdf}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/score_plot.pdf}
+\end{figure}
 
 \subsection*{Assessing summary statistic replication by model}
 
