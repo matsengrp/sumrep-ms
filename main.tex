@@ -8,6 +8,18 @@
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes,arrows}
+\usepackage{adjustbox}
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+        text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+        \tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+                text width=6em, text centered, rounded corners, minimum height=4em]
+                \tikzstyle{line} = [draw, -latex']
+                \tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+                        minimum height=2em]
+
 \graphicspath{ {figures/} }
 
 % Commands
@@ -173,8 +185,7 @@ d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathc
 \end{equation}
 
 \section{Results}
-The following notation is used in this section:
-
+Table \ref{tab:Datasets} gives metadata for each dataset used in this section.
 \begin{table}
 \begin{tabular}{c|c|c|c|c|c}
 	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time \\
@@ -198,14 +209,52 @@ The following notation is used in this section:
 \caption{Dataset notation.}
 \label{tab:Datasets}
 \end{table}
-
-In short, a prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default IgBlast germline databases;
+In short, the notation is as follows.
+A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default \texttt{igblast} germline databases;
 this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
 finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 
 \subsection*{Comparing observations to model simulations per model}
+In this section we perform model validation on the BCR sequence annotation and clonal family clustering strategy implemented in \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz}.
 We compute each summary statistic listed in table \ref{tab:SummaryStatistics} for each dataset in table \ref{tab:Datasets}.
-The goal of this section is to assess the similarity of an individual's observed repertoire and its corresponding simulated repertoire.
+Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
+For those statistics which require an inferred phylogenetic tree, we use the cft package with the \texttt{partis}-partitioned data as input.
+Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
+Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given dataset.
+\begin{figure}
+\begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
+    \begin{tikzpicture}
+        \node[block](fasta){Fasta file};
+        \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+
+        \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
+        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
+
+        \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+
+        \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+
+
+        \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
+
+        \path[line](fasta) -- (partis);
+
+        \path[line] (partis) -- (partisdata);
+        \path[line] (partis) -- (params);
+
+
+        \path[line] (params) -- (simulate);
+        \path[line] (simulate) -- (sim);
+
+        \path[line] (partisdata) -- (c1);
+        \path[line] (sim) -- (c1);
+
+    \end{tikzpicture}
+\end{adjustbox}
+\caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
+\label{PartisWorkflow}
+\end{figure}
+
 Figure \ref{SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
@@ -218,7 +267,50 @@ For such a simulator, the diagonal at the bottom of the plots in figure \ref{Sim
 In reality, it tends to be the case that observed repertoires are more similar to each other than an observed repertoire is to its simulated counterpart.
 
 A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
-To address this, we performed dataset annotation using standalone IgBlast, and compared these to simulations based on \texttt{partis} annotations using the IgBlast germline databases.
+To address this, we performed dataset annotation using standalone \texttt{igblast} \cite{Ye2013-kl}, and compared these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
+Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
+Our strategy is anaologous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
+The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
+\begin{figure}
+    \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
+        \begin{tikzpicture}
+            \node[block](fasta){Fasta file};
+            \node[cloud, below left=0.5 cm and 2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+            \node[cloud, below right=0.5 cm and 2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
+
+            \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
+            \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
+
+            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+
+            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+
+            \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
+
+            \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
+            \node[block, below right=0.75 and 0.1cm of sim](c2){Comparisons};
+
+            \path[line](fasta) -- (partis);
+            \path[line](fasta) -- (igblast);
+
+            \path[line] (partis) -- (partisdata);
+            \path[line] (partis) -- (params);
+
+            \path[line] (igblast) -- (igblastdata);
+
+            \path[line] (params) -- (simulate);
+            \path[line] (simulate) -- (sim);
+
+            \path[line] (partisdata) -- (c1);
+            \path[line] (sim) -- (c1);
+
+            \path[line] (igblastdata) -- (c2);
+            \path[line] (sim) -- (c2);
+        \end{tikzpicture}
+    \end{adjustbox}
+    \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
+    \label{IgblastWorkflow}
+\end{figure}
 The results are displayed in figure \ref{PartisIgb}.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/partis_igb.pdf}
