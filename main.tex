@@ -12,9 +12,9 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary{shapes,arrows}
 \usepackage{adjustbox}
-\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,
         text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
-        \tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+        \tikzstyle{block} = [rectangle, draw, fill=blue!20,
                 text width=6em, text centered, rounded corners, minimum height=4em]
                 \tikzstyle{line} = [draw, -latex']
                 \tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
@@ -25,7 +25,8 @@
 % Commands
 \newcommand{\alphabet}{\mathcal{A}}
 
-
+%EM Let's decide if we want to focus on generative model validation as a primary aim or as an application.
+%EM One could imagine writing this either way-- the application would be "repertoires are complex. here's a bunch of summary statistics and a standard means of comparing them. one can use them to compare repertoires, be they simulated or real."
 \title{Generative model validation for immune receptor repertoires}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
@@ -91,10 +92,12 @@ Furthermore, we investigate the effectiveness of various summary statistics in d
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
 
+
 \section*{Methods}
 
 \subsection*{Repertoire Comparison}
 
+%EM This next paragraph doesn't feel abstract methods-y.
 Applications of a methodical lymphocyte repertoire comparison tool include:
 \begin{itemize}
 \item Comparing simulated repertoires to observed ones (model selection and validation)
@@ -105,6 +108,7 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
 
 \begin{table}
 \begin{tabular}{c|c|c|c}
+%EM How about adding a column about where you are getting the implementation?
 Summary statistic & Annotations & Clustering & Phylogeny
 \\
 \hline \hline
@@ -173,6 +177,7 @@ Because the discrete formulation is much nicer to worth with than the continuous
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
 Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
 
+%EM Perhaps you can describe "sum of absolute differences" as a metric on its own and then make your way to VDJ? That would be more parallel with the above.
 Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, which we use to compare joint V/D/J-gene usage distributions.
 That is, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
@@ -184,7 +189,14 @@ then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_
 d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
 \end{equation}
 
-\section{Results}
+%EM This would be a good place to put your "efficient calculation by subsampling" approaches.
+
+
+
+\section*{Results}
+
+%EM for folks just reading because they are interested in the package, you could start by just describing
+
 Table \ref{tab:Datasets} gives metadata for each dataset used in this section.
 \begin{table}
 \begin{tabular}{c|c|c|c|c|c}
@@ -324,13 +336,14 @@ The plots do not suggest any systematic bias in our approach.
 
 \subsection*{Assessing summary statistic replication by model}
 We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
+%EM For methods?
 One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
 Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
 Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
 \begin{equation}
     \text{score}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
-    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)} 
-        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right) 
+    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
+        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
 \end{equation}
 Figure \ref{Scores} displays the LRD scores for the three individuals based on \texttt{partis} simulations.
 \begin{figure}
@@ -343,7 +356,7 @@ Figure \ref{Scores} displays the LRD scores for the three individuals based on \
 
 \subsection*{Comparing observations to competing model simulations}
 
-\section{Discussion}
+\section*{Discussion}
 We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
 
 
