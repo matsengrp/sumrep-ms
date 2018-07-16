@@ -22,11 +22,15 @@
 
 \graphicspath{ {figures/} }
 
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
 % Commands
 \newcommand{\alphabet}{\mathcal{A}}
 
 %EM Let's decide if we want to focus on generative model validation as a primary aim or as an application.
 %EM One could imagine writing this either way-- the application would be "repertoires are complex. here's a bunch of summary statistics and a standard means of comparing them. one can use them to compare repertoires, be they simulated or real."
+%BJO To me it seems that model validation provides a more substantive goal, but I'm willing to consider either option. Do you have a preference?
 \title{Generative model validation for immune receptor repertoires}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
@@ -93,11 +97,11 @@ Although by comparing various generative models to real data, we obtain a valida
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
 
 
-\section*{Methods}
 
 \subsection*{Repertoire Comparison}
 
 %EM This next paragraph doesn't feel abstract methods-y.
+%BJO It may eventually be a better fit for a Discussion section, but I'll put it here for now.
 Applications of a methodical lymphocyte repertoire comparison tool include:
 \begin{itemize}
 \item Comparing simulated repertoires to observed ones (model selection and validation)
@@ -106,40 +110,51 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
 \item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
 \end{itemize}
 
+\section*{Methods}
 \begin{table}
-\begin{tabular}{c|c|c|c}
-%EM How about adding a column about where you are getting the implementation?
-Summary statistic & Annotations & Clustering & Phylogeny
+\begin{tabular}{c|c|c|c|c}
+    Summary statistic & Annotations & Clustering & Phylogeny & Implementation
 \\
 \hline \hline
-Pairwise distance matrix & No & No & No \\
-Distance to $k$th closest sequence & No & No & No \\
-GC-content & No & No & No \\
-Hot/cold spot motif frequencies & No & No & No \\
-$k$mer frequency & No & No & No \\
+Pairwise distance matrix & No & No & No & \texttt{stringdist} \\
+Distance to $k$th closest sequence & No & No & No & \texttt{stringdist} \\
+GC-content & No & No & No & \texttt{ape} \\
+Hot/cold spot motif frequencies & No & No & No & \texttt{Biostrings} \\
+%BJO Hmm... we never really did much with this (i.e. the Eulerian path paper). Maybe we should discuss?
+$k$mer frequency & No & No & No & -- \\
 \hline
-Distance from naive to mature & Yes & No & No \\
-Distance to $k$th closest V-sequence & Yes & No & No \\
-CDR3 length & Yes & No & No \\
-Joint distribution of germline gene use & Yes & No & No \\
-Levenshtein distance between CDR3s & Yes & No & No \\
-Physiochemical features of CDR3s & Yes & No & No \\
-Per-gene substitution rate & Yes & No & No \\
-Per-gene-per-position substitution rate & Yes & No & No \\
-Base-by-base substitution matrix & Yes & No & No \\
-Transition/transversion rates & Yes & No & No \\
-Positional distance between mutations & Yes & No & No \\
-Distance from naive to mature & Yes & No & No \\
-V/D/J deletion/insertion lengths & Yes & No & No \\
-Transition matrix for insertions & Yes & No & No \\
+Distance from naive to mature & Yes & No & No & \texttt{stringdist} \\
+%BJO Another one we kind of skipped over.
+Distance to $k$th closest V-sequence & Yes & No & No & -- \\
+CDR3 length & Yes & No & No & -- \\
+Joint distribution of germline gene use & Yes & No & No & Custom \\
+Levenshtein distance between CDR3s & Yes & No & No & \texttt{stringdist} \\
+Hydrophobicity & Yes & No & No & \texttt{Peptides} \\
+Atchley factors & Yes & No & No & \texttt{HDMD} \\
+Aliphatic index & Yes & No & No & \texttt{Peptides} \\
+G.R.A.V.Y. index & Yes & No & No & \texttt{alakazam} \\
+Per-gene substitution rate & Yes & No & No & Custom \\
+Per-gene-per-position substitution rate & Yes & No & No & Custom \\
+Per-base mutability model & Yes & No & No & \texttt{shazam} \\
+Per-base substitution model & Yes & No & No & \texttt{shazam} \\
+%BJO This one doesn't depend on fit-star, right?
+Transition/transversion rates & Yes & No & No & -- \\
+Positional distance between mutations & Yes & No & No & Custom \\
+Distance from naive to mature & Yes & No & No & \texttt{stringdist} \\
+V/D/J deletion/insertion lengths & Yes & No & No & -- \\
+Transition matrix for insertions & Yes & No & No & Custom \\
 \hline
-Cluster size distribution & Yes & Yes & No \\
-Hill numbers (diversity indices) & Yes & Yes & No \\
-Selection estimates & Yes & Yes & No \\
-Transition/transversion rates & Yes & Yes & No \\
+Cluster size distribution & Yes & Yes & No & Custom \\
+Hill numbers (diversity indices) & Yes & Yes & No & \texttt{alakazam} \\
+Selection estimates & Yes & Yes & No & \texttt{shazam} \\
+%BJO blocked due to fit-star
+Transition/transversion rates & Yes & Yes & No & -- \\
 \hline
-Tree balance & Yes & Yes & Yes \\
-Graph-theoretical features & Yes & Yes & Yes \\
+Sackin index & Yes & Yes & Yes & \texttt{CollessLike} \\
+Colless-like index & Yes & Yes & Yes & \texttt{CollessLike} \\
+Cophenetic index & Yes & Yes & Yes & \texttt{CollessLike} \\
+%BJO To be delineated
+Graph-theoretical features & Yes & Yes & Yes & -- \\
 \end{tabular}
 \caption{Working table of summary statistics as well as their respective levels of assumed post-processing.}
 \label{tab:SummaryStatistics}
@@ -178,24 +193,90 @@ By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2
 Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
 
 %EM Perhaps you can describe "sum of absolute differences" as a metric on its own and then make your way to VDJ? That would be more parallel with the above.
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, which we use to compare joint V/D/J-gene usage distributions.
-That is, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences for count data:
+\begin{equation}\label{SAD}
+    d(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
+\end{equation}
+In words, \eqref{SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum. 
+This metric is well suited for comparing joint V/D/J-gene usage distributions:
+if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
 \begin{equation}
 u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
 \end{equation}
-then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ takes the form
+then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ becomes
 \begin{equation}
-d(R_1, R_2) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(R_1; v, d, j) - u(R_2; v, d, j) \right|.
+d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
 \end{equation}
 
 %EM This would be a good place to put your "efficient calculation by subsampling" approaches.
+\subsection*{Efficient computation by subsampling and averaging}
+Computing full summaries can be computationally inefficient for even moderately sized repertoires.
+When the target summary is a distribution, we can gain efficiency by subsampling and averaging.
+This idea is laid out in algorithm \ref{DivergenceAveraging}, which uses a rolling average to update the estimated divergence by computing the divergence from subsamples of the two distributions.
+Algorithm \ref{DivergenceAveraging} is automatic in that it converges when standardized successive divergence estimates are sufficiently close.
+
+\begin{algorithm}
+    \caption{Compute automatic approximate divergence.\\
+    \textbf{Input:} distributions $P$ and $Q$, divergence function $D$, subsample size $m$, convergence tolerance $\varepsilon$\\
+    \textbf{Output:} approximate $D$-divergence between $P$ and $Q$
+    }
+    \label{DivergenceAveraging}
+    \begin{algorithmic}
+    \State $n \gets 0$;
+    \State error $\gets \infty$;
+    \While{error $> \varepsilon$}:
+    \State $p_n \gets \text{subsample}(P, m)$
+    \State $q_n \gets \text{subsample}(Q, m)$
+    \State $D_n(P, Q) \gets D(p_n, q_n)$
+    \State $\overline{D}_n \gets \frac{(n - 1) \overline{D}_{n-1}(P, Q) + D_n(P, Q)}{n}$;
+    \State error $\gets \frac{ \left| \overline D_n(P, Q) - \overline D_{n-1}(P, Q) \right|}
+        { \overline D_n(P, Q) }$
+    \State $n \gets n + 1$
+    \EndWhile
+    \Return $D_n(P, Q)$
+\end{algorithmic}
+\end{algorithm}
 
 
+When the summary distributions themselves are of interest, we can apply the same reasoning for approximating them.
+Algorithm \ref{DistributionAveraging} describes an automatic procedure to approximate a distribution $d$.
+Here, the idea is to keep appending subsamples of $d$ to a working approximation until successive iterates have a sufficiently small JS-divergence.
+\begin{algorithm}
+    \caption{Compute automatic approximate distribution.\\
+        \textbf{Input:} distribution $d$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+        \textbf{Output:} subsampled approximation to $d$}
+    \label{DistributionAveraging}
+    \begin{algorithmic}
+        \State $d_0 \gets \text{subsample}(d, m)$
+        \State $n \gets 1$
+        \State error $\gets \infty$
+        \While{error $> \varepsilon$}:
+        \State $d_\text{samp} \gets \text{subsample}(d, m)$
+        \State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
+        \State error $\gets \text{JSD}(d_{n-1}, d_n)$
+        \State $n \gets n + 1$
+        \EndWhile
+    \end{algorithmic}
+    \Return $d_n$
+
+\end{algorithm}
+
+\subsection*{Scoring summary statistic replication by model}
+We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
+One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
+Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
+Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
+\begin{equation}
+    \text{score}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
+    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
+        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
+\end{equation}
 
 \section*{Results}
 
 %EM for folks just reading because they are interested in the package, you could start by just describing
+%BJO Sorry, not sure what you mean with the above.
 
 Table \ref{tab:Datasets} gives metadata for each dataset used in this section.
 \begin{table}
@@ -335,16 +416,6 @@ The plots do not suggest any systematic bias in our approach.
 
 
 \subsection*{Assessing summary statistic replication by model}
-We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
-%EM For methods?
-One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
-Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
-Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
-\begin{equation}
-    \text{score}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
-    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
-        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
-\end{equation}
 Figure \ref{Scores} displays the LRD scores for the three individuals based on \texttt{partis} simulations.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/score_plot.pdf}
