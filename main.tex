@@ -40,23 +40,18 @@
 \maketitle
 
 \begin{abstract}
-The adaptive immune system generates an incredible diversity of adaptive immune receptors to keep dangerous pathogens at bay.
-The DNA sequences coding for these receptors arise by a complex random process of random naive cell generation followed by a series of binding-based filters as well as (in the B cell case) affinity maturation, giving considerable structure to the distribution of sequences.
-Probabilistic models formalize our understanding of the random process of immune repertoire generation.
-%EM I'd prefer moving the following two sentences to after the comparison using summary stats sentence, describing them as applications. Or perhaps take them out? This abstract is getting long.
-Model benchmarking often consists of simulating from the true model, performing inference on data derived from the simulation, and assessing the accuracy of the inference.
-Model validation attempts to delineate the discrepancies between the simulations and observed data sets, which is challenging since the full underlying distribution is unknown.
-One can compare such complex data sets to each other and to model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
-Although many models exist, and the realism of these models can be assessed by comparison of summary statistics, a systematic comparison of models to data using these statistics has not yet been done.
-In this paper we perform a systematic comparison of existing models to data sets through the lens of summary statistics.
-We find regarding the models...
+The adaptive immune system generates an incredible diversity of antigen receptors to keep dangerous pathogens at bay.
+The DNA sequences coding for these receptors arise by a complex process of random naive cell generation followed by a series of binding-based filters as well as (in the B cell case) affinity maturation, giving considerable structure to the distribution of sequences.
+This structure leads to Rep-Seq datasets whose analysis is difficult but important for scientific understanding and public health applications.
+One can compare these data sets to each other and to generative model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
+In this paper we introduce \texttt{sumrep}, an R package that performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
 We find regarding the summary statistics...
-We have an R package.
+We find regarding the models...
 \end{abstract}
 
 \section*{Introduction}
 
-B cells and T cells, also known as lymphocytes, play critical roles in adaptive immunity through the cooperative identification of and response to antigens.
+B cells and T cells play critical roles in adaptive immunity through the cooperative identification of and response to antigens.
 The sophisticated rearrangement of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
 An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time.
 
@@ -81,19 +76,17 @@ On the other hand, statistics on the result of estimations are revealing when in
 In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
 
 %EM This feels a bit out of place.
-As noted above, BCR repertoires consist of collections of trees.
+%BJO I think you added this a while back, but I tried to pad it with more context. Feel free to change or remove any part of it.
+Still, determining how well a given summary can describe or distinguish a repertoire is a difficult task.
+To illustrate, as noted above, BCR repertoires consist of collections of trees.
 Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
 Tree statistics, albeit other ones, have also been a major focus of previous work in BCR sequence analysis \cite{Dunn-Walters2004-hv,Mehr2004-ej,Steiman-Shimony2006-fm,Shahaf2008-cc}.
-
-%EM What's "they" here?
-However, they are more complex, inviting other means of quantifying and comparing them.
-See below for a list of them.
-
+These difficulties suggest that an eclectic approach using many summaries of diverse nature seems reasonable for a thorough view of a repertoire's characteristics.
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
-In this paper, we gather summary statistics on repertoires and use them to perform model validation for state of the art simulation tools against real data.
-Our methodology also constitutes a systematic means of comparing any two lymphocyte repertoires, whether experimentally observed or artifically generated.
+In this paper, we gather many summary statistics on repertoires and use them to perform model validation for state of the art simulation tools against real data.
+We present \texttt{sumrep}, an R package that computes these summary distributions for Rep-Seq datasets and performs repertoire comparisons based on these summaries.
 Furthermore, we investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data.
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
