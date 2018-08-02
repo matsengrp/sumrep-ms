@@ -31,7 +31,8 @@
 %EM Let's decide if we want to focus on generative model validation as a primary aim or as an application.
 %EM One could imagine writing this either way-- the application would be "repertoires are complex. here's a bunch of summary statistics and a standard means of comparing them. one can use them to compare repertoires, be they simulated or real."
 %BJO To me it seems that model validation provides a more substantive goal, but I'm willing to consider either option. Do you have a preference?
-\title{Immune receptor repertoire comparison and model validation}
+%EM I prefer having both.
+\title{Immune receptor repertoire comparison and model validation via summary statistics}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
 \begin{document}
@@ -39,9 +40,10 @@
 \maketitle
 
 \begin{abstract}
-The adaptive immune system generates an incredible diversity of B cell receptor sequences coding for antibodies that keep dangerous pathogens at bay.
-These sequences arise by a complex process of random naive cell generation followed by affinity maturation, yielding considerable latent structure underlying the distribution of sequences.
+The adaptive immune system generates an incredible diversity of adaptive immune receptors to keep dangerous pathogens at bay.
+The DNA sequences coding for these receptors arise by a complex random process of random naive cell generation followed by a series of binding-based filters as well as (in the B cell case) affinity maturation, giving considerable structure to the distribution of sequences.
 Probabilistic models formalize our understanding of the random process of immune repertoire generation.
+%EM I'd prefer moving the following two sentences to after the comparison using summary stats sentence, describing them as applications. Or perhaps take them out? This abstract is getting long.
 Model benchmarking often consists of simulating from the true model, performing inference on data derived from the simulation, and assessing the accuracy of the inference.
 Model validation attempts to delineate the discrepancies between the simulations and observed data sets, which is challenging since the full underlying distribution is unknown.
 One can compare such complex data sets to each other and to model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
@@ -63,29 +65,30 @@ In particular, it is natural to benchmark model-based inferential tools by apply
 Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
 To build and improve on such probabilistic frameworks, we must identify the strengths and limitations of the underlying models.
-We usually perform model validation by comparing features of simulated data to observed repertoire samples and evaluating their concordance (or lack thereof).
+Statistical model validation compares features of simulated data to observed repertoire samples and evaluates their concordance (or lack thereof).
 This is not as easy a task for repertoires as it is for other problems, where a model output may simply be a real number.
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
-Moreover, accurate repertoire models incorporate various underyling structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
+Moreover, accurate repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
 Indeed, immune repertoires are large, complex objects.
 
 In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
 
-As noted above, BCR repertoires consist of collections of trees.
-Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
-Tree statistics, albeit other ones, have also been a major focus of previous work in BCR sequence analysis \cite{Dunn-Walters2004-hv,Mehr2004-ej,Steiman-Shimony2006-fm,Shahaf2008-cc}.
-
-However, they are more complex, inviting other means of quantifying and comparing them.
-See below for a list of them.
-
-
-
-A hefty collection of summary statistics for repertoires will be tabulated and discussed in detail below, and range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
+These summary statistics can range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
 Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
 For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line, but comparing nonparametric statistics like the sample mean or range is still sensible.
 On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
 In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
+
+%EM This feels a bit out of place.
+As noted above, BCR repertoires consist of collections of trees.
+Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
+Tree statistics, albeit other ones, have also been a major focus of previous work in BCR sequence analysis \cite{Dunn-Walters2004-hv,Mehr2004-ej,Steiman-Shimony2006-fm,Shahaf2008-cc}.
+
+%EM What's "they" here?
+However, they are more complex, inviting other means of quantifying and comparing them.
+See below for a list of them.
+
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
@@ -111,6 +114,7 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
 
 \section*{Methods}
 \begin{table}
+\makebox[\textwidth][c]{ % this centers a too-wide table
 \begin{tabular}{c|c|c|c|c}
     Summary statistic & Annotations & Clustering & Phylogeny & Implementation
 \\
@@ -137,6 +141,7 @@ Per-gene-per-position substitution rate & Yes & No & No & Custom \\
 Per-base mutability model & Yes & No & No & \texttt{shazam} \\
 Per-base substitution model & Yes & No & No & \texttt{shazam} \\
 %BJO This one doesn't depend on fit-star, right?
+%EM Yes, but we could just count Ts vs Tv, call it a "ratio" and drop the model-based rigor.
 Transition/transversion rates & Yes & No & No & -- \\
 Positional distance between mutations & Yes & No & No & Custom \\
 Distance from naive to mature & Yes & No & No & \texttt{stringdist} \\
@@ -155,11 +160,13 @@ Cophenetic index & Yes & Yes & Yes & \texttt{CollessLike} \\
 %BJO To be delineated
 Graph-theoretical features & Yes & Yes & Yes & -- \\
 \end{tabular}
+}
 \caption{Working table of summary statistics as well as their respective levels of assumed post-processing.}
 \label{tab:SummaryStatistics}
 \end{table}
 
-Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenic inference.
+%EM This should be expanded. E.g. to drive home that we need to use partis or some such tool.
+Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenetic inference.
 
 Other possible statistics:
 
@@ -173,7 +180,7 @@ Applied to make inferences about data \cite{Steiman-Shimony2006-fm}.
 
 \section*{Divergence}
 The general approach of \texttt{sumrep} is to get distributions of a given summary statistic for the two repertoires in consideration and compare them via some metric or divergence.
-We elect Jenson-Shannon divergence for most of our comparison functions.
+We have elected to use Jenson-Shannon divergence for most of our comparison functions.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
 \begin{equation}
 \text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
@@ -191,12 +198,12 @@ Because the discrete formulation is much nicer to worth with than the continuous
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
 Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
 
-%EM Perhaps you can describe "sum of absolute differences" as a metric on its own and then make your way to VDJ? That would be more parallel with the above.
 Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences for count data:
-\begin{equation}\label{SAD}
+%EM I prefer equations to have an eq: label, figures a fig: label, etc.
+\begin{equation}\label{eq:SAD}
     d(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
 \end{equation}
-In words, \eqref{SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum. 
+In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
 This metric is well suited for comparing joint V/D/J-gene usage distributions:
 if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
@@ -208,12 +215,12 @@ then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_
 d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
 \end{equation}
 
-%EM This would be a good place to put your "efficient calculation by subsampling" approaches.
 \subsection*{Efficient computation by subsampling and averaging}
 Computing full summaries can be computationally inefficient for even moderately sized repertoires.
 When the target summary is a distribution, we can gain efficiency by subsampling and averaging.
-This idea is laid out in algorithm \ref{DivergenceAveraging}, which uses a rolling average to update the estimated divergence by computing the divergence from subsamples of the two distributions.
-Algorithm \ref{DivergenceAveraging} is automatic in that it converges when standardized successive divergence estimates are sufficiently close.
+%EM I like to caps Algorithm, Figure, etc, and add ~ between for a non-breaking space. I didn't make changes below.
+This idea is laid out in Algorithm~\ref{DivergenceAveraging}, which uses a rolling average to update the estimated divergence by computing the divergence from subsamples of the two distributions.
+Algorithm~\ref{DivergenceAveraging} is automatic in that it converges when standardized successive divergence estimates are sufficiently close.
 
 \begin{algorithm}
     \caption{Compute automatic approximate divergence.\\
@@ -228,6 +235,7 @@ Algorithm \ref{DivergenceAveraging} is automatic in that it converges when stand
     \State $p_n \gets \text{subsample}(P, m)$
     \State $q_n \gets \text{subsample}(Q, m)$
     \State $D_n(P, Q) \gets D(p_n, q_n)$
+    %EM This is sad when n=0.
     \State $\overline{D}_n \gets \frac{(n - 1) \overline{D}_{n-1}(P, Q) + D_n(P, Q)}{n}$;
     \State error $\gets \frac{ \left| \overline D_n(P, Q) - \overline D_{n-1}(P, Q) \right|}
         { \overline D_n(P, Q) }$
@@ -239,7 +247,7 @@ Algorithm \ref{DivergenceAveraging} is automatic in that it converges when stand
 
 
 When the summary distributions themselves are of interest, we can apply the same reasoning for approximating them.
-Algorithm \ref{DistributionAveraging} describes an automatic procedure to approximate a distribution $d$.
+Algorithm~\ref{DistributionAveraging} describes an automatic procedure to approximate a distribution $d$.
 Here, the idea is to keep appending subsamples of $d$ to a working approximation until successive iterates have a sufficiently small JS-divergence.
 \begin{algorithm}
     \caption{Compute automatic approximate distribution.\\
@@ -262,6 +270,7 @@ Here, the idea is to keep appending subsamples of $d$ to a working approximation
 \end{algorithm}
 
 \subsection*{Scoring summary statistic replication by model}
+%EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
 We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
 One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
 Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
@@ -274,13 +283,16 @@ Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observ
 
 \section*{Results}
 
-%EM for folks just reading because they are interested in the package, you could start by just describing
-%BJO Sorry, not sure what you mean with the above.
+%EM I suggest having the first section of the results be a short blurb about the R package.
 
+%EM Then a section heading about model validation here.
+
+%EM I suggest moving this to "methods"-- it describes the "materials" used for your analysis.
+%EM We need a little more intro here to say that we're using the flu dataset etc.
 Table \ref{tab:Datasets} gives metadata for each dataset used in this section.
 \begin{table}
 \begin{tabular}{c|c|c|c|c|c}
-	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time \\
+	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
 	\hline
     \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
     \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
@@ -307,9 +319,11 @@ this is followed by a letter representing the individual succeeded by a number c
 finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 
 \subsection*{Comparing observations to model simulations per model}
+%EM I suggest this is more methods
 In this section we perform model validation on the BCR sequence annotation and clonal family clustering strategy implemented in \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz}.
 We compute each summary statistic listed in table \ref{tab:SummaryStatistics} for each dataset in table \ref{tab:Datasets}.
 Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
+%EM cft package is going to get us in trouble-- best to just describe the alignment and tree building programs (with versions)
 For those statistics which require an inferred phylogenetic tree, we use the cft package with the \texttt{partis}-partitioned data as input.
 Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
 Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given dataset.
@@ -347,6 +361,7 @@ Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given
 \label{PartisWorkflow}
 \end{figure}
 
+%EM Results paragraphs concern what was found. Can you comment on overall trends or interesting things we found that people can find in the figure?
 Figure \ref{SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
@@ -361,7 +376,7 @@ In reality, it tends to be the case that observed repertoires are more similar t
 A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
 To address this, we performed dataset annotation using standalone \texttt{igblast} \cite{Ye2013-kl}, and compared these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
 Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
-Our strategy is anaologous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
+Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
 The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
 \begin{figure}
     \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
@@ -415,6 +430,7 @@ The plots do not suggest any systematic bias in our approach.
 
 
 \subsection*{Assessing summary statistic replication by model}
+%EM Need some text here describing what was found.
 Figure \ref{Scores} displays the LRD scores for the three individuals based on \texttt{partis} simulations.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/score_plot.pdf}
