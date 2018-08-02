@@ -91,8 +91,6 @@ Furthermore, we investigate the effectiveness of various summary statistics in d
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
 
-
-
 \subsection*{Repertoire Comparison}
 
 %EM This next paragraph doesn't feel abstract methods-y.
@@ -160,6 +158,11 @@ Graph-theoretical features & Yes & Yes & Yes & -- \\
 
 %EM This should be expanded. E.g. to drive home that we need to use partis or some such tool.
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenetic inference.
+The first group does not require any post-processing and are completely tool-independent.
+The second group requires standard sequence annotations, such as inferred naive ancestor sequences, germline gene assignments, and indel information.
+The third group also requires clonal family cluster assignments.
+The fourth group further requires an imputed phylogeny for each clonal family.
+\texttt{sumrep} itself does not perform any annotation, clustering, or phylogeny inference, but rather assumes such metadata have been pre-computed and included in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
 Other possible statistics:
 
@@ -171,7 +174,7 @@ Applied to make inferences about data \cite{Steiman-Shimony2006-fm}.
 \end{itemize}
 
 
-\section*{Divergence}
+\subsection*{Divergence}
 The general approach of \texttt{sumrep} is to get distributions of a given summary statistic for the two repertoires in consideration and compare them via some metric or divergence.
 We have elected to use Jenson-Shannon divergence for most of our comparison functions.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
