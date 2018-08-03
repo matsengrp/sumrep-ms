@@ -225,7 +225,8 @@ Algorithm~\ref{DivergenceAveraging} is automatic in that it converges when stand
     }
     \label{DivergenceAveraging}
     \begin{algorithmic}
-    \State $n \gets 0$;
+    \State $\overline{D}_0 \gets 0$;
+    \State $n \gets 1$;
     \State error $\gets \infty$;
     \While{error $> \varepsilon$}:
     \State $p_n \gets \text{subsample}(P, m)$
@@ -265,8 +266,50 @@ Here, the idea is to keep appending subsamples of $d$ to a working approximation
 
 \end{algorithm}
 
+\subsection*{Comparing observations to model simulations per model}
+%EM I suggest this is more methods
+\texttt{sumrep} can be used for BCR/TCR generative model validation as follows.
+Given a repertoire dataset, we infer model parameters using software based on the given model, and use these parameters to generate corresponding simulated datasets.
+This allows us to directly compare the observed and simulated datasets using the full \texttt{sumrep} suite.
+Applying this methodology to many datasets gives a clear view of characteristics which the model captures well, as well as areas for improvement.
+
+We illustrate this approach with two case studies.
+First, we discuss model validation on the BCR sequence annotation and clonal family clustering strategy implemented in \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz}.
+We compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset in Table \ref{tab:Datasets}.
+Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
+%EM cft package is going to get us in trouble-- best to just describe the alignment and tree building programs (with versions)
+For those statistics which require an inferred phylogenetic tree, we use BCR-tailored tree-building software that takes \texttt{partis}-partitioned data as input and outputs tree data structures for each clonal family.
+Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
+Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given dataset.
+\begin{figure}
+\begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
+    \begin{tikzpicture}
+        \node[block](fasta){Fasta file};
+        \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+        \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
+        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
+        \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+        \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+        \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
+        \path[line](fasta) -- (partis);
+        \path[line] (partis) -- (partisdata);
+        \path[line] (partis) -- (params);
+        \path[line] (params) -- (simulate);
+        \path[line] (simulate) -- (sim);
+        \path[line] (partisdata) -- (c1);
+        \path[line] (sim) -- (c1);
+    \end{tikzpicture}
+\end{adjustbox}
+\caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
+\label{PartisWorkflow}
+\end{figure}
+
+Next, we discuss a similar model validation approach for TCR repertoires using \texttt{IGoR} \cite{Marcou2018-du}.
+(In progress)
+
 \subsection*{Scoring summary statistic replication by model}
 %EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
+%BJO Yes! Though I might have to put this off until after the WG meeting.
 We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
 One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
 Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
@@ -277,25 +320,22 @@ Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observ
         \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
 \end{equation}
 
-\section*{Results}
-
-%EM I suggest having the first section of the results be a short blurb about the R package.
-
-%EM Then a section heading about model validation here.
-
-%EM I suggest moving this to "methods"-- it describes the "materials" used for your analysis.
+\subsection*{Materials}
 %EM We need a little more intro here to say that we're using the flu dataset etc.
-Table \ref{tab:Datasets} gives metadata for each dataset used in this section.
+Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
+The raw data were obtained from \cite{Laserson2014-dx}, and the processed data, courtesy of Jason, are from a paper that isn't out yet.
+These datasets represent repertoires of patients at various time points following an influenza vaccination.
 \begin{table}
+\makebox[\textwidth][c]{ 
 \begin{tabular}{c|c|c|c|c|c}
 	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
 	\hline
     \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
     \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
     \texttt{p\_g1} & Observation &     \texttt{partis} & \texttt{partis} & G & 1 hour \\
-    \texttt{i\_f1} & Observation &     \texttt{igblast} & \texttt{partis} & F & 1 hour \\
-    \texttt{i\_f2} & Observation &     \texttt{igblast} & \texttt{partis} & F & 8 days \\
-    \texttt{i\_g1} & Observation &     \texttt{igblast} & \texttt{partis} & G & 1 hour\\
+    \texttt{i\_f1} & Observation &     \texttt{igblast} & \texttt{igblast} & F & 1 hour \\
+    \texttt{i\_f2} & Observation &     \texttt{igblast} & \texttt{igblast} & F & 8 days \\
+    \texttt{i\_g1} & Observation &     \texttt{igblast} & \texttt{igblast} & G & 1 hour\\
     \texttt{pi\_f1} & Observation &    \texttt{partis} & \texttt{igblast} & F & 1 hour\\
     \texttt{pi\_f2} & Observation &    \texttt{partis} & \texttt{igblast} & F & 8 days\\
     \texttt{pi\_g1} & Observation &    \texttt{partis} & \texttt{igBlast} & G & 1 hour\\
@@ -306,7 +346,8 @@ Table \ref{tab:Datasets} gives metadata for each dataset used in this section.
     \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 8 days\\
     \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 1 hour\\
 \end{tabular}
-\caption{Dataset notation.}
+}
+\caption{Metadata for each dataset used in the analyses.}
 \label{tab:Datasets}
 \end{table}
 In short, the notation is as follows.
@@ -314,60 +355,29 @@ A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \
 this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
 finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 
-\subsection*{Comparing observations to model simulations per model}
-%EM I suggest this is more methods
-In this section we perform model validation on the BCR sequence annotation and clonal family clustering strategy implemented in \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz}.
-We compute each summary statistic listed in table \ref{tab:SummaryStatistics} for each dataset in table \ref{tab:Datasets}.
-Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
-%EM cft package is going to get us in trouble-- best to just describe the alignment and tree building programs (with versions)
-For those statistics which require an inferred phylogenetic tree, we use the cft package with the \texttt{partis}-partitioned data as input.
-Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
-Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given dataset.
-\begin{figure}
-\begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
-    \begin{tikzpicture}
-        \node[block](fasta){Fasta file};
-        \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+\section*{Results}
 
-        \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
+\subsection*{Implementation}
+%EM I suggest having the first section of the results be a short blurb about the R package.
+The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
+It supports BCR and TCR repertoire datasets.
+It is open-source, unit-tested, and fully documented and AIRR compliant (by the time of release).
+Analyses will be reproducible using Docker.
 
-        \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
-
-        \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-
-
-        \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
-
-        \path[line](fasta) -- (partis);
-
-        \path[line] (partis) -- (partisdata);
-        \path[line] (partis) -- (params);
-
-
-        \path[line] (params) -- (simulate);
-        \path[line] (simulate) -- (sim);
-
-        \path[line] (partisdata) -- (c1);
-        \path[line] (sim) -- (c1);
-
-    \end{tikzpicture}
-\end{adjustbox}
-\caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
-\label{PartisWorkflow}
-\end{figure}
+\subsection*{Model validation}
+%EM Then a section heading about model validation here.
 
 %EM Results paragraphs concern what was found. Can you comment on overall trends or interesting things we found that people can find in the figure?
-Figure \ref{SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
+Figure \ref{fig:SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
     \caption{Divergences of empirical summary distributions based on three individual observed datasets.}
-    \label{SimObs}
+    \label{fig:SimObs}
 \end{figure}
 Because the absolute divergence values are sensitive to scale as well as the type of divergence used, we also include divergences for each observation-observation pair as a benchmark.
 The idea here is that a very good simulator should result in low divergence values between its reference repertoire and its simulated repertoire, as opposed to comparing the observed dataset to any other dataset.
-For such a simulator, the diagonal at the bottom of the plots in figure \ref{SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
-In reality, it tends to be the case that observed repertoires are more similar to each other than an observed repertoire is to its simulated counterpart.
+For such a simulator, the diagonal at the bottom of the plots in figure \ref{fig:SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
+We see that this is the case for some statistics, particularly the germline gene usages and CDR3 lengths, but in other cases the observations tend to be more similar to other observations, such as for the distributions of positional distance between mutations.
 
 A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
 To address this, we performed dataset annotation using standalone \texttt{igblast} \cite{Ye2013-kl}, and compared these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
@@ -380,33 +390,22 @@ The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
             \node[block](fasta){Fasta file};
             \node[cloud, below left=0.5 cm and 2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
             \node[cloud, below right=0.5 cm and 2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
-
             \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
             \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
-
             \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
-
             \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-
             \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
-
             \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
             \node[block, below right=0.75 and 0.1cm of sim](c2){Comparisons};
-
             \path[line](fasta) -- (partis);
             \path[line](fasta) -- (igblast);
-
             \path[line] (partis) -- (partisdata);
             \path[line] (partis) -- (params);
-
             \path[line] (igblast) -- (igblastdata);
-
             \path[line] (params) -- (simulate);
             \path[line] (simulate) -- (sim);
-
             \path[line] (partisdata) -- (c1);
             \path[line] (sim) -- (c1);
-
             \path[line] (igblastdata) -- (c2);
             \path[line] (sim) -- (c2);
         \end{tikzpicture}
@@ -435,6 +434,10 @@ Figure \ref{Scores} displays the LRD scores for the three individuals based on \
     }
     \label{Scores}
 \end{figure}
+As noted from Figure \ref{fig:SimObs}, the best-recapitulated statistics tend to be CDR3 lengths and most of the statistics based on germline inferences.
+This is sensible as these per-sample statistics are directly used for simulation.
+Interestingly, the simulations do tend to capture selection estimates and GRAVY indices well despite these quantities not being involved in the inference or simulation process.
+Conversely, the simulations tend to have less agreement in distributions of hotspot and coldspot motifs as well as positional distance between mutations and VD/DJ insertion matrices.
 
 \subsection*{Comparing observations to competing model simulations}
 
