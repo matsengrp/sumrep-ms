@@ -75,8 +75,6 @@ For example, if our inferential method was linear regression, comparing fit slop
 On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
 In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
 
-%EM This feels a bit out of place.
-%BJO I think you added this a while back, but I tried to pad it with more context. Feel free to change or remove any part of it.
 Still, determining how well a given summary can describe or distinguish a repertoire is a difficult task.
 To illustrate, as noted above, BCR repertoires consist of collections of trees.
 Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
@@ -156,7 +154,6 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \label{tab:SummaryStatistics}
 \end{table}
 
-%EM This should be expanded. E.g. to drive home that we need to use partis or some such tool.
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenetic inference.
 The first group does not require any post-processing and are completely tool-independent.
 The second group requires standard sequence annotations, such as inferred naive ancestor sequences, germline gene assignments, and indel information.
@@ -267,7 +264,6 @@ Here, the idea is to keep appending subsamples of $d$ to a working approximation
 \end{algorithm}
 
 \subsection*{Comparing observations to model simulations per model}
-%EM I suggest this is more methods
 \texttt{sumrep} can be used for BCR/TCR generative model validation as follows.
 Given a repertoire dataset, we infer model parameters using software based on the given model, and use these parameters to generate corresponding simulated datasets.
 This allows us to directly compare the observed and simulated datasets using the full \texttt{sumrep} suite.
@@ -321,12 +317,11 @@ Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observ
 \end{equation}
 
 \subsection*{Materials}
-%EM We need a little more intro here to say that we're using the flu dataset etc.
 Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
 The raw data were obtained from \cite{Laserson2014-dx}, and the processed data, courtesy of Jason, are from a paper that isn't out yet.
 These datasets represent repertoires of patients at various time points following an influenza vaccination.
 \begin{table}
-\makebox[\textwidth][c]{ 
+\makebox[\textwidth][c]{
 \begin{tabular}{c|c|c|c|c|c}
 	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
 	\hline
@@ -358,14 +353,12 @@ finally, we append the \texttt{sim} suffix if the dataset was simulated from an 
 \section*{Results}
 
 \subsection*{Implementation}
-%EM I suggest having the first section of the results be a short blurb about the R package.
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports BCR and TCR repertoire datasets.
 It is open-source, unit-tested, and fully documented and AIRR compliant (by the time of release).
 Analyses will be reproducible using Docker.
 
 \subsection*{Model validation}
-%EM Then a section heading about model validation here.
 
 %EM Results paragraphs concern what was found. Can you comment on overall trends or interesting things we found that people can find in the figure?
 Figure \ref{fig:SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
