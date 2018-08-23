@@ -7,6 +7,7 @@
 \usepackage{subcaption}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage[margin=1in]{geometry}
 
 \usepackage{tikz}
 \usetikzlibrary{positioning}
@@ -437,8 +438,30 @@ Conversely, the simulations tend to have less agreement in distributions of hots
 \section*{Discussion}
 We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
 
-
 \bibliographystyle{plain}
 \bibliography{main}
 
+\section*{Appendix A: Performance of distribution subsampling algorithm}
+Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
+We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
+Figure \ref{fig:Distributions} displays a sample view of each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/dists_by_tol.pdf}
+    \caption{True and subsampled pairwise distance distributions by tolerance.}
+    \label{fig:Distributions}
+\end{figure}
+Figure \ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/div_by_tol.pdf}
+    \caption{KL-divergence to true pairwise distance distribution by tolerance, taken over 10 trials of the algorithm.}
+    \label{fig:Divergences}
+\end{figure}
+Figure \ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/time_by_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/log_time_by_tol.pdf}
+    \caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
+    \label{fig:Times}
+\end{figure}
 \end{document}
