@@ -356,8 +356,18 @@ finally, we append the \texttt{sim} suffix if the dataset was simulated from an 
 \subsection*{Implementation}
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports BCR and TCR repertoire datasets.
-It is open-source, unit-tested, and fully documented and AIRR compliant (by the time of release).
+It is open-source, unit-tested, fully documented, and AIRR compliant (by the time of release).
 Analyses will be reproducible using Docker.
+
+\texttt{sumrep} contains a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
+It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotDistributions}, which shows each of these univariate distribution plots in a gridded figure.
+Figure \ref{fig:MasterPlot} shows an example output of \texttt{plotDistributions} computed for the \texttt{p\_f1} dataset described in the previous section.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/master_plot.pdf}
+    \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} dataset.}
+    \label{fig:MasterPlot}
+\end{figure}
+
 
 \subsection*{Model validation}
 
@@ -459,9 +469,14 @@ Figure \ref{fig:Divergences} displays the KL-divergence to the true distribution
 \end{figure}
 Figure \ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/time_by_tol.pdf}
-    \includegraphics[width=\linewidth]{Figures/log_time_by_tol.pdf}
+    \includegraphics[width=0.9\linewidth]{Figures/time_by_tol.pdf}
+    \includegraphics[width=0.9\linewidth]{Figures/log_time_by_tol.pdf}
     \caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     \label{fig:Times}
 \end{figure}
+
+For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the approximate distribution to the true distribution is consistently small, most of the time falling below 0.01. 
+Figure \ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.  
+Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
+These results suggest that the user should expect a high degree of accuracy while enjoying a significantly diminished runtime for any reasonable choice of epsilon.
 \end{document}
