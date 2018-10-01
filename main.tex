@@ -334,7 +334,7 @@ These datasets represent repertoires of patients at various time points followin
     \texttt{i\_g1} & Observation &     \texttt{igblast} & \texttt{igblast} & G & 1 hour\\
     \texttt{pi\_f1} & Observation &    \texttt{partis} & \texttt{igblast} & F & 1 hour\\
     \texttt{pi\_f2} & Observation &    \texttt{partis} & \texttt{igblast} & F & 8 days\\
-    \texttt{pi\_g1} & Observation &    \texttt{partis} & \texttt{igBlast} & G & 1 hour\\
+    \texttt{pi\_g1} & Observation &    \texttt{partis} & \texttt{igblast} & G & 1 hour\\
     \texttt{p\_f1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 1 hour\\
     \texttt{p\_f2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 8 days\\
     \texttt{p\_g1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 1 hour\\
@@ -360,8 +360,8 @@ It is open-source, unit-tested, fully documented, and AIRR compliant (by the tim
 Analyses will be reproducible using Docker.
 
 \texttt{sumrep} contains a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
-It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these univariate distribution plots in a gridded figure.
-Figures \ref{fig:MasterPlot}, \ref{fig:MasterPlotDouble}, \ref{fig:MasterPlotTriple} show an example outputs of \texttt{plotUnivariateDistributions} computed for one, two, and three datasets, respectively.
+It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these distribution plots in a gridded figure.
+Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets respectively.
 \ref{fig:MasterPlot} shows distributions the \texttt{p\_f1} dataset and \ref{fig:MasterPlotDouble} shows distributions for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.
 
 \begin{figure}
@@ -373,7 +373,7 @@ Figures \ref{fig:MasterPlot}, \ref{fig:MasterPlotDouble}, \ref{fig:MasterPlotTri
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/master_plot_double.pdf}
     \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.}
-    \label{fig:MasterPlot}
+    \label{fig:MasterPlotDouble}
 \end{figure}
 
 \subsection*{Model validation}
