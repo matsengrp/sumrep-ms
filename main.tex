@@ -361,7 +361,7 @@ Analyses will be reproducible using Docker.
 
 \texttt{sumrep} contains a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
 It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these univariate distribution plots in a gridded figure.
-Figures \ref{fig:MasterPlot}, \ref{fig:MasterPlotDouble}, \ref{fig:MasterPlotTriple} show an example outputs of \texttt{plotUnivariateDistributions} computed for one, two, and three datasets, respectively.
+Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show an example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets, respectively.
 \ref{fig:MasterPlot} shows distributions the \texttt{p\_f1} dataset and \ref{fig:MasterPlotDouble} shows distributions for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.
 
 \begin{figure}
@@ -373,7 +373,7 @@ Figures \ref{fig:MasterPlot}, \ref{fig:MasterPlotDouble}, \ref{fig:MasterPlotTri
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/master_plot_double.pdf}
     \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.}
-    \label{fig:MasterPlot}
+    \label{fig:MasterPlotDouble}
 \end{figure}
 
 \subsection*{Model validation}
@@ -462,12 +462,26 @@ We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bou
 Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
-Figure \ref{fig:Distributions} displays a sample view of each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
+Figure \ref{fig:Distributions} displays density estimates of one trial for each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/dists_by_tol.pdf}
-    \caption{True and subsampled pairwise distance distributions by tolerance.}
+    \includegraphics[width=\linewidth]{Figures/density_by_tol.pdf}
+    \caption{Density estimates of true and subsampled pairwise distance distributions by tolerance.}
     \label{fig:Distributions}
 \end{figure}
+Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/freqpoly_by_tol.pdf}
+    \caption{Frequency polygons of true and subsampled pairwise distance distributions by tolerance.}
+    \label{fig:FreqPoly}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/ecdf_by_tol.pdf}
+    \caption{Empirical c.d.f. of true and subsampled pairwise distance distributions by tolerance.}
+    \label{fig:ECDF}
+\end{figure}
+\input{summary.tex}
+Numerical summaries for each distribution are shown in Table \ref{tab:SummaryTable}.
+
 Figure \ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/div_by_tol.pdf}
@@ -482,8 +496,10 @@ Figure \ref{fig:Times} displays the runtimes and log-runtimes for each tolerance
     \label{fig:Times}
 \end{figure}
 
+
 For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the approximate distribution to the true distribution is consistently small, most of the time falling below 0.01. 
 Figure \ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.  
 Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
 These results suggest that the user should expect a high degree of accuracy while enjoying a significantly diminished runtime for any reasonable choice of epsilon.
+
 \end{document}
