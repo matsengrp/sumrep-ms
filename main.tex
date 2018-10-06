@@ -502,6 +502,19 @@ Figure \ref{fig:Times} displays the runtimes and log-runtimes for each tolerance
 For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the approximate distribution to the true distribution is consistently small, most of the time falling below 0.01. 
 Figure \ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.  
 Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
-These results suggest that the user should expect a high degree of accuracy while enjoying a significantly diminished runtime for any reasonable choice of epsilon.
+
+Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
+For sample sizes $s \in \{500, 1000, 2500, 10000, 25000\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
+We perform this experiment 10 times for each $s$.
+Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/div_by_size_and_tol.pdf}
+    \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:Sizes}
+\end{figure}
+The figure shows no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance.
+This suggests that the accuracy of our procedure is scalable to large datasets.
+
+These results suggest that the user should expect a high degree of accuracy while enjoying a significantly diminished runtime for any reasonable choice of tolerance $\varepsilon$.
 
 \end{document}
