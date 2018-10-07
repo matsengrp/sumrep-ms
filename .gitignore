@@ -1,2 +1,8 @@
-.sconsign.dblite
 _build
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf
+*.sconsign.dblite
