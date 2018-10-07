@@ -515,6 +515,19 @@ Boxplots of the KL-divergence by log(size) and tolerance over all trials are dis
 The figure shows no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance.
 This suggests that the accuracy of our procedure is scalable to large datasets.
 
-These results suggest that the user should expect a high degree of accuracy while enjoying a significantly diminished runtime for any reasonable choice of tolerance $\varepsilon$.
+Finally, we investigate the effect of summary statistic on the performance of Algorithm \ref{DistributionAveraging}.
+We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
+For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-7}\}$.
+We perform this experiment 10 times for each (summary, $\varepsilon$) combination.
+Figure \ref{fig:SummaryPerformance} shows the KL-divergence to the full dataset distributions by summary and tolerance over all trials.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/div_by_summary_and_tol.pdf}
+    \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
+    \label{fig:SummaryPerformance}
+\end{figure}
+It appears that the summary in question does affect the KL divergence, particular seen for the hotspot count distribution.
+However, in each case the KL divergence appears to approach zero exponentially as $\varepsilon \to 0$. 
+
+These results suggest that the user should expect a high degree of accuracy for a significantly diminished runtime for any reasonable choice of tolerance $\varepsilon$, although convergence will vary between statistics.
 
 \end{document}
