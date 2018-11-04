@@ -572,7 +572,7 @@ Figure \ref{fig:Times} shows that running the algorithm with this tolerance yiel
 Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
 
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
-For sample sizes $s \in \{500, 1000, 2500, 10000, 25000\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
+For sample sizes $s \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
 We perform this experiment 10 times for each $s$.
 Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
 \begin{figure}
@@ -636,13 +636,12 @@ Figure \ref{fig:NNTimes} displays the runtimes and log-runtimes for each toleran
     \label{fig:NNTimes}
 \end{figure}
 
-
-For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the approximate distribution to the true distribution is consistently small, most of the time falling below 0.01. 
-Figure \ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.  
-Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
+We see that while the nearest neighbor approximation routine greatly reduces the runtime, there is a consistently higher resultant KL divergence to the true distribution.
+This is most likely due to the tail bias discussed above.
+There is some evidence the KL divergence as well as its variance decrease as the tolerance decreases, but the degree of significance is unclear.
 
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
-For sample sizes $s \in \{500, 1000, 2500, 10000, 25000\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
+For sample sizes $s \in \{\exp(5), \dots, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
 We perform this experiment 10 times for each $s$.
 Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
 \begin{figure}
@@ -650,7 +649,7 @@ Boxplots of the KL-divergence by log(size) and tolerance over all trials are dis
     \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     \label{fig:Sizes}
 \end{figure}
-The figure shows no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance.
-This suggests that the accuracy of our procedure is scalable to large datasets.
+The figure shows a possible downward trend in the effect of dataset size on the KL-divergence for each choice of tolerance, although it is difficult to tell exactly what the limiting behavior is.
+This suggests that the accuracy of our procedure may increase as the dataset size increase, which may be the result of a more accurate and robust clustering step in \ref{NNDistributionAveraging}.
 
 \end{document}
