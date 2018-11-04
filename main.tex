@@ -275,7 +275,7 @@ where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
 If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will possibly have more sequences to iterate over.
 
 In this case, we can still approximate the nearest neighbor distance distribution using the following trick.
-First, we start by clustering the sequences based on pairwise distances, for example using the UCLUST algorithm.
+First, we start by clustering the sequences based on pairwise distances, for example using the UCLUST algorithm \cite{Edgar2010-nv}.
 This yields clusters $c$ with the property that, given $\text{card}(c) \ge 2$, the nearest neighbor of a sequence $s \in c$ will also belong to $c$; if not, then it would have been grouped into another cluster.
 Then, when computing the nearest neighbor distance of a given sequence, we can restrict to taking the minimum over its cluster, rather than blithely iterating over the entire repertoire. 
 For the case of singleton clusters $c = \{s_c\}$, we can combine them into a common cluster
@@ -423,7 +423,10 @@ It is open-source, unit-tested, fully documented, and AIRR compliant (by the tim
 Analyses will be reproducible using Docker.
 
 \texttt{sumrep} contains a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
-It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these univariate distribution plots in a gridded figure.
+A general-purpose implementation of algorithm \ref{DistributionAveraging} is also available and incorporated in applicable summary distributions.
+Algorithm \ref{NNDistributionAveraging} is also included for the nearest neighbor distance distribution, which uses \texttt{vsearch} for the clustering routine \cite{Rognes2016-bl}.
+
+\texttt{sumrep} also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these univariate distribution plots in a gridded figure.
 Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show an example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets, respectively.
 It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these distribution plots in a gridded figure.
 Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets respectively.
@@ -523,24 +526,26 @@ We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bou
 \bibliographystyle{plain}
 \bibliography{main}
 
-\section*{Appendix A: Performance of distribution subsampling algorithm}
+\section*{Appendix A: Performance of distribution subsampling algorithms}
 Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
 Figure \ref{fig:Distributions} displays density estimates of one trial for each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/density_by_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/PairwiseDistance/density_by_tol.pdf}
     \caption{Density estimates of true and subsampled pairwise distance distributions by tolerance.}
     \label{fig:Distributions}
 \end{figure}
+However, the density estimates exhibit awkward and inconsistent smoothing based on both the differences in orders of magnitude between distributions, as well as the fact that the pairwise distance distribution takes discrete values (and are thus not well-described by continuous smoothing kernels).
+We can instead look at the following more appropriate summaries for discrete data.
 Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/freqpoly_by_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/PairwiseDistance/freqpoly_by_tol.pdf}
     \caption{Frequency polygons of true and subsampled pairwise distance distributions by tolerance.}
     \label{fig:FreqPoly}
 \end{figure}
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/ecdf_by_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/PairwiseDistance/ecdf_by_tol.pdf}
     \caption{Empirical c.d.f. of true and subsampled pairwise distance distributions by tolerance.}
     \label{fig:ECDF}
 \end{figure}
@@ -549,14 +554,14 @@ Numerical summaries for each distribution are shown in Table \ref{tab:SummaryTab
 
 Figure \ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/div_by_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_tol.pdf}
     \caption{KL-divergence to true pairwise distance distribution by tolerance, taken over 10 trials of the algorithm.}
     \label{fig:Divergences}
 \end{figure}
 Figure \ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset.
 \begin{figure}
-    \includegraphics[width=0.9\linewidth]{Figures/time_by_tol.pdf}
-    \includegraphics[width=0.9\linewidth]{Figures/log_time_by_tol.pdf}
+    \includegraphics[width=0.9\linewidth]{Figures/PairwiseDistance/time_by_tol.pdf}
+    \includegraphics[width=0.9\linewidth]{Figures/PairwiseDistance/log_time_by_tol.pdf}
     \caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     \label{fig:Times}
 \end{figure}
@@ -571,7 +576,7 @@ For sample sizes $s \in \{500, 1000, 2500, 10000, 25000\}$, we subsample \texttt
 We perform this experiment 10 times for each $s$.
 Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/div_by_size_and_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_size_and_tol.pdf}
     \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     \label{fig:Sizes}
 \end{figure}
@@ -584,7 +589,7 @@ For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \d
 We perform this experiment 10 times for each (summary, $\varepsilon$) combination.
 Figure \ref{fig:SummaryPerformance} shows the KL-divergence to the full dataset distributions by summary and tolerance over all trials.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/div_by_summary_and_tol.pdf}
+    \includegraphics[width=\linewidth]{Figures/Multiple/div_by_summary_and_tol.pdf}
     \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
     \label{fig:SummaryPerformance}
 \end{figure}
@@ -592,5 +597,60 @@ It appears that the summary in question does affect the KL divergence, particula
 However, in each case the KL divergence appears to approach zero exponentially as $\varepsilon \to 0$. 
 
 These results suggest that the user should expect a high degree of accuracy for a significantly diminished runtime for any reasonable choice of tolerance $\varepsilon$, although convergence will vary between statistics.
+
+\subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
+
+Now, we run Algorithm \ref{NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
+We compute the nearest neighbor distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
+Figure \ref{fig:NNDistributions} displays density estimates of one trial for each of the distributions, which are also victims of awkward smoothing.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/density_by_tol.pdf}
+    \caption{Density estimates of true and subsampled nearest neighbor distributions by tolerance.}
+    \label{fig:NNDistributions}
+\end{figure}
+Figure \ref{fig:NNFreqPoly} shows a frequency polygon of the same distributions.
+Figure \ref{fig:NNECDF} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/freqpoly_by_tol.pdf}
+    \caption{Frequency polygons of true and subsampled nearest neighbor distributions by tolerance.}
+    \label{fig:NNFreqPoly}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/ecdf_by_tol.pdf}
+    \caption{Empirical c.d.f. of true and subsampled nearest neighbor distributions by tolerance.}
+    \label{fig:NNECDF}
+\end{figure}
+
+Figure \ref{fig:NNDivergences} displays the KL-divergence to the true distribution for each tolerance.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_tol.pdf}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance, taken over 10 trials of the algorithm.}
+    \label{fig:NNDivergences}
+\end{figure}
+Figure \ref{fig:NNTimes} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset.
+\begin{figure}
+    \includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/time_by_tol.pdf}
+    \includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/log_time_by_tol.pdf}
+    \caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
+    \label{fig:NNTimes}
+\end{figure}
+
+
+For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the approximate distribution to the true distribution is consistently small, most of the time falling below 0.01. 
+Figure \ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.  
+Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
+
+Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
+For sample sizes $s \in \{500, 1000, 2500, 10000, 25000\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
+We perform this experiment 10 times for each $s$.
+Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol.pdf}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:Sizes}
+\end{figure}
+The figure shows no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance.
+This suggests that the accuracy of our procedure is scalable to large datasets.
 
 \end{document}
