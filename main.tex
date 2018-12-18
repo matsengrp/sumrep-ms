@@ -192,13 +192,12 @@ Because the discrete formulation is much nicer to worth with than the continuous
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
 Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
 
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences for count data:
-%EM I prefer equations to have an eq: label, figures a fig: label, etc.
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
 \begin{equation}\label{eq:SAD}
-    d(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
+    d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
 \end{equation}
 In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
-This metric is well suited for comparing joint V/D/J-gene usage distributions:
+This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions:
 if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
 \begin{equation}
@@ -208,42 +207,15 @@ then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_
 \begin{equation}
 d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
 \end{equation}
+This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
+Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application.
 
 \subsection*{Efficient computation by subsampling and averaging}
 Computing full summaries can be computationally inefficient for even moderately sized repertoires.
-When the target summary is a distribution, we can gain efficiency by subsampling and averaging.
-%EM I like to caps Algorithm, Figure, etc, and add ~ between for a non-breaking space. I didn't make changes below.
-This idea is laid out in Algorithm~\ref{DivergenceAveraging}, which uses a rolling average to update the estimated divergence by computing the divergence from subsamples of the two distributions.
-Algorithm~\ref{DivergenceAveraging} is automatic in that it converges when standardized successive divergence estimates are sufficiently close.
-
-\begin{algorithm}
-    \caption{Compute automatic approximate divergence.\\
-    \textbf{Input:} distributions $P$ and $Q$, divergence function $D$, subsample size $m$, convergence tolerance $\varepsilon$\\
-    \textbf{Output:} approximate $D$-divergence between $P$ and $Q$
-    }
-    \label{DivergenceAveraging}
-    \begin{algorithmic}
-    \State $\overline{D}_0 \gets 0$;
-    \State $n \gets 1$;
-    \State error $\gets \infty$;
-    \While{error $> \varepsilon$}:
-    \State $p_n \gets \text{subsample}(P, m)$
-    \State $q_n \gets \text{subsample}(Q, m)$
-    \State $D_n(P, Q) \gets D(p_n, q_n)$
-    %EM This is sad when n=0.
-    \State $\overline{D}_n \gets \frac{(n - 1) \overline{D}_{n-1}(P, Q) + D_n(P, Q)}{n}$;
-    \State error $\gets \frac{ \left| \overline D_n(P, Q) - \overline D_{n-1}(P, Q) \right|}
-        { \overline D_n(P, Q) }$
-    \State $n \gets n + 1$
-    \EndWhile
-    \Return $D_n(P, Q)$
-\end{algorithmic}
-\end{algorithm}
-
-
-When the summary distributions themselves are of interest, we can apply the same reasoning for approximating them.
-Algorithm \ref{DistributionAveraging} describes an automatic procedure to approximate a distribution $d$.
-Here, the idea is to keep appending subsamples of $d$ to a working approximation until successive iterates have a sufficiently small JS-divergence.
+When the target summary is a distribution, we can gain efficiency by subsampling and averaging until convergence.
+This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends subsamples of $d$ to a rolling approximate distribution until successive distributions are sufficiently similar.
+Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
+Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
 \begin{algorithm}
     \caption{Compute automatic approximate distribution.\\
         \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\.
@@ -264,7 +236,7 @@ Here, the idea is to keep appending subsamples of $d$ to a working approximation
     \end{algorithmic}
     \Return $d_n$
 \end{algorithm}
-We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A.
+We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of settings.
 
 There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
 This occurs when a subset of the summary does not follow the same distribution as the full summary.
