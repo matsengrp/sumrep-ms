@@ -242,7 +242,7 @@ Algorithm~\ref{DivergenceAveraging} is automatic in that it converges when stand
 
 
 When the summary distributions themselves are of interest, we can apply the same reasoning for approximating them.
-Algorithm~\ref{DistributionAveraging} describes an automatic procedure to approximate a distribution $d$.
+Algorithm \ref{DistributionAveraging} describes an automatic procedure to approximate a distribution $d$.
 Here, the idea is to keep appending subsamples of $d$ to a working approximation until successive iterates have a sufficiently small JS-divergence.
 \begin{algorithm}
     \caption{Compute automatic approximate distribution.\\
@@ -264,6 +264,7 @@ Here, the idea is to keep appending subsamples of $d$ to a working approximation
     \end{algorithmic}
     \Return $d_n$
 \end{algorithm}
+We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A.
 
 There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
 This occurs when a subset of the summary does not follow the same distribution as the full summary.
@@ -274,19 +275,13 @@ d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
 where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
 If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will possibly have more sequences to iterate over.
 
-In this case, we can still approximate the nearest neighbor distance distribution using the following trick.
-First, we start by clustering the sequences based on pairwise distances, for example using the UCLUST algorithm \cite{Edgar2010-nv}.
-This yields clusters $c$ with the property that, given $\text{card}(c) \ge 2$, the nearest neighbor of a sequence $s \in c$ will also belong to $c$; if not, then it would have been grouped into another cluster.
-Then, when computing the nearest neighbor distance of a given sequence, we can restrict to taking the minimum over its cluster, rather than blithely iterating over the entire repertoire. 
-For the case of singleton clusters $c = \{s_c\}$, we can combine them into a common cluster
-\begin{equation}
-\label{singleton_union}
-c' = \bigcup_{\text{card}(c) = 1} c,
-\end{equation}
-and take nearest neighbor distance for $s_c$ over $c'$.
-This may still introduce some bias as the nearest neighbor of a sequence in a singleton may not truly lie in another singleton but instead in a cluster of two or more sequences.
-This can be avoided if the clustering algorithm can be forced to yield only clusters with two or more elements, but this may not always be possible.
-Nonetheless, the corresponding procedure, laid out in Algorithm \ref{NNDistributionAveraging}, yields drastically more accurate approximate distributions than using algorithm \ref{DistributionAveraging}, while significantly cutting down the runtime when computing the full distribution for moderate to large sample sizes.
+In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
+For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
+This will give an unbiased sample $d_\text{NN}(s_1, R), \dotsc, d_\text{NN}(s_b, R)$ of the true nearest neighbor distance distribution $D_\text{true}$ of $R$, but it may have significant noise depending on the nature of $D_\text{true}$ and the batch size $b$.
+Thus, we append batches to a running distribution until convergence as in Algorithm \ref{DistributionAveraging}, which produces more refined approximations as the tolerance decreases.
+
+Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
+Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
 
 \begin{algorithm}
     \caption{Compute automatic approximate nearest neighbor distance distribution.\\
@@ -294,14 +289,11 @@ Nonetheless, the corresponding procedure, laid out in Algorithm \ref{NNDistribut
         \textbf{Output:} subsampled approximation to $d$}
     \label{NNDistributionAveraging}
     \begin{algorithmic}
-    	\State $c_1, \dotsc, c_k \gets \text{UCLUST}(R)$
-		\State Merge singletons via \eqref{singleton_union} to get $\mathbf c = (c_1, \dotsc, c_\ell, c')$
-		\State Precompute $d_{c'} = \{d_\text{NN}(s; c')\}_{s \in c'}$
-        \State $d_0 \gets \Call{doBatchStep}{R, m, \mathbf c}$
+        \State $d_0 \gets \Call{doBatchStep}{R, m}$
         \State $n \gets 1$
         \State error $\gets \infty$
         \While{error $> \varepsilon$}:
-        	\State $d_\text{samp} \gets \Call{doBatchStep}{R, m, \mathbf c}$
+        	\State $d_\text{samp} \gets \Call{doBatchStep}{R, m}$
         	\State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
         	\State error $\gets \text{JSD}(d_{n-1}, d_n)$
         	\State $n \gets n + 1$
@@ -309,22 +301,16 @@ Nonetheless, the corresponding procedure, laid out in Algorithm \ref{NNDistribut
             \Return $d_n$
     \end{algorithmic}
     \begin{algorithmic}
-    \Function{doBatchStep}{$R, m, \mathbf c$}
+    \Function{doBatchStep}{$R, m$}
     \For{$i = 1, \dots, m$}:
 		\State $s_i \gets \text{subsample}(R, 1)$
-		\State $c_i \gets$ the cluster containing $s_i$
-		\If{$c_i = c'$}
-			\State $d_i \gets d_{c'}[s_i]$
-		\Else
-			\State $d_i \gets d_\text{NN}(s_i; c_i)$
-		\EndIf
+        \State $d_i \gets d_\text{NN}(s_i; R)$
 	\EndFor
 	\Return $(d_1, \dotsc, d_m)$
 	\EndFunction
     \end{algorithmic}
 \end{algorithm}
 
-We conduct a performance analysis of Algorithms \ref{DistributionAveraging} and \ref{NNDistributionAveraging} in Appendix A.
 
 
 \subsection*{Comparing observations to model simulations per model}
