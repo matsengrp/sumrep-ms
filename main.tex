@@ -599,15 +599,64 @@ This is most likely due to the tail bias discussed above.
 There is some evidence the KL divergence as well as its variance decrease as the tolerance decreases, but the degree of significance is unclear.
 
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
-For sample sizes $s \in \{\exp(5), \dots, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
-We perform this experiment 10 times for each $s$.
-Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
+For sample sizes $s \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.  
+We perform this experiment 5 times for each $s$.
+Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:DivBySize}.  
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol_cdr3.png}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:DivBySize}
+\end{figure}
+There is not an apparent trend of the KL-divergence that is consistent across tolerances, although there is much higher variation for higher tolerances than lower ones.
+Figure \ref{fig:TimeBySize} shows boxplots of the runtime of the procedure for each scenario.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/time_by_size_and_tol_cdr3.png}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:TimeBySize}
+\end{figure}
+As expected, runtime increases as tolerance decreases, but also increases with the size of the dataset which deviates from the behavior of Algorithm \ref{DistributionAveraging}, where dataset size did not seem to affect runtime.
+This is reasonable since each batch iteration of \ref{NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which is $\mathcal O(n^2 m)$, where $n = \text{card}(R)$ is the number of sequences in the full repertoire, and $m = \max_{s \in B} \text{length}(s)$ is the largest sequence length in the batch sample.
+
+To get a better picture of what is happening, we can also look at the time efficiency for each case, defined to be 
+\begin{align}
+    \text{Efficiency} := \frac{\text{time to compute full distribution}}{\text{time to compute approximate distribution}}
+\end{align}
+where the denominator of course depends on the size of the dataset and tolerance $\varepsilon$.
+This is shown in Figure \ref{fig:EfficiencyBySize}.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/efficiency_by_size_and_tol_cdr3.png}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:EfficiencyBySize}
+\end{figure}
+Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
+Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{NNDistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
+We see that efficiency increases with dataset size as well as tolerance.
+The former verifies that the complexity of the approximation routine is lower than that of computing the full distirbution.
+
+Next, we compute the pairwise distance distribution of full query sequence reads, using the same settings as before.
+Figures \ref{fig:DivBySizeFull}, \ref{fig:TimeBySizeFull}, and \ref{fig:EfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol.pdf}
     \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    \label{fig:Sizes}
+    \label{fig:DivBySizeFull}
 \end{figure}
-The figure shows a possible downward trend in the effect of dataset size on the KL-divergence for each choice of tolerance, although it is difficult to tell exactly what the limiting behavior is.
-This suggests that the accuracy of our procedure may increase as the dataset size increase, which may be the result of a more accurate and robust clustering step in \ref{NNDistributionAveraging}.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/time_by_size_and_tol.pdf}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:TimeBySizeFull}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/NearestNeighbor/efficiency_by_size_and_tol.pdf}
+    \caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+    \label{fig:EfficiencyBySizeFull}
+\end{figure}
+We see similar patterns as before, although numerical ranges differ when looking at query sequences versus CDR3 sequences.
+For example, the KL-divergences are consistently higher for each (tolerance, sample size) scenario, although they still seem to decay towards zero.
+This is likely due to the fact that raw sequence reads exhibit significantly more noise than CDR3 sequences.
+%BJO ^ This is an educated guess, since query sequences can in principle take many arbitrary forms, whereas CDR3 inferences are necessarily multiples of 3, and heavily constrainted by the inferred naive sequence
+Moreover, the runtime by dataset size is consistently higher, with runtimes of over an hour for datasets of size $\exp(10) \approx 22,000$ sequences and a tolerance of $10^{-5}$. 
+Still, as evidenced by Figure \ref{fig:EfficiencyBySizeFull}, these runtimes are consistently at least $\exp(2.5) \approx 12$ times smaller than computing the full distribution, with efficiencies as high as $\exp(6.25) \approx 457$ for datasets of size $\exp(10)$.
+While there is a tradeoff between minimizing the KL-divergence to truth and maximizing the time efficiency when choosing the tolerance, these results suggest that any reasonable choice of tolerance will outperform computing the full distribution for moderate and large datasets.
+The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
 \end{document}
