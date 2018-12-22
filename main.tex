@@ -632,6 +632,10 @@ Note the log-log scale, so that the line $y=0$ corresponds to instances when the
 Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{NNDistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
 We see that efficiency increases with dataset size as well as tolerance.
 The former verifies that the complexity of the approximation routine is lower than that of computing the full distirbution.
+Examining the boxplots near $y = 0$ by $\log(\text{size})$, we see that for a dataset of size $\exp(k)$, we would need a tolerance of at least $\frac{1}{10^{k - 4}}$.
+For example, for $\log(\text{size}) = 6$, we see that tolerances higher than $0.01 = \frac{1}{100} = \frac{1}{10^{6 - 2}}$ would on average yield an efficiency greater than one.
+This suggests that, for a dataset with $n$ CDR3 sequences, a sensible rule of thumb would be to choose $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$.
+This will of course be more or less appropriate for a given dataset depending on the nature of the repertoire from which it was sampled.
 
 Next, we compute the pairwise distance distribution of full query sequence reads, using the same settings as before.
 Figures \ref{fig:DivBySizeFull}, \ref{fig:TimeBySizeFull}, and \ref{fig:EfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
