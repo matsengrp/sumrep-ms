@@ -329,13 +329,22 @@ Next, we discuss a similar model validation approach for TCR repertoires using \
 %EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
 %BJO Yes! Though I might have to put this off until after the WG meeting.
 We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
-One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations and other observations.
+One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations to other observations.
 Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
 Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
 \begin{equation}
-    \text{score}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
+    \text{score}_\text{obs}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
     { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
         \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
+\end{equation}
+This value for a given summary will be negative if \texttt{partis} simulated repertoires look more like their experimental counterparts in terms of this summary than experimental repertoires 
+
+Another related score would be comparing the average divergence of observations to their simulated counterparts, and the average divergence of simulations to other simulations.
+Formally, this is
+\begin{equation}
+    \text{score}_\text{sim}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
+    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
+        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{sim}}, R_{j, \text{sim}}; s\right) } \right)
 \end{equation}
 
 \subsection*{Materials}
@@ -463,18 +472,30 @@ The plots do not suggest any systematic bias in our approach.
 
 \subsection*{Assessing summary statistic replication by model}
 %EM Need some text here describing what was found.
-Figure \ref{Scores} displays the LRD scores for the three individuals based on \texttt{partis} simulations.
+Figure \ref{fig:ObsScores} displays the summary scores for the three individuals based on \texttt{partis} simulations.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/score_plot.pdf}
-    \caption{The log relative deviance (LRD) of each statistic based on \texttt{partis} model inference and simulation.
+    \includegraphics[width=\linewidth]{Figures/obs_score_plot.pdf}
+    \caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{partis} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
-    \label{Scores}
+    \label{fig:ObsScores}
 \end{figure}
 As noted from Figure \ref{fig:SimObs}, the best-recapitulated statistics tend to be CDR3 lengths and most of the statistics based on germline inferences.
 This is sensible as these per-sample statistics are directly used for simulation.
 Interestingly, the simulations do tend to capture selection estimates and GRAVY indices well despite these quantities not being involved in the inference or simulation process.
 Conversely, the simulations tend to have less agreement in distributions of hotspot and coldspot motifs as well as positional distance between mutations and VD/DJ insertion matrices.
+
+Figure \ref{fig:SimScores} displays the LRD scores with respect to 
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/sim_score_plot.pdf}
+    \caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{partis} model inference and simulation.
+        A low LRD indicates a well-replicated statistic by the simulations.
+    }
+    \label{fig:SimScores}
+\end{figure}
+
+We see that for the vast majority of summaries, this score is greater than zero, indicating that simulations look closer to other simulations than they do to their experimental counterparts.
+While this is not very surprising since model simulations are a simplifiication of the true data-generating process, this does suggest that important biological quantities may need to be explicitly accounted for in a more accurate generative model.
 
 \subsection*{Comparing observations to competing model simulations}
 
@@ -661,7 +682,7 @@ Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{NNDistribu
 We see that efficiency increases with dataset size as well as tolerance.
 The former verifies that the complexity of the approximation routine is lower than that of computing the full distirbution.
 Examining the boxplots near $y = 0$ by $\log(\text{size})$, we see that for a dataset of size $\exp(k)$, we would need a tolerance of at least $\frac{1}{10^{k - 4}}$.
-For example, for $\log(\text{size}) = 6$, we see that tolerances higher than $0.01 = \frac{1}{100} = \frac{1}{10^{6 - 2}}$ would on average yield an efficiency greater than one.
+For example, for $\log(\text{size}) = 6$, we see that tolerances higher than $0.01 = \frac{1}{100} = \frac{1}{10^{6 - 4}}$ would on average yield an efficiency greater than one.
 This suggests that, for a dataset with $n$ CDR3 sequences, a sensible rule of thumb would be to choose $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$.
 This will of course be more or less appropriate for a given dataset depending on the nature of the repertoire from which it was sampled.
 
