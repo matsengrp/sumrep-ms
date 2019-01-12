@@ -415,21 +415,18 @@ Algorithm \ref{NNDistributionAveraging} is also included for the nearest neighbo
 \texttt{sumrep} also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots.
 Currently, these plots can be frequency polygons or empirical cumulative distribution functions.
 Each available univariate distribution is plotted by default, although the user can easily specify a custom subset of these distributions.
-Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show an example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets, respectively.
-It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these distribution plots in a gridded figure.
-Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets respectively.
-\ref{fig:MasterPlot} shows distributions the \texttt{p\_f1} dataset and \ref{fig:MasterPlotDouble} shows distributions for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.
-
+Figure \ref{fig:MasterPlot} shows an example outputs of \texttt{plotUnivariateDistributions} computed for four datasets: \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim}.
+This function displays frequency polygons by default, but can also display empirical cumulative distribution functions, shown in \ref{fig:MasterPlotECDF} for the same four datasets.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/master_plot.pdf}
-    \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} dataset.}
+    \includegraphics[width=\linewidth]{Figures/master_plot_freqpoly.pdf}
+    \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:MasterPlot}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/master_plot_double.pdf}
-    \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.}
-    \label{fig:MasterPlotDouble}
+    \includegraphics[width=\linewidth]{Figures/master_plot_ecdf.pdf}
+    \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
+    \label{fig:MasterPlotECDF}
 \end{figure}
 
 \subsection*{Model validation}
