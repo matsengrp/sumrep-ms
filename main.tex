@@ -96,13 +96,14 @@ Also, although summary statistics can be used in simulation-based inferential me
 %BJO It may eventually be a better fit for a Discussion section, but I'll put it here for now.
 Applications of a methodical lymphocyte repertoire comparison tool include:
 \begin{itemize}
-\item Comparing simulated repertoires to observed ones (model selection and validation)
+\item Comparing simulated repertoires to observed ones, such as for model selection and validation
 \item Contrasting repertoires in the context of antigen response or vaccination design and evaluation
 \item Assessing the performance of competing repertoire analysis tools
 \item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
 \end{itemize}
 
 \section*{Methods}
+
 \begin{table}
 \makebox[\textwidth][c]{ % this centers a too-wide table
 \begin{tabular}{c|c|c|c|c}
@@ -113,8 +114,6 @@ Pairwise distance distribution & No & No & No & \texttt{stringdist} \\
 $k$th nearest neighbor distribution & No & No & No & \texttt{stringdist} \\
 GC-content distribution & No & No & No & \texttt{ape} \\
 Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \\
-%BJO Hmm... we never really did much with this (i.e. the Eulerian path paper). Maybe we should discuss?
-$k$mer frequency & No & No & No & TBD \\
 \hline
 Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
 %BJO Another one we kind of skipped over.
@@ -323,7 +322,10 @@ Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given
 \end{figure}
 
 Next, we discuss a similar model validation approach for TCR repertoires using \texttt{IGoR} \cite{Marcou2018-du}.
-(In progress)
+We apply IGoR to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
+These datasets consist of consensus RNA sequences assembled using UMIs.
+Most of these sequences are functional, and IGoR is meant to build models of nonfunctional sequences that are not biased by selection.
+Nonetheless, we believe that meaningful models can be built from this data, and proceed with this caveat in mind.
 
 \subsection*{Scoring summary statistic replication by model}
 %EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
@@ -470,32 +472,54 @@ The results are displayed in figure \ref{PartisIgb}.
 The plots do not suggest any systematic bias in our approach.
 
 
-\subsection*{Assessing summary statistic replication by model}
+\subsection*{Assessing summary statistic replication for \texttt{partis}}
 %EM Need some text here describing what was found.
-Figure \ref{fig:ObsScores} displays the summary scores for the three individuals based on \texttt{partis} simulations.
+Figure \ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six BCR datasets based on \texttt{partis} simulations.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/obs_score_plot.pdf}
     \caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{partis} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
-    \label{fig:ObsScores}
+    \label{fig:ObsScoresBCR}
 \end{figure}
 As noted from Figure \ref{fig:SimObs}, the best-recapitulated statistics tend to be CDR3 lengths and most of the statistics based on germline inferences.
 This is sensible as these per-sample statistics are directly used for simulation.
 Interestingly, the simulations do tend to capture selection estimates and GRAVY indices well despite these quantities not being involved in the inference or simulation process.
 Conversely, the simulations tend to have less agreement in distributions of hotspot and coldspot motifs as well as positional distance between mutations and VD/DJ insertion matrices.
 
-Figure \ref{fig:SimScores} displays the LRD scores with respect to 
+Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/sim_score_plot.pdf}
     \caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{partis} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
-    \label{fig:SimScores}
+    \label{fig:SimScoresBCR}
 \end{figure}
 
 We see that for the vast majority of summaries, this score is greater than zero, indicating that simulations look closer to other simulations than they do to their experimental counterparts.
 While this is not very surprising since model simulations are a simplifiication of the true data-generating process, this does suggest that important biological quantities may need to be explicitly accounted for in a more accurate generative model.
+
+\subsection*{Assessing summary statistic replication for \texttt{igor}}
+Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/obs_score_plot-tcr.pdf}
+    \caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{igor} model inference and simulation.
+        A low LRD indicates a well-replicated statistic by the simulations.
+    }
+    \label{fig:ObsScoresTCR}
+\end{figure}
+
+Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/sim_score_plot-tcr.pdf}
+    \caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{igor} model inference and simulation.
+        A low LRD indicates a well-replicated statistic by the simulations.
+    }
+    \label{fig:SimScoresTCR}
+\end{figure}
+
+
 
 \subsection*{Comparing observations to competing model simulations}
 
