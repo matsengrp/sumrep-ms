@@ -235,6 +235,9 @@ Note that continually appending values to a rolling vector is analogous to compu
     \end{algorithmic}
     \Return $d_n$
 \end{algorithm}
+
+An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
+The main advantage of Algorithm \ref{DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
 We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of settings.
 
 There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
@@ -339,7 +342,7 @@ Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observ
     { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
         \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
 \end{equation}
-This value for a given summary will be negative if \texttt{partis} simulated repertoires look more like their experimental counterparts in terms of this summary than experimental repertoires 
+This value for a given summary will be negative if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and positive if the experimental repertoires tend to look more alike.
 
 Another related score would be comparing the average divergence of observations to their simulated counterparts, and the average divergence of simulations to other simulations.
 Formally, this is
@@ -348,6 +351,7 @@ Formally, this is
     { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
         \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{sim}}, R_{j, \text{sim}}; s\right) } \right)
 \end{equation}
+This value for a given summary will be negative if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
 \subsection*{Materials}
 Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
@@ -361,18 +365,33 @@ These datasets represent repertoires of patients at various time points followin
     \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
     \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
     \texttt{p\_g1} & Observation &     \texttt{partis} & \texttt{partis} & G & 1 hour \\
+    \texttt{p\_g2} & Observation &     \texttt{partis} & \texttt{partis} & G & 8 days \\
+    \texttt{p\_i1} & Observation &     \texttt{partis} & \texttt{partis} & I & 1 hour \\
+    \texttt{p\_i2} & Observation &     \texttt{partis} & \texttt{partis} & I & 8 days \\
     \texttt{i\_f1} & Observation &     \texttt{igblast} & \texttt{igblast} & F & 1 hour \\
     \texttt{i\_f2} & Observation &     \texttt{igblast} & \texttt{igblast} & F & 8 days \\
     \texttt{i\_g1} & Observation &     \texttt{igblast} & \texttt{igblast} & G & 1 hour\\
+    \texttt{i\_g2} & Observation &     \texttt{igblast} & \texttt{igblast} & G & 8 days\\
+    \texttt{i\_i1} & Observation &     \texttt{igblast} & \texttt{igblast} & I & 1 hour\\
+    \texttt{i\_i2} & Observation &     \texttt{igblast} & \texttt{igblast} & I & 8 days\\
     \texttt{pi\_f1} & Observation &    \texttt{partis} & \texttt{igblast} & F & 1 hour\\
     \texttt{pi\_f2} & Observation &    \texttt{partis} & \texttt{igblast} & F & 8 days\\
     \texttt{pi\_g1} & Observation &    \texttt{partis} & \texttt{igblast} & G & 1 hour\\
+    \texttt{pi\_g2} & Observation &    \texttt{partis} & \texttt{igblast} & G & 8 days\\
+    \texttt{pi\_i1} & Observation &    \texttt{partis} & \texttt{igblast} & I & 1 hour\\
+    \texttt{pi\_i2} & Observation &    \texttt{partis} & \texttt{igblast} & I & 8 days\\
     \texttt{p\_f1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 1 hour\\
     \texttt{p\_f2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 8 days\\
     \texttt{p\_g1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 1 hour\\
+    \texttt{p\_g2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 8 days\\
+    \texttt{p\_i1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 1 hour\\
+    \texttt{p\_i2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 8 days\\
     \texttt{pi\_f1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 1 hour\\
     \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 8 days\\
     \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 1 hour\\
+    \texttt{pi\_g2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 8 days\\
+    \texttt{pi\_i1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & I & 1 hour\\
+    \texttt{pi\_i2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & I & 8 days\\
 \end{tabular}
 }
 \caption{Metadata for each dataset used in the analyses.}
@@ -395,22 +414,21 @@ Analyses will be reproducible using Docker.
 A general-purpose implementation of algorithm \ref{DistributionAveraging} is also available and incorporated in applicable summary distributions.
 Algorithm \ref{NNDistributionAveraging} is also included for the nearest neighbor distance distribution, which uses \texttt{vsearch} for the clustering routine \cite{Rognes2016-bl}.
 
-\texttt{sumrep} also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these univariate distribution plots in a gridded figure.
-Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show an example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets, respectively.
-It also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows each of these distribution plots in a gridded figure.
-Figures \ref{fig:MasterPlot} and \ref{fig:MasterPlotDouble} show example outputs of \texttt{plotUnivariateDistributions} computed for one and two datasets respectively.
-\ref{fig:MasterPlot} shows distributions the \texttt{p\_f1} dataset and \ref{fig:MasterPlotDouble} shows distributions for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.
-
+\texttt{sumrep} also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots.
+Currently, these plots can be frequency polygons or empirical cumulative distribution functions.
+Each available univariate distribution is plotted by default, although the user can easily specify a custom subset of these distributions.
+Figure \ref{fig:MasterPlot} shows an example outputs of \texttt{plotUnivariateDistributions} computed for four datasets: \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim}.
+This function displays frequency polygons by default, but can also display empirical cumulative distribution functions, shown in \ref{fig:MasterPlotECDF} for the same four datasets.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/master_plot.pdf}
-    \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} dataset.}
+    \includegraphics[width=\linewidth]{Figures/master_plot_freqpoly.pdf}
+    \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:MasterPlot}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/master_plot_double.pdf}
-    \caption{Plot of each univariate summary distribution for the \texttt{p\_f1} and \texttt{p\_f1\_sim} datasets.}
-    \label{fig:MasterPlotDouble}
+    \includegraphics[width=\linewidth]{Figures/master_plot_ecdf.pdf}
+    \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
+    \label{fig:MasterPlotECDF}
 \end{figure}
 
 \subsection*{Model validation}
@@ -478,7 +496,7 @@ Figure \ref{fig:ObsScoresBCR} displays the observation-based summary scores for 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/obs_score_plot.pdf}
     \caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{partis} model inference and simulation.
-        A low LRD indicates a well-replicated statistic by the simulations.
+        A low score indicates a well-replicated statistic by the simulations.
     }
     \label{fig:ObsScoresBCR}
 \end{figure}
@@ -491,7 +509,7 @@ Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for t
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/sim_score_plot.pdf}
     \caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{partis} model inference and simulation.
-        A low LRD indicates a well-replicated statistic by the simulations.
+        A low score indicates a well-replicated statistic by the simulations.
     }
     \label{fig:SimScoresBCR}
 \end{figure}
