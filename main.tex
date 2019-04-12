@@ -112,10 +112,10 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
     Summary statistic & Annotations & Clustering & Phylogeny & Implementation
 \\
 \hline \hline
-Pairwise distance distribution & No & No & No & \texttt{stringdist} \\
+    Pairwise distance distribution & No & No & No & \texttt{stringdist} \cite{vanderLoo2014-re} \\
 $k$th nearest neighbor distribution & No & No & No & \texttt{stringdist} \\
-GC-content distribution & No & No & No & \texttt{ape} \\
-Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \\
+    GC-content distribution & No & No & No & \texttt{ape} \cite{Paradis04-hz} \\
+    Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagès17-bi} \\
 \hline
 Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
 %BJO Another one we kind of skipped over.
@@ -123,13 +123,13 @@ $k$th nearest neighbor (V-sequence) distribution & Yes & No & No &\texttt{string
 CDR3 length distribution & Yes & No & No & Tool-provided \\
 Joint distribution of germline gene use & Yes & No & No & \texttt{sumrep} \\
 Pairwise CDR3 distance distribution & Yes & No & No & \texttt{stringdist} \\
-Hydrophobicity distribution & Yes & No & No & \texttt{Peptides} \\
-Atchley factors distribution & Yes & No & No & \texttt{HDMD} \\
+    Hydrophobicity distribution & Yes & No & No & \texttt{Peptides} \cite{Osorio15-tv} \\
+    Atchley factors distribution & Yes & No & No & \texttt{HDMD} \cite{McFerrin13-ng} \\
 Aliphatic index distribution & Yes & No & No & \texttt{Peptides} \\
-G.R.A.V.Y. index distribution & Yes & No & No & \texttt{alakazam} \\
+    G.R.A.V.Y. index distribution & Yes & No & No & \texttt{alakazam} \cite{Gupta2015-iu} \\
 Per-gene substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Per-gene-per-position substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
-Per-base mutability model & Yes & No & No & \texttt{shazam} \\
+Per-base mutability model & Yes & No & No & \texttt{shazam} \cite{Gupta2015-iu} \\
 Per-base substitution model & Yes & No & No & \texttt{shazam} \\
 %BJO This one doesn't depend on fit-star, right?
 %EM Yes, but we could just count Ts vs Tv, call it a "ratio" and drop the model-based rigor.
@@ -145,7 +145,7 @@ Selection estimates & Yes & Yes & No & \texttt{shazam} \\
 %BJO blocked due to fit-star
 Transition/transversion rates & Yes & Yes & No & Tool-provided \\
 \hline
-Sackin index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
+    Sackin index distribution & Yes & Yes & Yes & \texttt{CollessLike} \cite{Mir2018-lk} \\
 Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 %BJO To be delineated
