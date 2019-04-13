@@ -42,7 +42,7 @@
 
 \begin{abstract}
 The adaptive immune system generates an incredible diversity of antigen receptors to keep dangerous pathogens at bay.
-The DNA sequences coding for these receptors arise by a complex process of random naive cell generation followed by a series of binding-based filters as well as (in the B cell case) affinity maturation, giving considerable structure to the distribution of sequences.
+    The DNA sequences coding for these receptors arise by a complex process of random naive cell generation followed by a series of binding-based filters as well as affinity maturation for B cells, giving considerable structure to the distribution of sequences.
 This structure leads to Rep-Seq datasets whose analysis is difficult but important for scientific understanding and public health applications.
 One can compare these data sets to each other and to generative model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
 In this paper we introduce \texttt{sumrep}, an R package that performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
@@ -54,39 +54,41 @@ We find regarding the models...
 
 B cells and T cells play critical roles in adaptive immunity through the cooperative identification of and response to antigens.
 The sophisticated rearrangement of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
-An individual's immune repertoire is the set of lymphocyte receptors present in the immune system and is constantly changing in time.
+We refer to the set of lymphocyte receptors present in an individual's immune system as their immune receptor repertoire; this repertoire constantly changes over the course of an individual's lifetime for various reasons including differences in germline gene sets and exposure to antigens.
 
-The random generation of immune repertoires from gene rearrangements invites probabilistic modeling and in particular model-based simulation.
-In particular, it is natural to benchmark model-based inferential tools by applying them to simulations from the assumed model and assessing the performance.
+The random generation of immune repertoires from gene rearrangements invites probabilistic modeling along with model-based simulation for generative models.
+In particular, one can benchmark generative model-based inferential tools by applying them to simulations from the assumed model and assessing the tool's performance.
 Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
 To build and improve on such probabilistic frameworks, we must identify the strengths and limitations of the underlying models.
-Statistical model validation compares features of simulated data to observed repertoire samples and evaluates their concordance (or lack thereof).
+One form of statistical model validation compares features of simulated data to observed repertoire samples and evaluates their concordance (or lack thereof).
 This is not as easy a task for repertoires as it is for other problems, where a model output may simply be a real number.
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
-Moreover, accurate repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
+Moreover, the most realistic repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
 Indeed, immune repertoires are large, complex objects.
 
 In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
-
 These summary statistics can range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
 Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
-For example, if our inferential method was linear regression, comparing fit slopes is less useful when the data is not close to a line, but comparing nonparametric statistics like the sample mean or range is still sensible.
-On the other hand, statistics on the result of estimations are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
-In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly.
+For example, in linear regression, comparing inferred slopes is less useful when the relationship of the data is not truly linear, but comparing nonparametric statistics like the sample mean or range is still sensible.
+On the other hand, more intricate statistics give more precise descriptions of the data and can yield more elaborate insights than simple ones.
+For example, model-based statistics are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
+In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly, and can differentiate between linear associations unlike the sample mean.
 
 Still, determining how well a given summary can describe or distinguish a repertoire is a difficult task.
-To illustrate, as noted above, BCR repertoires consist of collections of trees.
-Thus, repertoires are substantially more complex than trees, and even for this strictly simpler problem there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
+To illustrate, as noted above, a BCR repertoire can be abstracted as a collection of trees, with nucleotide sequences at the nodes.
+Thus, repertoires are substantially more complex than trees, and even for the strictly simpler problem of summarizing trees, there has been a lot of effort to define good summary statistics \cite{Mooers1997-jl}.
 Tree statistics, albeit other ones, have also been a major focus of previous work in BCR sequence analysis \cite{Dunn-Walters2004-hv,Mehr2004-ej,Steiman-Shimony2006-fm,Shahaf2008-cc}.
-These difficulties suggest that an eclectic approach using many summaries of diverse nature seems reasonable for a thorough view of a repertoire's characteristics.
+These difficulties suggest that an eclectic approach using many diverse summaries should give a thorough view of a repertoire's characteristics.
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
-In this paper, we gather many summary statistics on repertoires and use them to perform model validation for state of the art simulation tools against real data.
+In this paper, we gather dozens of meaningful summary statistics on repertoires, derive efficient and robust summary implementations, and identify appropriate comparison methods for each summary.
 We present \texttt{sumrep}, an R package that computes these summary distributions for Rep-Seq datasets and performs repertoire comparisons based on these summaries.
+We show how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \texttt{partis} \cite{Ralph2016-nw, Ralph2016-iz} for BCRs and \texttt{IGoR} \cite{Marcou2018-du} for TCRs.
 Furthermore, we investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data.
+%BJO - Not sure what is meant by the below line.
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
 
@@ -110,10 +112,10 @@ Applications of a methodical lymphocyte repertoire comparison tool include:
     Summary statistic & Annotations & Clustering & Phylogeny & Implementation
 \\
 \hline \hline
-Pairwise distance distribution & No & No & No & \texttt{stringdist} \\
+    Pairwise distance distribution & No & No & No & \texttt{stringdist} \cite{vanderLoo2014-re} \\
 $k$th nearest neighbor distribution & No & No & No & \texttt{stringdist} \\
-GC-content distribution & No & No & No & \texttt{ape} \\
-Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \\
+    GC-content distribution & No & No & No & \texttt{ape} \cite{Paradis04-hz} \\
+    Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagès17-bi} \\
 \hline
 Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
 %BJO Another one we kind of skipped over.
@@ -121,13 +123,13 @@ $k$th nearest neighbor (V-sequence) distribution & Yes & No & No &\texttt{string
 CDR3 length distribution & Yes & No & No & Tool-provided \\
 Joint distribution of germline gene use & Yes & No & No & \texttt{sumrep} \\
 Pairwise CDR3 distance distribution & Yes & No & No & \texttt{stringdist} \\
-Hydrophobicity distribution & Yes & No & No & \texttt{Peptides} \\
-Atchley factors distribution & Yes & No & No & \texttt{HDMD} \\
+    Hydrophobicity distribution & Yes & No & No & \texttt{Peptides} \cite{Osorio15-tv} \\
+    Atchley factors distribution & Yes & No & No & \texttt{HDMD} \cite{McFerrin13-ng} \\
 Aliphatic index distribution & Yes & No & No & \texttt{Peptides} \\
-G.R.A.V.Y. index distribution & Yes & No & No & \texttt{alakazam} \\
+    G.R.A.V.Y. index distribution & Yes & No & No & \texttt{alakazam} \cite{Gupta2015-iu} \\
 Per-gene substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Per-gene-per-position substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
-Per-base mutability model & Yes & No & No & \texttt{shazam} \\
+Per-base mutability model & Yes & No & No & \texttt{shazam} \cite{Gupta2015-iu} \\
 Per-base substitution model & Yes & No & No & \texttt{shazam} \\
 %BJO This one doesn't depend on fit-star, right?
 %EM Yes, but we could just count Ts vs Tv, call it a "ratio" and drop the model-based rigor.
@@ -143,7 +145,7 @@ Selection estimates & Yes & Yes & No & \texttt{shazam} \\
 %BJO blocked due to fit-star
 Transition/transversion rates & Yes & Yes & No & Tool-provided \\
 \hline
-Sackin index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
+    Sackin index distribution & Yes & Yes & Yes & \texttt{CollessLike} \cite{Mir2018-lk} \\
 Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 %BJO To be delineated
