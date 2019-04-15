@@ -4,6 +4,6 @@ _build
 *.blg
 *.log
 *.out
-*.pdf
 *.sconsign.dblite
 *.synctex.gz
+main.pdf
