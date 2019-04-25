@@ -33,6 +33,7 @@
 %EM One could imagine writing this either way-- the application would be "repertoires are complex. here's a bunch of summary statistics and a standard means of comparing them. one can use them to compare repertoires, be they simulated or real."
 %BJO To me it seems that model validation provides a more substantive goal, but I'm willing to consider either option. Do you have a preference?
 %EM I prefer having both.
+%BJO I like your idea above of presenting the summaries/comparisons as a general approach, and showing how to apply them to various comparison-based tasks like model validation.
 \title{Immune receptor repertoire comparison and model validation via summary statistics}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
@@ -94,15 +95,6 @@ Also, although summary statistics can be used in simulation-based inferential me
 
 \subsection*{Repertoire Comparison}
 
-%EM This next paragraph doesn't feel abstract methods-y.
-%BJO It may eventually be a better fit for a Discussion section, but I'll put it here for now.
-Applications of a methodical lymphocyte repertoire comparison tool include:
-\begin{itemize}
-\item Comparing simulated repertoires to observed ones, such as for model selection and validation
-\item Contrasting repertoires in the context of antigen response or vaccination design and evaluation
-\item Assessing the performance of competing repertoire analysis tools
-\item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
-\end{itemize}
 
 \section*{Methods}
 
@@ -449,17 +441,6 @@ This function displays frequency polygons by default, but can also display empir
 \subsection*{Model validation}
 
 %EM Results paragraphs concern what was found. Can you comment on overall trends or interesting things we found that people can find in the figure?
-Figure \ref{fig:SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
-    \caption{Divergences of empirical summary distributions based on three individual observed datasets.}
-    \label{fig:SimObs}
-\end{figure}
-Because the absolute divergence values are sensitive to scale as well as the type of divergence used, we also include divergences for each observation-observation pair as a benchmark.
-The idea here is that a very good simulator should result in low divergence values between its reference repertoire and its simulated repertoire, as opposed to comparing the observed dataset to any other dataset.
-For such a simulator, the diagonal at the bottom of the plots in figure \ref{fig:SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
-We see that this is the case for some statistics, particularly the germline gene usages and CDR3 lengths, but in other cases the observations tend to be more similar to other observations, such as for the distributions of positional distance between mutations.
-
 A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
 To address this, we performed dataset annotation using standalone \texttt{igblast} \cite{Ye2013-kl}, and compared these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
 Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
@@ -507,7 +488,7 @@ The plots do not suggest any systematic bias in our approach.
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
 Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot-tcr.pdf}
+    \includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
     \caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{igor} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
@@ -524,7 +505,7 @@ In particular, Atchley factor distributions of the observations are in general n
 
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot-tcr.pdf}
+    \includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
     \caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{igor} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
@@ -574,6 +555,12 @@ While this is not very surprising since model simulations are a simplifiication 
 \subsection*{Comparing observations to competing model simulations}
 
 \section*{Discussion}
+We have presented a general framework for summarizing and comparing rep-seq datasets, and applied it to several questions of scientific interest.
+One can imagine many further applications of \texttt{sumrep}, as well as general avenues of research.
+A natural extension of the model validation in this report would be to assess the performance of many competing repertoiore analysis tools over a larger group of datasets.
+Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
+\texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones\cite{Finlay2012}.
+
 We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
 
 \bibliographystyle{plain}
