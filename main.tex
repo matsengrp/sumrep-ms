@@ -302,17 +302,21 @@ Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given
         \node[block](fasta){Fasta file};
         \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
         \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
+        \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
+        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
         \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
         \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-        \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
+        \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
+        \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
         \path[line](fasta) -- (partis);
         \path[line] (partis) -- (partisdata);
         \path[line] (partis) -- (params);
         \path[line] (params) -- (simulate);
         \path[line] (simulate) -- (sim);
-        \path[line] (partisdata) -- (c1);
-        \path[line] (sim) -- (c1);
+        \path[line] (partisdata) -- (clones);
+        \path[line] (clones) -- (c1);
+        \path[line] (sim) -- (simclones);
+        \path[line] (simclones) -- (c1);
     \end{tikzpicture}
 \end{adjustbox}
 \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
