@@ -448,47 +448,6 @@ This function displays frequency polygons by default, but can also display empir
 %EM Results paragraphs concern what was found. Can you comment on overall trends or interesting things we found that people can find in the figure?
 A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
 To address this, we performed dataset annotation using standalone \texttt{igblast} \cite{Ye2013-kl}, and compared these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
-Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
-Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
-The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
-\begin{figure}
-    \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
-        \begin{tikzpicture}
-            \node[block](fasta){Fasta file};
-            \node[cloud, below left=0.5 cm and 2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
-            \node[cloud, below right=0.5 cm and 2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
-            \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-            \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
-            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
-            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-            \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
-            \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
-            \node[block, below right=0.75 and 0.1cm of sim](c2){Comparisons};
-            \path[line](fasta) -- (partis);
-            \path[line](fasta) -- (igblast);
-            \path[line] (partis) -- (partisdata);
-            \path[line] (partis) -- (params);
-            \path[line] (igblast) -- (igblastdata);
-            \path[line] (params) -- (simulate);
-            \path[line] (simulate) -- (sim);
-            \path[line] (partisdata) -- (c1);
-            \path[line] (sim) -- (c1);
-            \path[line] (igblastdata) -- (c2);
-            \path[line] (sim) -- (c2);
-        \end{tikzpicture}
-    \end{adjustbox}
-    \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
-    \label{IgblastWorkflow}
-\end{figure}
-The results are displayed in figure \ref{PartisIgb}.
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/partis_igb.pdf}
-    \caption{Comparing divergences for \texttt{igblast} annotations and \texttt{partis} simulations based on the same individual observed repertoires.
-        We use the default germline databases in \texttt{igblast} for consistency.
-    }
-    \label{PartisIgb}
-\end{figure}
-The plots do not suggest any systematic bias in our approach.
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
 Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
@@ -777,5 +736,63 @@ Moreover, the runtime by dataset size is consistently higher, with runtimes of o
 Still, as evidenced by Figure \ref{fig:EfficiencyBySizeFull}, these runtimes are consistently at least $\exp(2.5) \approx 12$ times smaller than computing the full distribution, with efficiencies as high as $\exp(6.25) \approx 457$ for datasets of size $\exp(10)$.
 While there is a tradeoff between minimizing the KL-divergence to truth and maximizing the time efficiency when choosing the tolerance, these results suggest that any reasonable choice of tolerance will outperform computing the full distribution for moderate and large datasets.
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
+
+\subsection*{Appendix C: Comparison of summary scores using IgBlast annotations}
+
+Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
+Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
+The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
+\begin{figure}
+    \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
+        \begin{tikzpicture}
+        \node[block](fasta){Fasta file};
+        \node[cloud, below left=0.5 cm and 1.2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+        \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
+        \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
+        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
+        \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+        \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+        \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
+        \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
+        \path[line](fasta) -- (partis);
+        \path[line] (partis) -- (partisdata);
+        \path[line] (partis) -- (params);
+        \path[line] (params) -- (simulate);
+        \path[line] (simulate) -- (sim);
+        \path[line] (partisdata) -- (clones);
+        \path[line] (clones) -- (c1);
+        \path[line] (sim) -- (simclones);
+        \path[line] (simclones) -- (c1);
+            \node[cloud, below right=0.5 cm and 1.2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
+            \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
+            \node[block, below = 0.75 cm of igblastdata](igblastclones){Subsample to unique clones};
+            \node[block, below right=0.75 and 0.1cm of simclones](c2){Comparisons};
+            \path[line](fasta) -- (igblast);
+            \path[line] (igblast) -- (igblastdata);
+            \path[line] (igblastdata) -- (igblastclones);
+            \path[line] (igblastclones) -- (c2);
+            \path[line] (simclones) -- (c2);
+        \end{tikzpicture}
+    \end{adjustbox}
+    \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
+    \label{IgblastWorkflow}
+\end{figure}
+The results are displayed in figure \ref{PartisIgb}.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot_igb.pdf}
+    \caption{Comparing divergences for \texttt{igblast} annotations and \texttt{partis} simulations based on the same individual observed repertoires.
+        We use the default germline databases in \texttt{igblast} for consistency.
+    }
+    \label{PartisIgb}
+\end{figure}
+The plots do not suggest any systematic bias in our approach.
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/score_diff.pdf}
+    \caption{Difference in score$_\text{obs}$ values when using \texttt{igblast} versus \texttt{partis} for annotations.
+    }
+    \label{PartisIgb}
+\end{figure}
+
 
 \end{document}
