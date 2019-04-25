@@ -334,21 +334,45 @@ Nonetheless, we believe that meaningful models can be built from this data, and 
 %BJO Yes! Though I might have to put this off until after the WG meeting.
 We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
 One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations to other observations.
-Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
-Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
+Suppose we have $k$ different experimental repertoires of immune receptor sequences, and let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ denote the $i$th observed and simulated repertoire, respectively.
+For a given statistic $s$, let $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ with respect to $s$.
+We can score a simulator's ability to recapitulate $s$ from the observed repertoire to the simulated via
 \begin{equation}
-    \text{score}_\text{obs}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
-    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
-        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
+    \text{score}_\text{obs}(s) := 
+    \log \left( 
+        \frac{ 
+            \frac{1}{\frac{1}{2} k\left(k - 1\right)}
+            \sum_{i=1}^{k}
+            \sum_{j \ne i}
+                \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) 
+        }
+        { 
+            \frac{1}{k} 
+            \sum_{i = 1}^k 
+                \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) 
+        } 
+    \right).
 \end{equation}
-This value for a given summary will be negative if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and positive if the experimental repertoires tend to look more alike.
+For a given summary $s$, score$_\text{obs}$ will be positive if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and negative if experimental repertoires tend to look more like other experimental repertoires than they do their simulated counterparts.
+In other words, this scores how well a simulator can differentiate $s$ from an experimental repertoire among other repertoires, and recapitulate $s$ into its simulation.
 
 Another related score would be comparing the average divergence of observations to their simulated counterparts, and the average divergence of simulations to other simulations.
 Formally, this is
 \begin{equation}
-    \text{score}_\text{sim}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
-    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
-        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{sim}}, R_{j, \text{sim}}; s\right) } \right)
+    \text{score}_\text{sim}(s) := 
+    \log \left( 
+        \frac{ 
+            \frac{1}{\frac{1}{2} k\left(k - 1\right)}
+            \sum_{i=1}^{k}
+            \sum_{j \ne i}
+                \mathcal D\left(R_{i, \text{sim}}, R_{j, \text{sim}}; s\right) 
+        }
+        { 
+            \frac{1}{k} 
+            \sum_{i = 1}^k 
+                \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) 
+        } 
+    \right).
 \end{equation}
 This value for a given summary will be negative if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
