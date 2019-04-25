@@ -46,9 +46,10 @@ The adaptive immune system generates an incredible diversity of antigen receptor
     The DNA sequences coding for these receptors arise by a complex process of random naive cell generation followed by a series of binding-based filters as well as affinity maturation for B cells, giving considerable structure to the distribution of sequences.
 This structure leads to Rep-Seq datasets whose analysis is difficult but important for scientific understanding and public health applications.
 One can compare these data sets to each other and to generative model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
-In this paper we introduce \texttt{sumrep}, an R package that performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
-We find regarding the summary statistics...
-We find regarding the models...
+In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
+%BJO Very high level summary here. Need to double check Peji and Chaim's analyses
+We find that summaries vary in their robustness to differentiate between datasets, although many are able to distinguish between donor as well as time of vaccination.
+Furthermore, we find that state-of-the-art generative models excel at recapitulaing gene usage and indel statistics in a given experimental repertoire, but struggle to capture many physiobiological properties of real repertoires.
 \end{abstract}
 
 \section*{Introduction}
