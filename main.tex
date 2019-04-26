@@ -69,6 +69,14 @@ In contrast, repertoire models generate sets of nucleotide sequences that are sp
 Moreover, the most realistic repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
 Indeed, immune repertoires are large, complex objects.
 
+In fact, identifying a principled means of immune receptor repertoire comparison has been a formiddable task due to the intricacies of repertoire data.
+Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
+Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd}, or transformation of a repertoire to another space and comparing these transformed quantities according to some metric.
+For example, several studies reduce nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
+These $k$mer distributions can be compared via some metric, but comprise a large space and lose important positional information.
+One can instead perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
+
+
 In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
 These summary statistics can range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
@@ -93,9 +101,6 @@ Furthermore, we investigate the effectiveness of various summary statistics in d
 %BJO - Not sure what is meant by the below line.
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
-
-\subsection*{Repertoire Comparison}
-
 
 \section*{Methods}
 
