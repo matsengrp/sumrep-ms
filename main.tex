@@ -809,7 +809,13 @@ The results are displayed in figure \ref{PartisIgb}.
     }
     \label{PartisIgb}
 \end{figure}
-The plots do not suggest any systematic bias in our approach.
+The plots show a high level of agreement for most summaries, with all but six of them differing by less than one units, and a strong majority of them close to zero.
+Where differences arise, this is likely the result of differences in how partis and IgBlast perform annotations.
+For example, we see that the insertion length distributions highly disagree in scores.
+This is at least partially attributable to the star-tree assumption on which partis operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
+Indeed, examining the VD insertion length distribution shows that IgBlast tends to assign a similar distribution to each dataset, whereas partis leads to more variable distributions with right skew due to the star-tree assumption.
+Thus, inherent differences in annotation tools will certainly lead to differences in summary scores, regardless of how good either tool is.
+Hence, it is important to understand that a given annotations-based summary should be considered in the context of the tool which provided annotations, and not as a ground-truth summary of the actual gene usage/indel statistics.
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/score_diff.pdf}
