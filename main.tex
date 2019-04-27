@@ -33,6 +33,7 @@
 %EM One could imagine writing this either way-- the application would be "repertoires are complex. here's a bunch of summary statistics and a standard means of comparing them. one can use them to compare repertoires, be they simulated or real."
 %BJO To me it seems that model validation provides a more substantive goal, but I'm willing to consider either option. Do you have a preference?
 %EM I prefer having both.
+%BJO I like your idea above of presenting the summaries/comparisons as a general approach, and showing how to apply them to various comparison-based tasks like model validation.
 \title{Immune receptor repertoire comparison and model validation via summary statistics}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
@@ -45,9 +46,10 @@ The adaptive immune system generates an incredible diversity of antigen receptor
 The DNA sequences coding for these receptors arise by a complex process of random naive cell generation followed by a series of binding-based filters as well as affinity maturation for B cells, giving considerable structure to the distribution of sequences.
 This structure leads to Rep-Seq datasets whose analysis is difficult but important for scientific understanding and public health applications.
 One can compare these data sets to each other and to generative model simulations using summary statistics, or quantities that summarize some aspect of the repertoires.
-In this paper we introduce \texttt{sumrep}, an R package that performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
-We find regarding the summary statistics...
-We find regarding the models...
+In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
+%BJO Very high level summary here. Need to double check Peji and Chaim's analyses
+We find that summaries vary in their robustness to differentiate between datasets, although many are able to distinguish between donor as well as time of vaccination.
+Furthermore, we find that state-of-the-art generative models excel at recapitulaing gene usage and indel statistics in a given experimental repertoire, but struggle to capture many physiobiological properties of real repertoires.
 \end{abstract}
 
 \section*{Introduction}
@@ -66,6 +68,14 @@ This is not as easy a task for repertoires as it is for other problems, where a 
 In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
 Moreover, the most realistic repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
 Indeed, immune repertoires are large, complex objects.
+
+In fact, identifying a principled means of immune receptor repertoire comparison has been a formiddable task due to the intricacies of repertoire data.
+Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
+Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd}, or transformation of a repertoire to another space and comparing these transformed quantities according to some metric.
+For example, several studies reduce nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
+These $k$mer distributions can be compared via some metric, but comprise a large space and lose important positional information.
+One can instead perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
+
 
 In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
@@ -91,18 +101,6 @@ Furthermore, we investigate the effectiveness of various summary statistics in d
 %BJO - Not sure what is meant by the below line.
 Although by comparing various generative models to real data, we obtain a validated means of generating data for benchmarking inferential tools, we don't do that here.
 Also, although summary statistics can be used in simulation-based inferential methods such as approximate Bayesian computation, we don't do that here either.
-
-\subsection*{Repertoire Comparison}
-
-%EM This next paragraph doesn't feel abstract methods-y.
-%BJO It may eventually be a better fit for a Discussion section, but I'll put it here for now.
-Applications of a methodical lymphocyte repertoire comparison tool include:
-\begin{itemize}
-\item Comparing simulated repertoires to observed ones, such as for model selection and validation
-\item Contrasting repertoires in the context of antigen response or vaccination design and evaluation
-\item Assessing the performance of competing repertoire analysis tools
-\item Evaluating artificial lymphocyte repertoires \cite{Finlay2012}
-\end{itemize}
 
 \section*{Methods}
 
@@ -309,17 +307,21 @@ Figure \ref{PartisWorkflow} describes the workflow of this procedure for a given
         \node[block](fasta){Fasta file};
         \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
         \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
+        \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
+        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
         \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
         \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-        \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
+        \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
+        \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
         \path[line](fasta) -- (partis);
         \path[line] (partis) -- (partisdata);
         \path[line] (partis) -- (params);
         \path[line] (params) -- (simulate);
         \path[line] (simulate) -- (sim);
-        \path[line] (partisdata) -- (c1);
-        \path[line] (sim) -- (c1);
+        \path[line] (partisdata) -- (clones);
+        \path[line] (clones) -- (c1);
+        \path[line] (sim) -- (simclones);
+        \path[line] (simclones) -- (c1);
     \end{tikzpicture}
 \end{adjustbox}
 \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
@@ -337,21 +339,45 @@ Nonetheless, we believe that meaningful models can be built from this data, and 
 %BJO Yes! Though I might have to put this off until after the WG meeting.
 We would like a measure of how well a statistic is replicated when a model performs simulations using parameters infered from the observed repertoire dataset.
 One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts, and the average divergence of observations to other observations.
-Let $\mathcal I$ be the set of dataset indices so that each separate dataset for a (individual, timepoint) pair corresponds to a unique index.
-Furthermore, let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ be the $i$th observed and simulated repertoire, respectively, and $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ based on statistic $s$, we have
+Suppose we have $k$ different experimental repertoires of immune receptor sequences, and let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$ denote the $i$th observed and simulated repertoire, respectively.
+For a given statistic $s$, let $\mathcal D(R_1, R_2; s)$ be the divergence of repertoires $R_1$ and $R_2$ with respect to $s$.
+We can score a simulator's ability to recapitulate $s$ from the observed repertoire to the simulated via
 \begin{equation}
-    \text{score}_\text{obs}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
-    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
-        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) } \right)
+    \text{score}_\text{obs}(s) := 
+    \log \left( 
+        \frac{ 
+            \frac{1}{\frac{1}{2} k\left(k - 1\right)}
+            \sum_{i=1}^{k}
+            \sum_{j \ne i}
+                \mathcal D\left(R_{i, \text{obs}}, R_{j, \text{obs}}; s\right) 
+        }
+        { 
+            \frac{1}{k} 
+            \sum_{i = 1}^k 
+                \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) 
+        } 
+    \right).
 \end{equation}
-This value for a given summary will be negative if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and positive if the experimental repertoires tend to look more alike.
+For a given summary $s$, score$_\text{obs}$ will be positive if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and negative if experimental repertoires tend to look more like other experimental repertoires than they do their simulated counterparts.
+In other words, this scores how well a simulator can differentiate $s$ from an experimental repertoire among other repertoires, and recapitulate $s$ into its simulation.
 
 Another related score would be comparing the average divergence of observations to their simulated counterparts, and the average divergence of simulations to other simulations.
 Formally, this is
 \begin{equation}
-    \text{score}_\text{sim}(s) := \log \left( \frac{ \frac{1}{|\mathcal I|} \sum_{i \in \mathcal I} \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) }
-    { \frac{1}{\frac{1}{2} |\mathcal I|\left(|\mathcal I| - 1\right)}
-        \sum_{\substack{i, j \in \mathcal I \\ i \ne j}} \mathcal D\left(R_{i, \text{sim}}, R_{j, \text{sim}}; s\right) } \right)
+    \text{score}_\text{sim}(s) := 
+    \log \left( 
+        \frac{ 
+            \frac{1}{\frac{1}{2} k\left(k - 1\right)}
+            \sum_{i=1}^{k}
+            \sum_{j \ne i}
+                \mathcal D\left(R_{i, \text{sim}}, R_{j, \text{sim}}; s\right) 
+        }
+        { 
+            \frac{1}{k} 
+            \sum_{i = 1}^k 
+                \mathcal D \left( R_{i, \text{obs}}, R_{i, \text{sim}} ; s\right) 
+        } 
+    \right).
 \end{equation}
 This value for a given summary will be negative if \texttt{partis} simulated repertoires tend to look more like their experimental counterparts in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
@@ -422,26 +448,26 @@ Each available univariate distribution is plotted by default, although the user 
 Figure \ref{fig:PartisFreqPolys} shows an example outputs of \texttt{plotUnivariateDistributions} computed for four datasets: \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim}.
 This function displays frequency polygons by default, but can also display empirical cumulative distribution functions, shown in \ref{fig:PartisECDFs} for the same four datasets.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/partis_freqpoly.pdf}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/partis_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:PartisFreqPolys}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/partis_ecdf.pdf}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/partis_ecdf.pdf}
     \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:PartisECDFs}
 \end{figure}
 
 %BJO - IGoR freqploy and ecdf plots. Should move both these and partis ones to results section
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/igor_freqpoly.pdf}
+    \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:IgorFreqPolys}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/igor_ecdf.pdf}
+    \includegraphics[width=\linewidth]{Figures/IgorScores/igor_ecdf.pdf}
     \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:IgorECDFs}
 \end{figure}
@@ -449,65 +475,13 @@ This function displays frequency polygons by default, but can also display empir
 \subsection*{Model validation}
 
 %EM Results paragraphs concern what was found. Can you comment on overall trends or interesting things we found that people can find in the figure?
-Figure \ref{fig:SimObs} displays the divergences of each statistic in \ref{tab:SummaryStatistics} for three observed repertoires.
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/sim_obs.pdf}
-    \caption{Divergences of empirical summary distributions based on three individual observed datasets.}
-    \label{fig:SimObs}
-\end{figure}
-Because the absolute divergence values are sensitive to scale as well as the type of divergence used, we also include divergences for each observation-observation pair as a benchmark.
-The idea here is that a very good simulator should result in low divergence values between its reference repertoire and its simulated repertoire, as opposed to comparing the observed dataset to any other dataset.
-For such a simulator, the diagonal at the bottom of the plots in figure \ref{fig:SimObs}, which represents observation-simulation divergences, would have lighter colors than those in the upper left corner, which represent observation-observation divergenes.
-We see that this is the case for some statistics, particularly the germline gene usages and CDR3 lengths, but in other cases the observations tend to be more similar to other observations, such as for the distributions of positional distance between mutations.
-
 A valid concern about our methodology is that \texttt{partis} simulations would be unreasonably biased by \texttt{partis} annotations on which they are based.
 To address this, we performed dataset annotation using standalone \texttt{igblast} \cite{Ye2013-kl}, and compared these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
-Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
-Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
-The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
-\begin{figure}
-    \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
-        \begin{tikzpicture}
-            \node[block](fasta){Fasta file};
-            \node[cloud, below left=0.5 cm and 2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
-            \node[cloud, below right=0.5 cm and 2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
-            \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-            \node[block, below right=0.75 cm and 0.1 cm of partis](params){Parameters};
-            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
-            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-            \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
-            \node[block, below left=0.75 and 0.1cm of sim](c1){Comparisons};
-            \node[block, below right=0.75 and 0.1cm of sim](c2){Comparisons};
-            \path[line](fasta) -- (partis);
-            \path[line](fasta) -- (igblast);
-            \path[line] (partis) -- (partisdata);
-            \path[line] (partis) -- (params);
-            \path[line] (igblast) -- (igblastdata);
-            \path[line] (params) -- (simulate);
-            \path[line] (simulate) -- (sim);
-            \path[line] (partisdata) -- (c1);
-            \path[line] (sim) -- (c1);
-            \path[line] (igblastdata) -- (c2);
-            \path[line] (sim) -- (c2);
-        \end{tikzpicture}
-    \end{adjustbox}
-    \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
-    \label{IgblastWorkflow}
-\end{figure}
-The results are displayed in figure \ref{PartisIgb}.
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/partis_igb.pdf}
-    \caption{Comparing divergences for \texttt{igblast} annotations and \texttt{partis} simulations based on the same individual observed repertoires.
-        We use the default germline databases in \texttt{igblast} for consistency.
-    }
-    \label{PartisIgb}
-\end{figure}
-The plots do not suggest any systematic bias in our approach.
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
 Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot-tcr.pdf}
+    \includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
     \caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{igor} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
@@ -524,7 +498,7 @@ In particular, Atchley factor distributions of the observations are in general n
 
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot-tcr.pdf}
+    \includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
     \caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{igor} model inference and simulation.
         A low LRD indicates a well-replicated statistic by the simulations.
     }
@@ -574,6 +548,12 @@ While this is not very surprising since model simulations are a simplifiication 
 \subsection*{Comparing observations to competing model simulations}
 
 \section*{Discussion}
+We have presented a general framework for summarizing and comparing rep-seq datasets, and applied it to several questions of scientific interest.
+One can imagine many further applications of \texttt{sumrep}, as well as general avenues of research.
+A natural extension of the model validation in this report would be to assess the performance of many competing repertoiore analysis tools over a larger group of datasets.
+Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
+\texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones\cite{Finlay2012}.
+
 We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
 
 \bibliographystyle{plain}
@@ -785,5 +765,79 @@ Moreover, the runtime by dataset size is consistently higher, with runtimes of o
 Still, as evidenced by Figure \ref{fig:EfficiencyBySizeFull}, these runtimes are consistently at least $\exp(2.5) \approx 12$ times smaller than computing the full distribution, with efficiencies as high as $\exp(6.25) \approx 457$ for datasets of size $\exp(10)$.
 While there is a tradeoff between minimizing the KL-divergence to truth and maximizing the time efficiency when choosing the tolerance, these results suggest that any reasonable choice of tolerance will outperform computing the full distribution for moderate and large datasets.
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
+
+\subsection*{Appendix C: Comparison of summary scores using IgBlast annotations}
+
+Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
+Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
+The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
+\begin{figure}
+    \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
+        \begin{tikzpicture}
+        \node[block](fasta){Fasta file};
+        \node[cloud, below left=0.5 cm and 1.2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+        \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
+        \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
+        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
+        \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+        \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+        \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
+        \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
+        \path[line](fasta) -- (partis);
+        \path[line] (partis) -- (partisdata);
+        \path[line] (partis) -- (params);
+        \path[line] (params) -- (simulate);
+        \path[line] (simulate) -- (sim);
+        \path[line] (partisdata) -- (clones);
+        \path[line] (clones) -- (c1);
+        \path[line] (sim) -- (simclones);
+        \path[line] (simclones) -- (c1);
+            \node[cloud, below right=0.5 cm and 1.2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
+            \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
+            \node[block, below = 0.75 cm of igblastdata](igblastclones){Subsample to unique clones};
+            \node[block, below right=0.75 and 0.1cm of simclones](c2){Comparisons};
+            \path[line](fasta) -- (igblast);
+            \path[line] (igblast) -- (igblastdata);
+            \path[line] (igblastdata) -- (igblastclones);
+            \path[line] (igblastclones) -- (c2);
+            \path[line] (simclones) -- (c2);
+        \end{tikzpicture}
+    \end{adjustbox}
+    \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
+    \label{IgblastWorkflow}
+\end{figure}
+The results are displayed in figure \ref{PartisIgb}.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot_igb.pdf}
+    \caption{Comparing divergences for \texttt{igblast} annotations and \texttt{partis} simulations based on the same individual observed repertoires.
+        We use the default germline databases in \texttt{igblast} for consistency.
+    }
+    \label{PartisIgb}
+\end{figure}
+The plots show a high level of agreement for most summaries, with all but six of them differing by less than one units, and a strong majority of them close to zero.
+Where differences arise, this is likely the result of differences in how partis and IgBlast perform annotations.
+For example, we see that the insertion length distributions highly disagree in scores.
+This is at least partially attributable to the star-tree assumption on which partis operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
+Indeed, examining the VD insertion length distribution shows that IgBlast tends to assign a similar distribution to each dataset, whereas partis leads to more variable distributions with right skew due to the star-tree assumption.
+Moreover, if IgBlast tends to assign a similar insertion length distribution to every dataset, then this will make it difficult for a simulator designed to match particular insertion lengths distributions to behave more like the IgBlast distributions.
+Thus, inherent differences in annotation tools will certainly lead to differences in summary scores, regardless of how accurate either tool is.
+Hence, it is important to understand that a given annotations-based summary should be considered in the context of the tool which provided annotations, and not as a ground-truth summary of the actual gene usage/indel statistics.
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/score_diff.pdf}
+    \caption{Difference in score$_\text{obs}$ values when using \texttt{igblast} versus \texttt{partis} for annotations.
+    }
+    \label{PartisIgb}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/pi_freqpoly.pdf}
+    \caption{Summary distribution frequency polygons of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/PartisScores/pi_ecdf.pdf}
+    \caption{Summary distribution empirical cdfs of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+\end{figure}
 
 \end{document}
