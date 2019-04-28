@@ -154,11 +154,19 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \label{tab:SummaryStatistics}
 \end{table}
 
-Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the assumed level of annotation, clustering, and phylogenetic inference.
-The first group does not require any post-processing and are completely tool-independent.
-The second group requires standard sequence annotations, such as inferred naive ancestor sequences, germline gene assignments, and indel information.
-The third group also requires clonal family cluster assignments.
-The fourth group further requires an imputed phylogeny for each clonal family.
+Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
+These default assumptions were chosen to cover common use cases while also attempting to encourage meaningful analyses.
+While these assumptions drive the methodology underlying \texttt{sumrep}, we still allow for flexibility by allowing the user to specify custom inputs to each summary function, among other options.
+
+Level zero operates on raw query sequences and does not require any post-processing , so that it is completely tool-independent.
+While such a level avoids any tool-specific biases, it also can yield ill-defined analyses if sequences are not filtered by any criterion.
+For example, a pairwise distance distribution of reads which cover arbitrary regions of an immune receptor will be highly unstable and likely not yield meaningful insights about the underlying repertoire characteristics.
+Consequently, none of the summaries in \texttt{sumrep} operate at this level by default, so that this level is mostly a formality.
+Level one requires input sequences to be pairwise aligned and constrained to the variable region.
+This coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
+Level two requires standard sequence annotations, such as inferred naive ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
+Level three requires clonal family cluster assignments.
+Level four further requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogeny inference, but rather assumes such metadata have been pre-computed and included in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
 Other possible statistics:
@@ -172,8 +180,8 @@ Applied to make inferences about data \cite{Steiman-Shimony2006-fm}.
 
 
 \subsection*{Divergence}
-The general approach of \texttt{sumrep} is to get distributions of a given summary statistic for the two repertoires in consideration and compare them via some metric or divergence.
-We have elected to use Jenson-Shannon divergence for most of our comparison functions.
+\texttt{sumrep} allows for the comparison of each summary statistic between two repertoires by employing some metric or divergence appropriate for the summary in question.
+We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
 \begin{equation}
 \text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
@@ -189,7 +197,7 @@ In the case where $P$ and $Q$ are both discrete distributions, this becomes
 where $\Omega$ is the countable sample space for $P_1$.
 Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
-Instead of binning, one could construct approximating functions for the two densities and compute the expectation via numerical integration; this may increase accuracy but also introduces extra complexity and possible division-by-zero issues.
+We also discard bins which would lead to an infinite KL divergence to increase numerical stability.
 
 Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
 \begin{equation}\label{eq:SAD}
@@ -207,7 +215,7 @@ then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_
 d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
 \end{equation}
 This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
-Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application.
+Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
 
 \subsection*{Efficient computation by subsampling and averaging}
 Computing full summaries can be computationally inefficient for even moderately sized repertoires.
@@ -515,7 +523,7 @@ Figure \ref{fig:ObsScoresBCR} displays the observation-based summary scores for 
     }
     \label{fig:ObsScoresBCR}
 \end{figure}
-As noted from Figure \ref{fig:SimObs}, the best-recapitulated statistics tend to be CDR3 lengths and most of the statistics based on germline inferences.
+As noted from Figure \ref{fig:ObsScoresBCR}, the best-recapitulated statistics tend to be CDR3 lengths and most of the statistics based on germline inferences.
 This is sensible as these per-sample statistics are directly used for simulation.
 Interestingly, the simulations do tend to capture selection estimates and GRAVY indices well despite these quantities not being involved in the inference or simulation process.
 Conversely, the simulations tend to have less agreement in distributions of hotspot and coldspot motifs as well as positional distance between mutations and VD/DJ insertion matrices.
@@ -550,7 +558,11 @@ While this is not very surprising since model simulations are a simplifiication 
 \section*{Discussion}
 We have presented a general framework for summarizing and comparing rep-seq datasets, and applied it to several questions of scientific interest.
 One can imagine many further applications of \texttt{sumrep}, as well as general avenues of research.
-A natural extension of the model validation in this report would be to assess the performance of many competing repertoiore analysis tools over a larger group of datasets.
+
+A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
+Moreover, it would likely be useful to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can be quite different.
+
+
 Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
 \texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones\cite{Finlay2012}.
 
