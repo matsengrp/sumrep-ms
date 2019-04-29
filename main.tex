@@ -707,22 +707,22 @@ Figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution fu
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/freqpoly_by_tol.pdf}
    		\caption{Frequency polygons of true and subsampled pairwise distance distributions by tolerance.}
-    	\label{fig:NNFreqPoly}
+    	\label{fig:NNFreqPolySequence}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/ecdf_by_tol.pdf}
     	\caption{Empirical c.d.f. of true and subsampled pairwise distance distributions by tolerance.}
-    	\label{fig:NNECDF}
+    	\label{fig:NNECDFSequence}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/div_by_tol.pdf}
     	\caption{KL-divergence to true pairwise distance distribution by tolerance, taken over 10 trials of the algorithm.}
-    	\label{fig:NNDivergences}
+    	\label{fig:NNDivergencesSequence}
 	\end{subfigure}
     \begin{subfigure}{.5\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/Sequence/log_time_by_tol.pdf}
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
-    	\label{fig:NNTimes}
+    	\label{fig:NNTimesSequence}
     \end{subfigure}
     \begin{subfigure}[H]{\textwidth}
     	\vspace{1em}
@@ -787,17 +787,17 @@ Figures \ref{fig:DivBySizeFull}, \ref{fig:TimeBySizeFull}, and \ref{fig:Efficien
 	\begin{subfigure}{0.5\textwidth}
     	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:DivBySize}
+    	\label{fig:DivBySizeFull}
 	\end{subfigure}
 	\begin{subfigure}{0.5\textwidth}
     	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/time_by_size_and_tol.pdf}
     	\caption{Time complexity of the approximate nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:TimeBySize}
+    	\label{fig:TimeBySizeFull}
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/efficiency_by_size_and_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:EfficiencyBySize}
+    	\label{fig:EfficiencyBySizeFull}
     \end{subfigure}
 \end{figure}
 
