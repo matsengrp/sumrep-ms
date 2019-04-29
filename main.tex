@@ -71,11 +71,12 @@ Indeed, immune repertoires are large, complex objects.
 
 In fact, identifying a principled means of immune receptor repertoire comparison has been a formiddable task due to the intricacies of repertoire data.
 Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
-Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd}, or transformation of a repertoire to another space and comparing these transformed quantities according to some metric.
-For example, several studies reduce nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
-These $k$mer distributions can be compared via some metric, but comprise a large space and lose important positional information.
+Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd}, or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
+One can also transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
+For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
+These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
 One can instead perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
-
+Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
 In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
 Luckily, researchers have already derived many means of quantifying important features of repertoires.
