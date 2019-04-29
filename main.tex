@@ -306,8 +306,6 @@ We illustrate this approach with two case studies.
 First, we discuss model validation on the BCR sequence annotation and clonal family clustering strategy implemented in \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz}.
 We compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset in Table \ref{tab:Datasets}.
 Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
-%EM cft package is going to get us in trouble-- best to just describe the alignment and tree building programs (with versions)
-For those statistics which require an inferred phylogenetic tree, we use BCR-tailored tree-building software that takes \texttt{partis}-partitioned data as input and outputs tree data structures for each clonal family.
 Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
 Figure \ref{fig:PartisWorkflow} describes the workflow of this procedure for a given dataset.
 
@@ -487,15 +485,15 @@ Thus, we proceed with this caveat in mind.
 \subsection*{Implementation}
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports BCR and TCR repertoire datasets.
-It is open-source, unit-tested, fully documented, and AIRR compliant (by the time of release).
+It is open-source, unit-tested, extensively documented, and AIRR compliant.
 Analyses will be reproducible using Docker.
 
-\texttt{sumrep} contains a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
+\texttt{sumrep} includes a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
 A general-purpose implementation of algorithm \ref{DistributionAveraging} is also available and incorporated in applicable summary distributions.
-Algorithm \ref{NNDistributionAveraging} is also included for the nearest neighbor distance distribution, which uses \texttt{vsearch} for the clustering routine \cite{Rognes2016-bl}.
+Algorithm \ref{NNDistributionAveraging} is also included for the nearest neighbor distance distribution.
 
 \texttt{sumrep} also contains a plotting function for each univariate summary distribution, as well as a master plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots.
-Currently, these plots can be frequency polygons or empirical cumulative distribution functions.
+Currently, this plotting function supports frequency polygons and empirical cumulative distribution functions.
 Each available univariate distribution is plotted by default, although the user can easily specify a custom subset of these distributions.
 Figure \ref{fig:PartisFreqPolys} shows an example outputs of \texttt{plotUnivariateDistributions} computed for four datasets: \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim}.
 This function displays frequency polygons by default, but can also display empirical cumulative distribution functions, shown in \ref{fig:PartisECDFs} for the same four datasets.
@@ -689,7 +687,7 @@ Figure \ref{fig:SummaryPerformance} shows the KL-divergence to the full dataset 
     \label{fig:SummaryPerformance}
 \end{figure}
 It appears that the summary in question does affect the KL divergence, particular seen for the hotspot count distribution.
-However, in each case the KL divergence appears to approach zero exponentially as $\varepsilon \to 0$. 
+However, this effect diminishes as the tolerance decreases, and in each case the KL divergence appears to approach zero exponentially as $\varepsilon \to 0$. 
 
 These results suggest that the user should expect a high degree of accuracy for a significantly diminished runtime for any reasonable choice of tolerance $\varepsilon$, although convergence will vary between statistics.
 
