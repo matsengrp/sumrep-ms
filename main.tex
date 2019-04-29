@@ -669,9 +669,21 @@ For sample sizes $s \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f
 We perform this experiment 10 times for each $s$.
 Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_size_and_tol.pdf}
-    \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    \label{fig:Sizes}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_size_and_tol.pdf}
+        \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+        \label{fig:Sizes}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/PairwiseDistance/time_by_size_and_tol.pdf}
+        \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+        \label{fig:Sizes}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/PairwiseDistance/efficiency_by_size_and_tol.pdf}
+        \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+        \label{fig:Sizes}
+    \end{subfigure}
 \end{figure}
 The figure shows no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance.
 This suggests that the accuracy of our procedure is scalable to large datasets.
@@ -782,17 +794,17 @@ There is not an apparent trend of the KL-divergence that is consistent across to
 Figure \ref{fig:TimeBySize} shows boxplots of the runtime of the procedure for each scenario.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol_cdr3.png}
+    	\includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_size_and_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     	\label{fig:DivBySize}
 	\end{subfigure}
 	\begin{subfigure}{0.5\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/time_by_size_and_tol_cdr3.png}
+    	\includegraphics[width=\linewidth]{Figures/PairwiseDistance/time_by_size_and_tol.pdf}
     	\caption{Time complexity of the approximate nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     	\label{fig:TimeBySize}
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\linewidth]{Figures/NearestNeighbor/efficiency_by_size_and_tol_cdr3.png}
+        \includegraphics[width=\linewidth]{Figures/PairwiseDistance/efficiency_by_size_and_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     	\label{fig:EfficiencyBySize}
     \end{subfigure}
