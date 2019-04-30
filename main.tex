@@ -309,7 +309,14 @@ First, we discuss model validation on the BCR sequence annotation and clonal fam
 We compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset in Table \ref{tab:Datasets}.
 Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
 Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
-Figure \ref{fig:PartisWorkflow} describes the workflow of this procedure for a given dataset.
+For each comparison, we subsample one receptor per clonal family to get a dataset consisting of ``unique clones'', for both the observed and simulated datasets.
+We do this since \texttt{partis simulate} draws from distributions over clonal families for each rearrangement event as inferred from \texttt{partis partition}.
+While it is possible to simulate multiple leaves for each rearrangement, it is not obvious how to best synchronize this with the observed clonal family distributions.
+For example, if we had one clonal family with 1,000 members, and 99 singleton clonal families, we could try to coerce the simulator to produce on average a (roughly) size-1,000 clonal family for every 99 singletons.
+However, it seems like this is highly contrived to the nature of our experimental sample, and does not clearly mimic the true repertoire dynamics of the individual from which the dataset was obtained.
+Also, there is ambiguity to whether the rearrangement parameters for this size-1,000 clonal family should always match those of the observed size-1,000 clonal family, or if they should be sampled in some random fashion.
+Hence, it seems more principled to subsample to unique clones and examine clonal family dynamics without dealing with abundance biases.
+Figure \ref{fig:PartisWorkflow} describes the overall workflow of this procedure for a given dataset.
 
 
 Next, we discuss a similar model validation approach for TCR repertoires using \texttt{IGoR} \cite{Marcou2018-du}.
