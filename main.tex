@@ -69,22 +69,24 @@ In contrast, repertoire models generate sets of nucleotide sequences that are sp
 Moreover, the most realistic repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
 Indeed, immune repertoires are large, complex objects.
 
-In fact, identifying a principled means of immune receptor repertoire comparison has been a formiddable task due to the intricacies of repertoire data.
+In fact, identifying a principled means of immune receptor repertoire comparison has been a formidable task due to the intricacies of repertoire data.
 Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
-Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd}, or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
+Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt}, or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
+Many studies consider only the CDR3 length distribution of a repertoire \cite{Miqueu2007-lk}.
+
 One can also transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
 For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
 One can instead perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
 Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
-In such a setting, summary statistics are useful (and sometimes sufficient) for expressing discrepancies between model simulations and data, and also between simulations and between data sets.
-Luckily, researchers have already derived many means of quantifying important features of repertoires.
-These summary statistics can range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex inferences.
-Simple statistics acting on raw sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
+In any case, summary statistics are useful for immune receptor repertoire analysis and comparison, for both experimental and simulated repertoires.
+Besides the summaries discussed above, researchers have already derived many other means of quantifying important features of repertoires.
+These summary statistics can range from simple statistics such as the level of GC content, to statistics such as tree shapes which are applied to complex phylogenetic inferences.
+Simple statistics acting on minimally processed sequences are helpful because they are robust to potentially problematic assumptions of inferential methods as well as implementation intricacies.
 For example, in linear regression, comparing inferred slopes is less useful when the relationship of the data is not truly linear, but comparing nonparametric statistics like the sample mean or range is still sensible.
 On the other hand, more intricate statistics give more precise descriptions of the data and can yield more elaborate insights than simple ones.
-For example, model-based statistics are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
+Model-based statistics are revealing when inferential model fit is reasonable, and can help reduce noise from sampling or measurement error.
 In our linear regression example, comparing the general trends of points can be less distracted by noise than comparing the sets of points directly, and can differentiate between linear associations unlike the sample mean.
 
 Still, determining how well a given summary can describe or distinguish a repertoire is a difficult task.
@@ -114,7 +116,7 @@ Also, although summary statistics can be used in simulation-based inferential me
     Pairwise distance distribution & No & No & No & \texttt{stringdist} \cite{vanderLoo2014-re} \\
 $k$th nearest neighbor distribution & No & No & No & \texttt{stringdist} \\
     GC-content distribution & No & No & No & \texttt{ape} \cite{Paradis04-hz} \\
-    Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagès17-bi} \\
+    Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagas17-bi} \\
 \hline
 Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
 %BJO Another one we kind of skipped over.
@@ -256,7 +258,7 @@ For example, consider the nearest neighbor distance of a sequence $s_i$ to a rep
 d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
 \end{equation}
 where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
-If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will possibly have more sequences to iterate over.
+If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
 
 In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
 For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
@@ -546,10 +548,12 @@ The least accurately replicated statistic is the pairwise distance distribution,
 (Nonetheless, IGoR does not currently have an option to output the full variable region nucleotide sequences.)
 The CDR3 length distribution is also not well replicated, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
 Interestingly, the kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
-Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera
-In particular, Atchley factor distributions of the observations are in general not well recapitulated in the simulations.
+Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors).
 
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
+We still see high scores for gene usage and indel statistics, although now the various Kidera factor and GRAVY index distributions have lower scores.
+This suggests that while the average \texttt{igor} simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure \ref{fig:IgorFreqPolys}.
+The low scor
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
@@ -571,16 +575,14 @@ Figure \ref{fig:ObsScoresBCR} displays the observation-based summary scores for 
     	\label{fig:SimScoresBCR}
 	\end{subfigure}
 \end{figure}
-As noted from Figure \ref{fig:ObsScoresBCR}, the best-recapitulated statistics tend to be CDR3 lengths and most of the statistics based on germline inferences.
-This is sensible as these per-sample statistics are directly used for simulation.
-Interestingly, the simulations do tend to capture selection estimates and GRAVY indices well despite these quantities not being involved in the inference or simulation process.
-Conversely, the simulations tend to have less agreement in distributions of hotspot and coldspot motifs as well as positional distance between mutations and VD/DJ insertion matrices.
+Like \texttt{igor}, we see that \texttt{partis} simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well, but failing to recapitulate VD and DJ insertion matrices.
+This contrasts \texttt{igor} which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
+The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations, and hot and cold spot counts, not being well-captured.
+This is not very surprising as \texttt{partis} does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models.
+
 
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
-
-
-We see that for the vast majority of summaries, this score is greater than zero, indicating that simulations look closer to other simulations than they do to their experimental counterparts.
-While this is not very surprising since model simulations are a simplifiication of the true data-generating process, this does suggest that important biological quantities may need to be explicitly accounted for in a more accurate generative model.
+The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some summaries like positional distance between mutations and VD/DJ insertion matrices seeing a moderate drop.
 
 
 %BJO - Chaim's analysis
@@ -646,8 +648,7 @@ Figure \ref{fig:Distributions} displays density estimates of one trial for each 
 		\label{tab:PDSummaryTable}
     \end{subfigure}
 \end{figure}
-However, the density estimates exhibit awkward and inconsistent smoothing based on both the differences in orders of magnitude between distributions, as well as the fact that the pairwise distance distribution takes discrete values (and are thus not well-described by continuous smoothing kernels).
-We can instead look at the following more appropriate summaries for discrete data.
+
 Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
 
 
