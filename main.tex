@@ -692,16 +692,29 @@ Finally, we investigate the effect of summary statistic on the performance of Al
 We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
 For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-7}\}$.
 We perform this experiment 10 times for each (summary, $\varepsilon$) combination.
-Figure \ref{fig:SummaryPerformance} shows the KL-divergence to the full dataset distributions by summary and tolerance over all trials.
+Figures \ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:EfficiencyBySummary} show the KL-divergence to the full dataset distributions, runtimes, and efficiencies, respectively, by summary and tolerance over all trials.
 \begin{figure}
-    \includegraphics[width=\linewidth]{Figures/Multiple/div_by_summary_and_tol.pdf}
-    \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
-    \label{fig:SummaryPerformance}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/Multiple/div_by_summary_and_tol.pdf}
+        \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
+        \label{fig:DivBySummary}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/Multiple/time_by_summary_and_tol.pdf}
+        \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
+        \label{fig:TimeBySummary}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/Multiple/efficiency_by_summary_and_tol.pdf}
+        \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
+        \label{fig:EfficiencyBySummary}
+    \end{subfigure}
 \end{figure}
-It appears that the summary in question does affect the KL divergence, particular seen for the hotspot count distribution.
-However, this effect diminishes as the tolerance decreases, and in each case the KL divergence appears to approach zero exponentially as $\varepsilon \to 0$. 
+It appears that the KL divergence, runtime, and efficiency of the approximation routine depends on the summary in question.
+In particular, the approximation routine for hotspot and coldspot count distributions does not yield as high of an efficiency for moderately low tolerance, and struggles to minimize the KL-divergence to the true distribution for higher tolerances.
+This is likely due to the fact that the full hotspot and coldspot count distributions is extremely fast to compute even for large datasets.
 
-These results suggest that the user should expect a high degree of accuracy for a significantly diminished runtime for any reasonable choice of tolerance $\varepsilon$, although convergence will vary between statistics.
+These results suggest that convegence and efficiency will vary by summary, and the user should be aware of this fact when choosing whether to run the approximation routine as well as an appropriate tolerance.
 
 \subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
 
