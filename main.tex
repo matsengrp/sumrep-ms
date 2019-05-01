@@ -675,26 +675,38 @@ Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
 For sample sizes $s \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.  
 We perform this experiment 10 times for each $s$.
-Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:Sizes}.
+Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:PDDivBySize}.
+We see no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance for the pairwise distribution.
+Boxplots of the runtime (in log-seconds) by log(size) and tolerance are shown in Figure \ref{fig:PDTimeBySize}, and boxplots of the log-efficiency by log(size) and tolerance are shown in Figure \ref{fig:PDEfficiencyBySize}, where we define the efficiency to be
+\begin{equation}\label{eq:Efficiency}
+	\text{Efficiency} :=
+		\frac{\text{time to compute the full distribution}
+		}{
+			  \text{time to compute the approximate distribution}
+		}.
+\end{equation}
+Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
+Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{DistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
+We see that while runtime increases superlinearly with dataset size for each tolerance, the efficiency appears to increase exponentially with dataset size.
+Thus, the accuracy of Algorithm \ref{DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency.
+
 \begin{figure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_size_and_tol.pdf}
         \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-        \label{fig:Sizes}
+        \label{fig:PDDivBySize}
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/PairwiseDistance/time_by_size_and_tol.pdf}
-        \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-        \label{fig:Sizes}
+        \caption{Runtime by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+        \label{fig:PDTimeBySize}
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/PairwiseDistance/efficiency_by_size_and_tol.pdf}
-        \caption{KL-divergence to true pairwise distance distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-        \label{fig:Sizes}
+        \caption{Efficiency by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
+        \label{fig:PDEfficiencyBySize}
     \end{subfigure}
 \end{figure}
-The figure shows no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance.
-This suggests that the accuracy of our procedure is scalable to large datasets.
 
 Finally, we investigate the effect of summary statistic on the performance of Algorithm \ref{DistributionAveraging}.
 We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
@@ -718,16 +730,16 @@ Figures \ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:Efficiency
         \label{fig:EfficiencyBySummary}
     \end{subfigure}
 \end{figure}
-It appears that the KL divergence, runtime, and efficiency of the approximation routine depends on the summary in question.
+We see that the KL divergence, runtime, and efficiency of the approximation routine depends on the summary in question.
 In particular, the approximation routine for hotspot and coldspot count distributions does not yield as high of an efficiency for moderately low tolerance, and struggles to minimize the KL-divergence to the true distribution for higher tolerances.
 This is likely due to the fact that the full hotspot and coldspot count distributions is extremely fast to compute even for large datasets.
 
 These results suggest that convegence and efficiency will vary by summary, and the user should be aware of this fact when choosing whether to run the approximation routine as well as an appropriate tolerance.
 
 \subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
-
-Now, we run Algorithm \ref{NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
-We compute the nearest neighbor distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+This section assesses the performance of the approximation routine \ref{NNDistributionAveraging} modified for the nearest neighbor distribution 
+We run Algorithm \ref{NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
+We compute the nearest neighbor distribution of CDR3 sequences (specified via the \texttt{junction} column) for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
 Figure \ref{fig:NNFreqPoly} shows a frequency polygon of the same distributions.
 Figure \ref{fig:NNECDF} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
@@ -735,17 +747,17 @@ Figure \ref{fig:NNECDF} shows their empirical cumulative distribution functions,
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/freqpoly_by_tol.pdf}
-   		\caption{Frequency polygons of true and subsampled pairwise distance distributions by tolerance.}
+   		\caption{Frequency polygons of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNFreqPoly}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/ecdf_by_tol.pdf}
-    	\caption{Empirical c.d.f. of true and subsampled pairwise distance distributions by tolerance.}
+    	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDF}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/div_by_tol.pdf}
-    	\caption{KL-divergence to true pairwise distance distribution by tolerance, taken over 10 trials of the algorithm.}
+    	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergences}
 	\end{subfigure}
     \begin{subfigure}{.5\textwidth}
@@ -756,35 +768,35 @@ Figure \ref{fig:NNECDF} shows their empirical cumulative distribution functions,
     \begin{subfigure}[H]{\textwidth}
     	\vspace{1em}
 		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate pairwise distance distribution, and the true pairwise distance distribution.}
+		\caption{Numerical summaries of one trial run for each approximate nearest neighbor distance distribution, and the true pairwise distance distribution.}
 		\label{tab:NNSummaryTable}
     \end{subfigure}
 \end{figure}
 
-To assess the effect of sequence lengths on Algorithm \ref{NNDistributionAveraging}, we perform the same experiment as above on query sequence reads rather than inferred CDR3 sequences.
+To assess the effect of sequence lengths on Algorithm \ref{NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned query sequences rather than inferred CDR3 sequences.
 These length distributions are different by about an order of magnitude, as seen in the table below.
 \input{Tables/sequence_lengths.tex}.
-We note that the \texttt{sequence} column is the default for Algorithm \ref{NNDistributionAveraging} within \texttt{sumrep}, although we expect users to examine this distribution for a variety of sequence types including CDR3s.
+We note that the \texttt{sequence\_alignment} column is the default for Algorithm \ref{NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
 We run Algorithm \ref{NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
 We compute the nearest neighbor distribution of query sequences for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-5} \right\}$.
 We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
-Figure \ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distributions.
-Figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
-
+Figure \ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distributions, and figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution functions.
+Moreover, figures \ref{fig:NNDivergencesSequence}
+ and \ref{fig:NNTimesSequence} show the KL-divergences to truth and runtimes, respectively.
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/freqpoly_by_tol.pdf}
-   		\caption{Frequency polygons of true and subsampled pairwise distance distributions by tolerance.}
+   		\caption{Frequency polygons of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNFreqPolySequence}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/ecdf_by_tol.pdf}
-    	\caption{Empirical c.d.f. of true and subsampled pairwise distance distributions by tolerance.}
+    	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDFSequence}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/div_by_tol.pdf}
-    	\caption{KL-divergence to true pairwise distance distribution by tolerance, taken over 10 trials of the algorithm.}
+    	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergencesSequence}
 	\end{subfigure}
     \begin{subfigure}{.5\textwidth}
@@ -795,51 +807,40 @@ Figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution fu
     \begin{subfigure}[H]{\textwidth}
     	\vspace{1em}
 		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate pairwise distance distribution, and the true pairwise distance distribution.}
+		\caption{Numerical summaries of one trial run for each approximate nearest neighbor distance distribution, and the true pairwise distance distribution.}
 		\label{tab:NNSequenceSummaryTable}
     \end{subfigure}
 \end{figure}
 
-
-Overall, Algorithm \ref{NNDistributionAveraging} has more trouble honing in on the nearest neighbor distribution of query sequences as quickly as it does for CDR3s, although the runtime efficiency appears to be higher.
-This is likely due to the pecularities of the full NN distribution of query sequences, in which roughly 75\% of the mass is at zero and the remaning 25\% is gradually and nonuniformly dispersed over the values 1 through about 80.
-Nonetheless, the approximate distributions appear to converge to the truth as $\varepsilon \to 0$, and the stastical characteristics of the full distribution are captured for even small values of $\varepsilon$.
-
-
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{NNDistributionAveraging}.
-For sample sizes $s \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.  
+For sample sizes $s \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of \texttt{sequence\_alignment} sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.  
 We perform this experiment 5 times for each $s$.
-Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure \ref{fig:DivBySize}.  
 
-There is not an apparent trend of the KL-divergence that is consistent across tolerances, although there is much higher variation for higher tolerances than lower ones.
-Figure \ref{fig:TimeBySize} shows boxplots of the runtime of the procedure for each scenario.
+Figures \ref{fig:NNDivBySizeFull}, \ref{fig:NNTimeBySizeFull}, and \ref{fig:NNEfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/PairwiseDistance/div_by_size_and_tol.pdf}
+    	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:DivBySize}
+    	\label{fig:NNDivBySizeFull}
 	\end{subfigure}
 	\begin{subfigure}{0.5\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/PairwiseDistance/time_by_size_and_tol.pdf}
+    	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/time_by_size_and_tol.pdf}
     	\caption{Time complexity of the approximate nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:TimeBySize}
+    	\label{fig:NNTimeBySizeFull}
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\linewidth]{Figures/PairwiseDistance/efficiency_by_size_and_tol.pdf}
+        \includegraphics[width=\linewidth]{Figures/NearestNeighbor/efficiency_by_size_and_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:EfficiencyBySize}
+    	\label{fig:NNEfficiencyBySizeFull}
     \end{subfigure}
 \end{figure}
-As expected, runtime increases as tolerance decreases, but also increases with the size of the dataset which deviates from the behavior of Algorithm \ref{DistributionAveraging}, where dataset size did not seem to affect runtime.
+
+
+There is a possible positive trend of the KL-divergence as sample size increases when conditioning on a tolerances, although the nature of this trend is difficult to ascertain.
+As expected, runtime increases as tolerance decreases, and also increases with the size of the dataset.
 This is reasonable since each batch iteration of \ref{NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which is $\mathcal O(n^2 m)$, where $n = \text{card}(R)$ is the number of sequences in the full repertoire, and $m = \max_{s \in B} \text{length}(s)$ is the largest sequence length in the batch sample.
 
-To get a better picture of what is happening, we can also look at the time efficiency for each case, defined to be 
-\begin{align}
-    \text{Efficiency} := \frac{\text{time to compute full distribution}}{\text{time to compute approximate distribution}}
-\end{align}
-where the denominator of course depends on the size of the dataset and tolerance $\varepsilon$.
-This is shown in Figure \ref{fig:EfficiencyBySize}.
-
+Next we look at the efficiency relative to computing the full distribution.
 Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
 Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{NNDistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
 We see that efficiency increases with dataset size as well as tolerance.
@@ -849,33 +850,18 @@ For example, for $\log(\text{size}) = 6$, we see that tolerances higher than $0.
 This suggests that, for a dataset with $n$ CDR3 sequences, a sensible rule of thumb would be to choose $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$.
 This will of course be more or less appropriate for a given dataset depending on the nature of the repertoire from which it was sampled.
 
-Next, we compute the pairwise distance distribution of full query sequence reads, using the same settings as before.
-Figures \ref{fig:DivBySizeFull}, \ref{fig:TimeBySizeFull}, and \ref{fig:EfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
-\begin{figure}
-	\begin{subfigure}{0.5\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/div_by_size_and_tol.pdf}
-    	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:DivBySizeFull}
-	\end{subfigure}
-	\begin{subfigure}{0.5\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/time_by_size_and_tol.pdf}
-    	\caption{Time complexity of the approximate nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:TimeBySizeFull}
-    \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\linewidth]{Figures/NearestNeighbor/efficiency_by_size_and_tol.pdf}
-    	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
-    	\label{fig:EfficiencyBySizeFull}
-    \end{subfigure}
-\end{figure}
+%BJO - Please ignore the following paragraph for now
 
-We see similar patterns as before, although numerical ranges differ when looking at query sequences versus CDR3 sequences.
-For example, the KL-divergences are consistently higher for each (tolerance, sample size) scenario, although they still seem to decay towards zero.
-This is likely due to the fact that raw sequence reads exhibit significantly more noise than CDR3 sequences.
-%BJO ^ This is an educated guess, since query sequences can in principle take many arbitrary forms, whereas CDR3 inferences are necessarily multiples of 3, and heavily constrainted by the inferred naive sequence
-Moreover, the runtime by dataset size is consistently higher, with runtimes of over an hour for datasets of size $\exp(10) \approx 22,000$ sequences and a tolerance of $10^{-5}$. 
-Still, as evidenced by Figure \ref{fig:EfficiencyBySizeFull}, these runtimes are consistently at least $\exp(2.5) \approx 12$ times smaller than computing the full distribution, with efficiencies as high as $\exp(6.25) \approx 457$ for datasets of size $\exp(10)$.
-While there is a tradeoff between minimizing the KL-divergence to truth and maximizing the time efficiency when choosing the tolerance, these results suggest that any reasonable choice of tolerance will outperform computing the full distribution for moderate and large datasets.
+%Next, we compute the nearest neighbor distribution of full query sequence reads, using the same settings as before.
+%
+%We see similar patterns as before, although numerical ranges differ when looking at query sequences versus CDR3 sequences.
+%For example, the KL-divergences are consistently higher for each (tolerance, sample size) scenario, although they still seem to decay towards zero.
+%This is likely due to the fact that raw sequence reads exhibit significantly more noise than CDR3 sequences.
+%%BJO ^ This is an educated guess, since query sequences can in principle take many arbitrary forms, whereas CDR3 inferences are necessarily multiples of 3, and heavily constrainted by the inferred naive sequence
+%Moreover, the runtime by dataset size is consistently higher, with runtimes of over an hour for datasets of size $\exp(10) \approx 22,000$ sequences and a tolerance of $10^{-5}$. 
+%Still, as evidenced by Figure \ref{fig:EfficiencyBySizeFull}, these runtimes are consistently at least $\exp(2.5) \approx 12$ times smaller than computing the full distribution, with efficiencies as high as $\exp(6.25) \approx 457$ for datasets of size $\exp(10)$.
+%While there is a tradeoff between minimizing the KL-divergence to truth and maximizing the time efficiency when choosing the tolerance, these results suggest that any reasonable choice of tolerance will outperform computing the full distribution for moderate and large datasets.
+
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
 \subsection*{Appendix C: Comparison of summary scores using IgBlast annotations}
