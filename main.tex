@@ -68,17 +68,17 @@ These $k$mer distributions can then be compared via a string metric, but still c
 One can instead perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
 Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
-%EM Similarly, here we take a substantial deviation. I'd suggest a shorter paragraph combining the following two starting with something like "Another application of summary statistics is to compare simulations to sequence data."
-The random generation of immune repertoires from gene rearrangements invites probabilistic modeling along with model-based simulation for generative models.
-In particular, one can benchmark generative model-based inferential tools by applying them to simulations from the assumed model and assessing the tool's performance.
-Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
+%EM I rewrote some of the following in a less formal way. I hope you don't mind.
+In addition to comparing sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
+Namely one can use a form of model checking that is common in statistics: after fitting a model to data, one compares the real data to data generated from the model.
+In this case, we generate sequences from the models and compare those sequences to real-data sequences via summary statistics.
 
-To build and improve on such probabilistic frameworks, we must identify the strengths and limitations of the underlying models.
-One form of statistical model validation compares features of simulated data to observed repertoire samples and evaluates their concordance (or lack thereof).
-This is not as easy a task for repertoires as it is for other problems, where a model output may simply be a real number.
-In contrast, repertoire models generate sets of nucleotide sequences that are sparse in the very large set of all possible nucleotide sequences.
-Moreover, the most realistic repertoire models incorporate various underlying structures such as clonal family clusters or phylogenetic trees, further compounding the difficulties.
-Indeed, immune repertoires are large, complex objects.
+We are motivated to perform such comparison because these probabilistic models are used as part of inference, and because they are used for inferential tool benchmarking.
+%EM Actually I'm not 100% positive that the inferential part will make sense to immunologists. So I'm not filling out this sentence yet.
+For example...
+Such generative models are used to simulate sequences for benchmarking inferential software (refs), and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
+%EM Putting this reason on hold for the time being.
+% Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
 %EM Here we need a paragraph saying that there are no unified packages dedicated to the task of calculating and comparing summary statistics for rep-seq data.
 %EM Perhaps point out that immcantation does a lot of these things, but there aren't any comparison functions and you can't ask alakazam to just go out and calculate everything then come back with plots describing differences between repertoires.
@@ -103,6 +103,10 @@ In our linear regression example, comparing the general trends of points can be 
 
 
 \section*{Methods}
+
+%EM I'd like to put the information here that most users will want to know, which is currently at the top of the Results section.
+%EM I looked for other software papers in Frontiers and found that https://paperpile.com/shared/qnTKS9 doesn't have a Methods section at all! https://www.frontiersin.org/about/author-guidelines seems to say that headings are just guidelines.
+%EM I'd like to propose moving most of this to a Results section, and put the Methods last and use it to describe things that immunologists won't care about.
 
 \begin{table}
 \makebox[\textwidth][c]{ % this centers a too-wide table
@@ -155,13 +159,17 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \end{table}
 
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
+%EM I don't know if the rest of this paragraph adds much?
 These default assumptions were chosen to cover common use cases while also attempting to encourage meaningful analyses.
 While these assumptions drive the methodology underlying \texttt{sumrep}, we still allow for flexibility by allowing the user to specify custom inputs to each summary function, among other options.
 
-Level zero operates on raw query sequences and does not require any post-processing , so that it is completely tool-independent.
+%EM I know that a lot of email ink was spilled on this paragraph, but given that the reader doesn't have that context does it make sense to include given that we have no summaries in this category?
+Level zero operates on raw query sequences and does not require any post-processing, so that it is completely tool-independent.
 While such a level avoids any tool-specific biases, it also can yield ill-defined analyses if sequences are not filtered by any criterion.
 For example, a pairwise distance distribution of reads which cover arbitrary regions of an immune receptor will be highly unstable and likely not yield meaningful insights about the underlying repertoire characteristics.
 Consequently, none of the summaries in \texttt{sumrep} operate at this level by default, so that this level is mostly a formality.
+
+%EM If we want to use the "level x" terminology then we should add it to the table. If not, then let's just say "The first group of statistics..."
 Level one requires input sequences to be pairwise aligned and constrained to the variable region.
 This coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
 Level two requires standard sequence annotations, such as inferred naive ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
@@ -180,8 +188,14 @@ Applied to make inferences about data \cite{Steiman-Shimony2006-fm}.
 
 
 \subsection*{Divergence}
-\texttt{sumrep} allows for the comparison of each summary statistic between two repertoires by employing some metric or divergence appropriate for the summary in question.
+\texttt{sumrep} makes it easy to compare each summary statistic between two repertoires by employing some metric or divergence appropriate for the summary in question.
+%EM The ability to make comparison is a great thing for users, so perhaps we should expand a little? Like say that for every function like CDR3Length there is a CDR3LengthCompare or whatnot?
+%EM We definitely want to say that people can just do "compareRepertoires" and lots of good things happen.
 We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
+%EM the formulas can get buried in a Methods section.
+%EM On the other hand we really need to explain how each repertoire gives a _distribution_ of values of summary statistics, and that sumrep can compare these distributions of values. A cartoon is probably needed.
+%EM Then you can say that JS is a standard and useful means of comparing distributions on numbers, and l1 is a good way of comparing distributions on categories.
+%EM We can consider adding an intuitive explanation of KL.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
 \begin{equation}
 \text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
@@ -217,6 +231,7 @@ d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \su
 This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
 Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
 
+%EM I'd suggest keeping an immmunologist-friendly version of this in the Results, and kick the more technical parts to the Methods. We certainly want prospective users to appreciate that we are subsampling, and that for most summaries this means just injecting a little noise into the distribution we are comparing.
 \subsection*{Efficient computation by subsampling and averaging}
 Computing full summaries can be computationally inefficient for even moderately sized repertoires.
 When the target summary is a distribution, we can gain efficiency by subsampling and averaging until convergence.
@@ -296,14 +311,18 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
 
 
 \subsection*{Comparing observations to model simulations per model}
-\texttt{sumrep} can be used for BCR/TCR generative model validation as follows.
+%EM If we rearrange methods and results as I propose, then we'll have some results from between-repertoire comparison first, then I can add this "also" below.
+\texttt{sumrep} can also be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data.
 Given a repertoire dataset, we infer model parameters using software based on the given model, and use these parameters to generate corresponding simulated datasets.
 This allows us to directly compare the observed and simulated datasets using the full \texttt{sumrep} suite.
 Applying this methodology to many datasets gives a clear view of characteristics which the model captures well, as well as areas for improvement.
+%EM As described in the introduction, we are motivated to do this because...
+We emphasize that validating the model in this way is different than the usual means of benchmarking model performance-- rather than benchmarking the inferential results of the model, we benchmark the model's ability to generate realistic sequences.
 
 We illustrate this approach with two case studies.
 First, we discuss model validation on the BCR sequence annotation and clonal family clustering strategy implemented in \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz}.
 We compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset in Table \ref{tab:Datasets}.
+%EM We could throw some of these details in the methods, with a one-sentence summary here.
 Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
 Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
 For each comparison, we subsample one receptor per clonal family to get a dataset consisting of ``unique clones'', for both the observed and simulated datasets.
@@ -315,10 +334,12 @@ Also, there is ambiguity to whether the rearrangement parameters for this size-1
 Hence, it seems more principled to subsample to unique clones and examine clonal family dynamics without dealing with abundance biases.
 Figure \ref{fig:PartisWorkflow} describes the overall workflow of this procedure for a given dataset.
 
-
 Next, we discuss a similar model validation approach for TCR repertoires using \texttt{IGoR} \cite{Marcou2018-du}.
-We apply IGoR to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
+Although IGoR is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand IGoR's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
+
+We applied IGoR in this way to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 Figure \ref{fig:IgorWorkflow} describes the workflow of this procedure for a given dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
+%EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
 Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
 
 \begin{figure}
@@ -420,7 +441,7 @@ Formally, this is
         }
     \right).
 \end{equation}
-This value for a given summary will be negative if simulated repertoires tend to look more like their experimental counterparts in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
+This value for a given summary will be negative if simulated repertoires tend to look more like their experimental counterparts (small $\mathcal D$ on the denominator) in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
 We apply this approach to \texttt{partis} and \texttt{igor} simulations in the Results section.
 However, this framework can be used to validate any immune receptor repertoire simulator which outputs the fields compatible with the summaries in \ref{tab:SummaryStatistics}, or more generally any set of summaries outside of the scope of \texttt{sumrep}.
@@ -482,9 +503,8 @@ For the IGoR model validation analysis, we use several datasets from \cite{Brita
 For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads in these six datasets ranged from 37,363 sequences to 243,903 sequences.
 %BJO - Trying to run \texttt{igor} on larger datasets would often throw a segmentation fault. If this is a concern, we could choose a dataset from each of five individuals and subsample each dataset to, say, 50,000 sequences. But I don't think this would change the result that much.
 These datasets consist of consensus RNA sequences assembled using UMIs.
-Most of these sequences are functional, and IGoR is meant to build models of nonfunctional sequences that are not biased by selection.
-Nonetheless, we believe that meaningful models can be built from this data: we are not making inferential claims about the rearrangement model of these individuals, but only wish to benchmark \texttt{igor} simulations with respect to a given set of inferred model parameters.
-Thus, we proceed with this caveat in mind.
+Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
+
 
 \section*{Results}
 
@@ -494,7 +514,7 @@ It supports BCR and TCR repertoire datasets.
 It is open-source, unit-tested, extensively documented, and AIRR compliant.
 Analyses will be reproducible using Docker.
 
-\texttt{sumrep} includes a function to retrieve each summary statistic in Table \ref{tab:SummaryStatistics}.
+\texttt{sumrep} includes a function to calculate each summary statistic in Table \ref{tab:SummaryStatistics}.
 A general-purpose implementation of algorithm \ref{DistributionAveraging} is also available and incorporated in applicable summary distributions.
 Algorithm \ref{NNDistributionAveraging} is also included for the nearest neighbor distance distribution.
 
@@ -504,6 +524,7 @@ Each available univariate distribution is plotted by default, although the user 
 Figure \ref{fig:PartisFreqPolys} shows an example outputs of \texttt{plotUnivariateDistributions} computed for four datasets: \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim}.
 This function displays frequency polygons by default, but can also display empirical cumulative distribution functions, shown in \ref{fig:PartisECDFs} for the same four datasets.
 \begin{figure}
+%EM Wow, the binwidth isn't looking so great for a lot of these. I'm sure that you have worked on this without luck. If it's not easy, perhaps we just put in the CDFs? In any case only one of them should go in the main text.
     \includegraphics[width=\linewidth]{Figures/PartisScores/partis_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:PartisFreqPolys}
@@ -548,16 +569,16 @@ Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for 
 \end{figure}
 It is seen that IGoR simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
 V, D, and joing VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
+%EM Is this even worth including then? It sounds just like an artifact.
 The least accurately replicated statistic is the pairwise distance distribution, although this is likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations (easily seen from Figures \ref{fig:IgorFreqPolys} and \ref{fig:IgorECDFs}).
 (Nonetheless, IGoR does not currently have an option to output the full variable region nucleotide sequences.)
 The CDR3 length distribution is also not well replicated, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
-Interestingly, the kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
+Interestingly, the Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
 Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors).
 
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 We still see high scores for gene usage and indel statistics, although now the various Kidera factor and GRAVY index distributions have lower scores.
 This suggests that while the average \texttt{igor} simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure \ref{fig:IgorFreqPolys}.
-The low scor
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
@@ -588,6 +609,7 @@ This is not very surprising as \texttt{partis} does not incorporate these quanti
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some summaries like positional distance between mutations and VD/DJ insertion matrices seeing a moderate drop.
 
+%EM I guess I'd prefer to have the real-data analysis happen first.
 
 %BJO - Chaim's analysis
 \subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
@@ -614,7 +636,6 @@ Moreover, it would likely be useful to perform separate analyses restricted to d
 Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
 \texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones\cite{Finlay2012}.
 
-We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bourcy2017-pu}.
 
 \bibliographystyle{plain}
 \bibliography{main}
@@ -623,6 +644,7 @@ We aren't talking about pairwise summary statistics such as UniFrac \cite{De_Bou
 Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
+%EM This ref is giving ??. Please check that latex is compiling cleanly.
 Figure \ref{fig:Distributions} displays density estimates of one trial for each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
