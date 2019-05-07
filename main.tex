@@ -178,6 +178,11 @@ Level three requires clonal family cluster assignments.
 Level four requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
+Computing full summaries can be computationally inefficient for even moderately sized repertoires.
+When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
+The result is an approximation to the full distribution, which introduces some  extra noise but can yield very high efficiency gains for large datasets.
+We outline a generic distrbution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
+
 %BJO - Erick, I believe you added the following at the very beginning of the project -- I think it's safe enough to remove it, but you might want to note the references or possibly rework them elsewhere?
 Other possible statistics:
 
@@ -272,86 +277,6 @@ Further, summaries that are not distributions can still be compared using approp
 }
 \label{fig:DivergenceCartoon}
 \end{figure}
-
-
-%EM I'd suggest keeping an immmunologist-friendly version of this in the Results, and kick the more technical parts to the Methods. We certainly want prospective users to appreciate that we are subsampling, and that for most summaries this means just injecting a little noise into the distribution we are comparing.
-\subsection*{Efficient computation by subsampling and averaging}
-Computing full summaries can be computationally inefficient for even moderately sized repertoires.
-When the target summary is a distribution, we can gain efficiency by subsampling and averaging until convergence.
-This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends subsamples of $d$ to a rolling approximate distribution until successive distributions are sufficiently similar.
-Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
-Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
-\begin{algorithm}
-    \caption{Compute automatic approximate distribution.\\
-        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\.
-        \textbf{Output:} subsampled approximation to $d$}
-    \label{DistributionAveraging}
-    \begin{algorithmic}
-        \State $R_0 \gets \text{subsample}(R, m)$
-        \State $d_0 \gets s(R_0)$
-        \State $n \gets 1$
-        \State error $\gets \infty$
-        \While{error $> \varepsilon$}:
-        \State $R_\text{samp} \gets \text{subsample}(R, m)$
-        \State $d_\text{samp} \gets s(R_\text{samp})$
-        \State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
-        \State error $\gets \text{JSD}(d_{n-1}, d_n)$
-        \State $n \gets n + 1$
-        \EndWhile
-    \end{algorithmic}
-    \Return $d_n$
-\end{algorithm}
-
-An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
-The main advantage of Algorithm \ref{DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
-We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of settings.
-
-There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
-This occurs when a subset of the summary does not follow the same distribution as the full summary.
-For example, consider the nearest neighbor distance of a sequence $s_i$ to a repertoire of sequences $R$,
-\begin{equation}
-d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
-\end{equation}
-where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
-If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
-
-In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
-For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
-This will give an unbiased sample $d_\text{NN}(s_1, R), \dotsc, d_\text{NN}(s_b, R)$ of the true nearest neighbor distance distribution $D_\text{true}$ of $R$, but it may have significant noise depending on the nature of $D_\text{true}$ and the batch size $b$.
-Thus, we append batches to a running distribution until convergence as in Algorithm \ref{DistributionAveraging}, which produces more refined approximations as the tolerance decreases.
-
-Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
-Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
-
-\begin{algorithm}
-    \caption{Compute automatic approximate nearest neighbor distance distribution.\\
-        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\.
-        \textbf{Output:} subsampled approximation to $d$}
-    \label{NNDistributionAveraging}
-    \begin{algorithmic}
-        \State $d_0 \gets \Call{doBatchStep}{R, m}$
-        \State $n \gets 1$
-        \State error $\gets \infty$
-        \While{error $> \varepsilon$}:
-        	\State $d_\text{samp} \gets \Call{doBatchStep}{R, m}$
-        	\State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
-        	\State error $\gets \text{JSD}(d_{n-1}, d_n)$
-        	\State $n \gets n + 1$
-        \EndWhile
-            \Return $d_n$
-    \end{algorithmic}
-    \begin{algorithmic}
-    \Function{doBatchStep}{$R, m$}
-    \For{$i = 1, \dots, m$}:
-		\State $s_i \gets \text{subsample}(R, 1)$
-        \State $d_i \gets d_\text{NN}(s_i; R)$
-	\EndFor
-	\Return $(d_1, \dotsc, d_m)$
-	\EndFunction
-    \end{algorithmic}
-\end{algorithm}
-
-
 
 \subsection*{Comparing observations to model simulations per model}
 %EM If we rearrange methods and results as I propose, then we'll have some results from between-repertoire comparison first, then I can add this "also" below.
@@ -592,6 +517,17 @@ This function displays frequency polygons by default, but can also display empir
     \label{fig:IgorECDFs}
 \end{figure}
 
+%BJO - Chaim's and Peji's analyses
+\subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
+
+\subsection*{Principal components analysis of TCR sequences by individual}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
+    \caption{PCA plots of select summaries by donor and timepoint}
+    \label{fig:TCR_PCA}
+\end{figure}
+
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
 Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
 \begin{figure}
@@ -651,23 +587,83 @@ This is not very surprising as \texttt{partis} does not incorporate these quanti
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some summaries like positional distance between mutations and VD/DJ insertion matrices seeing a moderate drop.
 
-%EM I guess I'd prefer to have the real-data analysis happen first.
-
-%BJO - Chaim's analysis
-\subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
-
-\subsection*{Principal components analysis of TCR sequences by individual}
-
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
-    \caption{PCA plots of select summaries by donor and timepoint}
-    \label{fig:TCR_PCA}
-\end{figure}
-
-%BJO - Is this Peji's section?
-\subsection*{Comparing observations to competing model simulations}
-
 \section*{Methods}
+\subsection*{Approximating distributions via subsampling and averaging}
+Computing full summary distributions over large datasets can be intractable.
+However, we can compute a sort of Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values.
+This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends subsamples of $d$ to a rolling approximate distribution until successive distributions are sufficiently similar.
+Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
+Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
+\begin{algorithm}
+    \caption{Compute automatic approximate distribution.\\
+        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+        \textbf{Output:} subsampled approximation to $d$}
+    \label{DistributionAveraging}
+    \begin{algorithmic}
+        \State $R_0 \gets \text{subsample}(R, m)$
+        \State $d_0 \gets s(R_0)$
+        \State $n \gets 1$
+        \State error $\gets \infty$
+        \While{error $> \varepsilon$}:
+        \State $R_\text{samp} \gets \text{subsample}(R, m)$
+        \State $d_\text{samp} \gets s(R_\text{samp})$
+        \State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
+        \State error $\gets \text{JSD}(d_{n-1}, d_n)$
+        \State $n \gets n + 1$
+        \EndWhile
+    \end{algorithmic}
+    \Return $d_n$
+\end{algorithm}
+
+An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
+The main advantage of Algorithm \ref{DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
+We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings.
+
+There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
+This occurs when a subset of the summary does not follow the same distribution as the full summary.
+For example, consider the nearest neighbor distance of a sequence $s_i$ to a repertoire of sequences $R$,
+\begin{equation}
+d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
+\end{equation}
+where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
+If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
+
+In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
+For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
+This will give an unbiased sample $d_\text{NN}(s_1, R), \dotsc, d_\text{NN}(s_b, R)$ of the true nearest neighbor distance distribution $D_\text{true}$ of $R$, but it may have significant noise depending on the nature of $D_\text{true}$ and the batch size $b$.
+Thus, we append batches to a running distribution until convergence as in Algorithm \ref{DistributionAveraging}, which produces more refined approximations as the tolerance decreases.
+
+Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
+Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
+
+\begin{algorithm}
+    \caption{Compute automatic approximate nearest neighbor distance distribution.\\
+        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+        \textbf{Output:} subsampled approximation to $d$}
+    \label{NNDistributionAveraging}
+    \begin{algorithmic}
+        \State $d_0 \gets \Call{doBatchStep}{R, m}$
+        \State $n \gets 1$
+        \State error $\gets \infty$
+        \While{error $> \varepsilon$}:
+        	\State $d_\text{samp} \gets \Call{doBatchStep}{R, m}$
+        	\State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
+        	\State error $\gets \text{JSD}(d_{n-1}, d_n)$
+        	\State $n \gets n + 1$
+        \EndWhile
+            \Return $d_n$
+    \end{algorithmic}
+    \begin{algorithmic}
+    \Function{doBatchStep}{$R, m$}
+    \For{$i = 1, \dots, m$}:
+		\State $s_i \gets \text{subsample}(R, 1)$
+        \State $d_i \gets d_\text{NN}(s_i; R)$
+	\EndFor
+	\Return $(d_1, \dotsc, d_m)$
+	\EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
 \subsection*{Divergence}
 We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
