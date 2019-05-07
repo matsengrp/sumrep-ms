@@ -43,6 +43,7 @@
 \title{Immune receptor repertoire comparison and model validation via summary statistics}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
+\pgfplotsset{compat=1.12}
 \begin{document}
 
 \maketitle
@@ -66,6 +67,7 @@ We refer to the set of B and T cell receptors present in an individual's immune 
 
 Although immune receptor repertoires are now accessible for scientific research and medical applications through high-throughput sequencing, it is not necessarily straightforward to gain insight from and to compare these data sets.
 %EM Do we actually address the following complexities with sumrep?
+%BJO I guess not. My thought was that many studies just look at a few statistics (gene usage, CDR3 length) and this only gives a small snapshot of what's happening because of sparsity. But I can see why the following seems off-topic.
 %EM I'd suggest replacing the rest of this paragraph with something like "without further processing, we just have a big list of DNA sequences." Even after annotation we then have gene names and CDR3 sequences, which still aren't immediately obvious how to compare.
 Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
 Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz}, gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt}, or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
@@ -74,12 +76,14 @@ Many studies consider only the CDR3 length distribution of a repertoire \cite{Mi
 One can also transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
 %EM I'd suggest that talking about k-mers is getting us off track here. I understand that you want to say that there are other ways of going about comparing things (which have their disadvantages), but it seems like a large deviation for the introduction. Perhaps better in Discussion?
 %EM If you agree, then we can say here that a good and popular approach is to summarize various aspects of the data in terms of numerical summaries which can then be easily compared. For example...
+%BJO I guess I'm used to lit reviews being in the introduction rather than the discussion, but I trust your judgment here.
 For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
 One can instead perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
 Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
 %EM I rewrote some of the following in a less formal way. I hope you don't mind.
+%BJO :thumsbup::skin-tone-3:
 In addition to comparing different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
 Namely one can use a form of model checking that is common in statistics: after fitting a model to data, one compares the real data to data generated from the model.
 In this case, we generate sequences from the models and compare those sequences to real-data sequences via summary statistics.
@@ -91,8 +95,10 @@ Such generative models are used to simulate sequences for benchmarking inferenti
 %EM Putting this reason on hold for the time being.
 % Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
-%EM Here we need a paragraph saying that there are no unified packages dedicated to the task of calculating and comparing summary statistics for rep-seq data.
-%EM Perhaps point out that immcantation does a lot of these things, but there aren't any comparison functions and you can't ask alakazam to just go out and calculate everything then come back with plots describing differences between repertoires.
+Currently there are no unified packages dedicated to the task of calculating and comparing summary statistics for rep-seq data sets.
+While the immcantation pipeline (which includes the \texttt{shazam} and \texttt{alakazam} R packages) contains many summary functions for rep-seq data, it does not have general functionality for retrieving, comparing, and plotting these summaries \cite{Gupta2015-iu}.
+Many summaries of interest are implemented in one package or another, but differences in functionality and data structures make it troublesome to compute and compare summaries across packages.
+Some summaries of interest, such as the positional distance between mutations distribution, are not readily implemented in a package.
 
 [Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
 
@@ -204,7 +210,7 @@ There is also a \texttt{compareRepertoires} function which takes two repertoires
 %EM Then you can say that JS is a standard and useful means of comparing distributions on numbers, and l1 is a good way of comparing distributions on categories.
 %EM We can consider adding an intuitive explanation of KL.
 The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in \ref{fig:DivergenceCartoon}.
-A given summary $s$ is applied to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
+A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
 These two resultant distributions can be compared using a divergence $d$ that is tailored to the nature of $s$.
 The Jenson-Shannon (JS) divergence is a standard and useful means of comparing scalar distributions (e.g. GC content, CDR3 length), and the $\ell_1$ divergence is useful for comparing categorical distributions (e.g. gene call frequencies, amino acid frequencies).
 
@@ -740,17 +746,8 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:Times}
     \end{subfigure}
-    \begin{subfigure}[H]{\textwidth}
-    	\vspace{1em}
-		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate pairwise distance distribution, and the true pairwise distance distribution.}
-		\label{tab:PDSummaryTable}
-    \end{subfigure}
 \end{figure}
 Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
-
-
-Numerical summaries for each distribution are shown in Table \ref{tab:PDSummaryTable}.
 
 Figure \ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance.
 \begin{figure}
@@ -836,37 +833,30 @@ Figure \ref{fig:NNFreqPoly} shows a frequency polygon of the same distributions.
 Figure \ref{fig:NNECDF} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
 
 \begin{figure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/freqpoly_by_tol.pdf}
    		\caption{Frequency polygons of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNFreqPoly}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/ecdf_by_tol.pdf}
     	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDF}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/div_by_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergences}
 	\end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/CDR3/log_time_by_tol.pdf}
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimes}
     \end{subfigure}
-    \begin{subfigure}[H]{\textwidth}
-    	\vspace{1em}
-		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate nearest neighbor distance distribution, and the true pairwise distance distribution.}
-		\label{tab:NNSummaryTable}
-    \end{subfigure}
 \end{figure}
 
 To assess the effect of sequence lengths on Algorithm \ref{NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned query sequences rather than inferred CDR3 sequences.
-These length distributions are different by about an order of magnitude, as seen in the table below.
-\input{Tables/sequence_lengths.tex}.
+These length distributions are different by about an order of magnitude.
 We note that the \texttt{sequence\_alignment} column is the default for Algorithm \ref{NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
 We run Algorithm \ref{NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
 We compute the nearest neighbor distribution of query sequences for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-5} \right\}$.
@@ -875,31 +865,25 @@ Figure \ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distri
 Moreover, figures \ref{fig:NNDivergencesSequence}
  and \ref{fig:NNTimesSequence} show the KL-divergences to truth and runtimes, respectively.
 \begin{figure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/freqpoly_by_tol.pdf}
    		\caption{Frequency polygons of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNFreqPolySequence}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/ecdf_by_tol.pdf}
     	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDFSequence}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/div_by_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergencesSequence}
 	\end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/Sequence/log_time_by_tol.pdf}
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimesSequence}
-    \end{subfigure}
-    \begin{subfigure}[H]{\textwidth}
-    	\vspace{1em}
-		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate nearest neighbor distance distribution, and the true pairwise distance distribution.}
-		\label{tab:NNSequenceSummaryTable}
     \end{subfigure}
 \end{figure}
 
