@@ -4,6 +4,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{pgfplots}
 \usepackage{subcaption}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
@@ -23,6 +24,16 @@
 
 \graphicspath{ {figures/} }
 
+\pgfmathdeclarefunction{gauss}{2}{%
+  \pgfmathparse{exp(-((x-#1)^2)/(2*#2^2))}%
+}
+
+\pgfmathdeclarefunction{multimodal}{2}{%
+  \pgfmathparse{0.7*exp(-((x-#1)^2)/(2))+0.3*exp(-((x-#2)^2)/(2))}%
+}
+
+\pgfplotsset{every tick label/.append style={font=\small}}
+ 
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 
@@ -69,7 +80,7 @@ One can instead perform dimension reduction techniques like t-SNE to project rep
 Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
 %EM I rewrote some of the following in a less formal way. I hope you don't mind.
-In addition to comparing sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
+In addition to comparing different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
 Namely one can use a form of model checking that is common in statistics: after fitting a model to data, one compares the real data to data generated from the model.
 In this case, we generate sequences from the models and compare those sequences to real-data sequences via summary statistics.
 
@@ -102,11 +113,12 @@ In our linear regression example, comparing the general trends of points can be 
 
 
 
-\section*{Methods}
+\section*{Results}
 
 %EM I'd like to put the information here that most users will want to know, which is currently at the top of the Results section.
 %EM I looked for other software papers in Frontiers and found that https://paperpile.com/shared/qnTKS9 doesn't have a Methods section at all! https://www.frontiersin.org/about/author-guidelines seems to say that headings are just guidelines.
 %EM I'd like to propose moving most of this to a Results section, and put the Methods last and use it to describe things that immunologists won't care about.
+%BJO This is fine with me. I've made an attempt to initiate this.
 
 \begin{table}
 \makebox[\textwidth][c]{ % this centers a too-wide table
@@ -159,24 +171,19 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \end{table}
 
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
-%EM I don't know if the rest of this paragraph adds much?
-These default assumptions were chosen to cover common use cases while also attempting to encourage meaningful analyses.
-While these assumptions drive the methodology underlying \texttt{sumrep}, we still allow for flexibility by allowing the user to specify custom inputs to each summary function, among other options.
-
-%EM I know that a lot of email ink was spilled on this paragraph, but given that the reader doesn't have that context does it make sense to include given that we have no summaries in this category?
-Level zero operates on raw query sequences and does not require any post-processing, so that it is completely tool-independent.
-While such a level avoids any tool-specific biases, it also can yield ill-defined analyses if sequences are not filtered by any criterion.
-For example, a pairwise distance distribution of reads which cover arbitrary regions of an immune receptor will be highly unstable and likely not yield meaningful insights about the underlying repertoire characteristics.
-Consequently, none of the summaries in \texttt{sumrep} operate at this level by default, so that this level is mostly a formality.
-
-%EM If we want to use the "level x" terminology then we should add it to the table. If not, then let's just say "The first group of statistics..."
-Level one requires input sequences to be pairwise aligned and constrained to the variable region.
+The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region.
 This coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
-Level two requires standard sequence annotations, such as inferred naive ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
+The second group requires standard sequence annotations, such as inferred germline  ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 Level three requires clonal family cluster assignments.
-Level four further requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
-\texttt{sumrep} itself does not perform any annotation, clustering, or phylogeny inference, but rather assumes such metadata have been pre-computed and included in the given dataset; in principle, one can use any tool which performs these tasks as expected.
+Level four requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
+\texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
+Computing full summaries can be computationally inefficient for even moderately sized repertoires.
+When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
+The result is an approximation to the full distribution, which introduces some  extra noise but can yield very high efficiency gains for large datasets.
+We outline a generic distrbution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
+
+%BJO - Erick, I believe you added the following at the very beginning of the project -- I think it's safe enough to remove it, but you might want to note the references or possibly rework them elsewhere?
 Other possible statistics:
 
 \begin{itemize}
@@ -186,129 +193,90 @@ Applied to make inferences about data \cite{Steiman-Shimony2006-fm}.
 \item Trees + sequence level information for selection estimates \cite{Uduman2014-pb}
 \end{itemize}
 
-
-\subsection*{Divergence}
-\texttt{sumrep} makes it easy to compare each summary statistic between two repertoires by employing some metric or divergence appropriate for the summary in question.
 %EM The ability to make comparison is a great thing for users, so perhaps we should expand a little? Like say that for every function like CDR3Length there is a CDR3LengthCompare or whatnot?
 %EM We definitely want to say that people can just do "compareRepertoires" and lots of good things happen.
-We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
-%EM the formulas can get buried in a Methods section.
+\texttt{sumrep} makes it easy to compare each summary statistic between two repertoires by employing a ``divergence'' appropriate for the summary in question.
+For example, the \texttt{getCDR3Length} function returns a vector of each sequence's CDR3 length, and the corresponding \texttt{compareCDR3Lengths} takes two repertoires and returns a numerical summary of the difference between these two length distributions.
+The comparison method depends on the summary, and this is discussed more in the Methods section.
+There is also a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befits the data.
+
 %EM On the other hand we really need to explain how each repertoire gives a _distribution_ of values of summary statistics, and that sumrep can compare these distributions of values. A cartoon is probably needed.
 %EM Then you can say that JS is a standard and useful means of comparing distributions on numbers, and l1 is a good way of comparing distributions on categories.
 %EM We can consider adding an intuitive explanation of KL.
-The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
-\begin{equation}
-\text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
-\end{equation}
-where $M := (P + Q)/2$ and $\text{KLD}(P || M)$ is the usual KL-divergence,
-\begin{equation}
-\text{KLD}\left(P_1 || P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
-\end{equation}
-In the case where $P$ and $Q$ are both discrete distributions, this becomes
-\begin{equation}
-\text{KLD}\left(P_1 || P_2\right) = \sum_{n \in \Omega} p_1(n) \log\left( \frac{p_1(n)}{p_2(n)} \right)
-\end{equation}
-where $\Omega$ is the countable sample space for $P_1$.
-Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
-By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
-We also discard bins which would lead to an infinite KL divergence to increase numerical stability.
+The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in \ref{fig:DivergenceCartoon}.
+A given summary $s$ is applied to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
+These two resultant distributions can be compared using a divergence $d$ that is tailored to the nature of $s$.
+The Jenson-Shannon (JS) divergence is a standard and useful means of comparing scalar distributions (e.g. GC content, CDR3 length), and the $\ell_1$ divergence is useful for comparing categorical distributions (e.g. gene call frequencies, amino acid frequencies).
 
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
-\begin{equation}\label{eq:SAD}
-    d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
-\end{equation}
-In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
-This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions:
-if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
-defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
-\begin{equation}
-u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
-\end{equation}
-then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ becomes
-\begin{equation}
-d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
-\end{equation}
-This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
-Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
-
-%EM I'd suggest keeping an immmunologist-friendly version of this in the Results, and kick the more technical parts to the Methods. We certainly want prospective users to appreciate that we are subsampling, and that for most summaries this means just injecting a little noise into the distribution we are comparing.
-\subsection*{Efficient computation by subsampling and averaging}
-Computing full summaries can be computationally inefficient for even moderately sized repertoires.
-When the target summary is a distribution, we can gain efficiency by subsampling and averaging until convergence.
-This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends subsamples of $d$ to a rolling approximate distribution until successive distributions are sufficiently similar.
-Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
-Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
-\begin{algorithm}
-    \caption{Compute automatic approximate distribution.\\
-        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\.
-        \textbf{Output:} subsampled approximation to $d$}
-    \label{DistributionAveraging}
-    \begin{algorithmic}
-        \State $R_0 \gets \text{subsample}(R, m)$
-        \State $d_0 \gets s(R_0)$
-        \State $n \gets 1$
-        \State error $\gets \infty$
-        \While{error $> \varepsilon$}:
-        \State $R_\text{samp} \gets \text{subsample}(R, m)$
-        \State $d_\text{samp} \gets s(R_\text{samp})$
-        \State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
-        \State error $\gets \text{JSD}(d_{n-1}, d_n)$
-        \State $n \gets n + 1$
-        \EndWhile
-    \end{algorithmic}
-    \Return $d_n$
-\end{algorithm}
-
-An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
-The main advantage of Algorithm \ref{DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
-We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of settings.
-
-There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
-This occurs when a subset of the summary does not follow the same distribution as the full summary.
-For example, consider the nearest neighbor distance of a sequence $s_i$ to a repertoire of sequences $R$,
-\begin{equation}
-d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
-\end{equation}
-where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
-If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
-
-In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
-For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
-This will give an unbiased sample $d_\text{NN}(s_1, R), \dotsc, d_\text{NN}(s_b, R)$ of the true nearest neighbor distance distribution $D_\text{true}$ of $R$, but it may have significant noise depending on the nature of $D_\text{true}$ and the batch size $b$.
-Thus, we append batches to a running distribution until convergence as in Algorithm \ref{DistributionAveraging}, which produces more refined approximations as the tolerance decreases.
-
-Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
-Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
-
-\begin{algorithm}
-    \caption{Compute automatic approximate nearest neighbor distance distribution.\\
-        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\.
-        \textbf{Output:} subsampled approximation to $d$}
-    \label{NNDistributionAveraging}
-    \begin{algorithmic}
-        \State $d_0 \gets \Call{doBatchStep}{R, m}$
-        \State $n \gets 1$
-        \State error $\gets \infty$
-        \While{error $> \varepsilon$}:
-        	\State $d_\text{samp} \gets \Call{doBatchStep}{R, m}$
-        	\State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
-        	\State error $\gets \text{JSD}(d_{n-1}, d_n)$
-        	\State $n \gets n + 1$
-        \EndWhile
-            \Return $d_n$
-    \end{algorithmic}
-    \begin{algorithmic}
-    \Function{doBatchStep}{$R, m$}
-    \For{$i = 1, \dots, m$}:
-		\State $s_i \gets \text{subsample}(R, 1)$
-        \State $d_i \gets d_\text{NN}(s_i; R)$
-	\EndFor
-	\Return $(d_1, \dotsc, d_m)$
-	\EndFunction
-    \end{algorithmic}
-\end{algorithm}
-
-
+\begin{figure}
+\begin{gather}
+s(R_1) =
+\begin{tikzpicture}[baseline={(0.5, 0.5)}]
+\begin{axis}[
+  domain=0:8, samples=100,
+  xlabel near ticks,
+  xtick=4,
+  yticklabels={,,},
+  xticklabels={GC content},
+  tick style={draw=none},
+  axis line style={draw=none},
+  height=3cm, width=3cm,
+  enlargelimits=false, clip=false, axis on top
+  ]
+  \addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
+\end{axis}
+\end{tikzpicture}
+\hspace{1em}
+s(R_2) =
+\begin{tikzpicture}[baseline={(0.5, 0.5)}]
+\begin{axis}[
+  no markers, domain=0:11, samples=100,
+  xlabel near ticks,
+  xtick=5.5,
+  yticklabels={,,},
+  xticklabels={GC content},
+  tick style={draw=none},
+  axis line style={draw=none},
+  height=3cm, width=3cm,
+  enlargelimits=false, clip=false, axis on top
+  ]
+  \addplot [very thick,violet, fill=violet!20!] {multimodal(3, 6)};
+\end{axis}
+\end{tikzpicture}
+\\
+d
+\left(
+	\begin{tikzpicture}[baseline={(0.5, 0.5)}]
+		\begin{axis}[
+  		domain=0:8, samples=100,
+      	axis lines=none,
+      	height=3cm, width=3cm,
+      	enlargelimits=false, clip=false, axis on top
+      	]
+      	\addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
+    	\end{axis}
+    \end{tikzpicture}
+,
+\begin{tikzpicture}[baseline={(0.5, 0.5)}]
+\begin{axis}[
+  no markers, domain=0:11, samples=100,
+  axis lines=none,
+  height=3cm, width=3cm,
+  enlargelimits=false, clip=false, axis on top
+  ]
+  \addplot [very thick,violet, fill=violet!20!] {multimodal(3, 6)};
+\end{axis}
+\end{tikzpicture}
+\right)
+= 0.01
+\end{gather}
+\caption{
+Cartoon of our summary divergence framework. Most summary statistics, e.g. ``GC content'', yield a distribution over a given repertoire $R$.
+We can compare these distributions using a statistical divergence $d$, which takes two distributions and outputs a nonnegative scalar.
+Further, summaries that are not distributions can still be compared using appropriate divergences.
+}
+\label{fig:DivergenceCartoon}
+\end{figure}
 
 \subsection*{Comparing observations to model simulations per model}
 %EM If we rearrange methods and results as I propose, then we'll have some results from between-repertoire comparison first, then I can add this "also" below.
@@ -340,6 +308,7 @@ Although IGoR is typically applied to non-productive sequences in order to captu
 We applied IGoR in this way to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 Figure \ref{fig:IgorWorkflow} describes the workflow of this procedure for a given dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
 %EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
+%BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
 Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
 
 \begin{figure}
@@ -506,8 +475,6 @@ These datasets consist of consensus RNA sequences assembled using UMIs.
 Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
 
 
-\section*{Results}
-
 \subsection*{Implementation}
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports BCR and TCR repertoire datasets.
@@ -525,6 +492,7 @@ Figure \ref{fig:PartisFreqPolys} shows an example outputs of \texttt{plotUnivari
 This function displays frequency polygons by default, but can also display empirical cumulative distribution functions, shown in \ref{fig:PartisECDFs} for the same four datasets.
 \begin{figure}
 %EM Wow, the binwidth isn't looking so great for a lot of these. I'm sure that you have worked on this without luck. If it's not easy, perhaps we just put in the CDFs? In any case only one of them should go in the main text.
+%BJO - Yeah... this has been difficult in general, though I just decreased the bin count a bunch and it helps a bit.
     \includegraphics[width=\linewidth]{Figures/PartisScores/partis_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:PartisFreqPolys}
@@ -539,14 +507,25 @@ This function displays frequency polygons by default, but can also display empir
 %BJO - IGoR freqploy and ecdf plots. Should move both these and partis ones to results section
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
-    \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
+    \caption{Frequency polygon plots of each univariate summary distribution for the IGoR datasets.}
     \label{fig:IgorFreqPolys}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_ecdf.pdf}
-    \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
+    \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the IGoR datasets.}
     \label{fig:IgorECDFs}
+\end{figure}
+
+%BJO - Chaim's and Peji's analyses
+\subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
+
+\subsection*{Principal components analysis of TCR sequences by individual}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
+    \caption{PCA plots of select summaries by donor and timepoint}
+    \label{fig:TCR_PCA}
 \end{figure}
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
@@ -582,7 +561,6 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
-%EM Need some text here describing what was found.
 Figure \ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six BCR datasets based on \texttt{partis} simulations.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
@@ -609,21 +587,120 @@ This is not very surprising as \texttt{partis} does not incorporate these quanti
 Figure \ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some summaries like positional distance between mutations and VD/DJ insertion matrices seeing a moderate drop.
 
-%EM I guess I'd prefer to have the real-data analysis happen first.
+\section*{Methods}
+\subsection*{Approximating distributions via subsampling and averaging}
+Computing full summary distributions over large datasets can be intractable.
+However, we can compute a sort of Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values.
+This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends subsamples of $d$ to a rolling approximate distribution until successive distributions are sufficiently similar.
+Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
+Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
+\begin{algorithm}
+    \caption{Compute automatic approximate distribution.\\
+        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+        \textbf{Output:} subsampled approximation to $d$}
+    \label{DistributionAveraging}
+    \begin{algorithmic}
+        \State $R_0 \gets \text{subsample}(R, m)$
+        \State $d_0 \gets s(R_0)$
+        \State $n \gets 1$
+        \State error $\gets \infty$
+        \While{error $> \varepsilon$}:
+        \State $R_\text{samp} \gets \text{subsample}(R, m)$
+        \State $d_\text{samp} \gets s(R_\text{samp})$
+        \State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
+        \State error $\gets \text{JSD}(d_{n-1}, d_n)$
+        \State $n \gets n + 1$
+        \EndWhile
+    \end{algorithmic}
+    \Return $d_n$
+\end{algorithm}
 
-%BJO - Chaim's analysis
-\subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
+An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
+The main advantage of Algorithm \ref{DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
+We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings.
 
-\subsection*{Principal components analysis of TCR sequences by individual}
+There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
+This occurs when a subset of the summary does not follow the same distribution as the full summary.
+For example, consider the nearest neighbor distance of a sequence $s_i$ to a repertoire of sequences $R$,
+\begin{equation}
+d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
+\end{equation}
+where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
+If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
 
-\begin{figure}
-    \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
-    \caption{PCA plots of select summaries by donor and timepoint}
-    \label{fig:TCR_PCA}
-\end{figure}
+In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
+For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
+This will give an unbiased sample $d_\text{NN}(s_1, R), \dotsc, d_\text{NN}(s_b, R)$ of the true nearest neighbor distance distribution $D_\text{true}$ of $R$, but it may have significant noise depending on the nature of $D_\text{true}$ and the batch size $b$.
+Thus, we append batches to a running distribution until convergence as in Algorithm \ref{DistributionAveraging}, which produces more refined approximations as the tolerance decreases.
 
-%BJO - Is this Peji's section?
-\subsection*{Comparing observations to competing model simulations}
+Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
+Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
+
+\begin{algorithm}
+    \caption{Compute automatic approximate nearest neighbor distance distribution.\\
+        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+        \textbf{Output:} subsampled approximation to $d$}
+    \label{NNDistributionAveraging}
+    \begin{algorithmic}
+        \State $d_0 \gets \Call{doBatchStep}{R, m}$
+        \State $n \gets 1$
+        \State error $\gets \infty$
+        \While{error $> \varepsilon$}:
+        	\State $d_\text{samp} \gets \Call{doBatchStep}{R, m}$
+        	\State $d_n \gets \text{concatenate}(d_{n-1}, d_\text{samp})$
+        	\State error $\gets \text{JSD}(d_{n-1}, d_n)$
+        	\State $n \gets n + 1$
+        \EndWhile
+            \Return $d_n$
+    \end{algorithmic}
+    \begin{algorithmic}
+    \Function{doBatchStep}{$R, m$}
+    \For{$i = 1, \dots, m$}:
+		\State $s_i \gets \text{subsample}(R, 1)$
+        \State $d_i \gets d_\text{NN}(s_i; R)$
+	\EndFor
+	\Return $(d_1, \dotsc, d_m)$
+	\EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection*{Divergence}
+We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
+The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
+\begin{equation}
+\text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
+\end{equation}
+where $M := (P + Q)/2$ and $\text{KLD}(P || M)$ is the usual KL-divergence,
+\begin{equation}
+\text{KLD}\left(P_1 || P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
+\end{equation}
+In the case where $P$ and $Q$ are both discrete distributions, this becomes
+\begin{equation}
+\text{KLD}\left(P_1 || P_2\right) = \sum_{n \in \Omega} p_1(n) \log\left( \frac{p_1(n)}{p_2(n)} \right)
+\end{equation}
+where $\Omega$ is the countable sample space for $P_1$.
+Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
+By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
+We also discard bins which would lead to an infinite KL divergence to increase numerical stability.
+
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
+\begin{equation}\label{eq:SAD}
+    d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
+\end{equation}
+In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
+This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions:
+if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
+defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
+\begin{equation}
+u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
+\end{equation}
+then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ becomes
+\begin{equation}
+d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
+\end{equation}
+This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
+Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
+
 
 \section*{Discussion}
 We have presented a general framework for summarizing and comparing rep-seq datasets, and applied it to several questions of scientific interest.
@@ -644,8 +721,6 @@ Contrasting repertoires in the context of antigen response or vaccination design
 Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
-%EM This ref is giving ??. Please check that latex is compiling cleanly.
-Figure \ref{fig:Distributions} displays density estimates of one trial for each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/PairwiseDistance/freqpoly_by_tol.pdf}
@@ -674,7 +749,6 @@ Figure \ref{fig:Distributions} displays density estimates of one trial for each 
 		\label{tab:PDSummaryTable}
     \end{subfigure}
 \end{figure}
-
 Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
 
 
