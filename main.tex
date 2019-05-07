@@ -69,7 +69,7 @@ One can instead perform dimension reduction techniques like t-SNE to project rep
 Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
 %EM I rewrote some of the following in a less formal way. I hope you don't mind.
-In addition to comparing sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
+In addition to comparing different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
 Namely one can use a form of model checking that is common in statistics: after fitting a model to data, one compares the real data to data generated from the model.
 In this case, we generate sequences from the models and compare those sequences to real-data sequences via summary statistics.
 
@@ -159,24 +159,14 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \end{table}
 
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
-%EM I don't know if the rest of this paragraph adds much?
-These default assumptions were chosen to cover common use cases while also attempting to encourage meaningful analyses.
-While these assumptions drive the methodology underlying \texttt{sumrep}, we still allow for flexibility by allowing the user to specify custom inputs to each summary function, among other options.
-
-%EM I know that a lot of email ink was spilled on this paragraph, but given that the reader doesn't have that context does it make sense to include given that we have no summaries in this category?
-Level zero operates on raw query sequences and does not require any post-processing, so that it is completely tool-independent.
-While such a level avoids any tool-specific biases, it also can yield ill-defined analyses if sequences are not filtered by any criterion.
-For example, a pairwise distance distribution of reads which cover arbitrary regions of an immune receptor will be highly unstable and likely not yield meaningful insights about the underlying repertoire characteristics.
-Consequently, none of the summaries in \texttt{sumrep} operate at this level by default, so that this level is mostly a formality.
-
-%EM If we want to use the "level x" terminology then we should add it to the table. If not, then let's just say "The first group of statistics..."
-Level one requires input sequences to be pairwise aligned and constrained to the variable region.
+The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region.
 This coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
-Level two requires standard sequence annotations, such as inferred naive ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
+The second group requires standard sequence annotations, such as inferred germline  ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 Level three requires clonal family cluster assignments.
-Level four further requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
-\texttt{sumrep} itself does not perform any annotation, clustering, or phylogeny inference, but rather assumes such metadata have been pre-computed and included in the given dataset; in principle, one can use any tool which performs these tasks as expected.
+Level four requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
+\texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
+%BJO - Erick, I believe you added the following at the very beginning of the project -- I think it's safe enough to remove it, but you might want to note the references or possibly rework them elsewhere?
 Other possible statistics:
 
 \begin{itemize}
@@ -340,6 +330,7 @@ Although IGoR is typically applied to non-productive sequences in order to captu
 We applied IGoR in this way to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 Figure \ref{fig:IgorWorkflow} describes the workflow of this procedure for a given dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
 %EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
+%BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
 Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
 
 \begin{figure}
@@ -539,13 +530,13 @@ This function displays frequency polygons by default, but can also display empir
 %BJO - IGoR freqploy and ecdf plots. Should move both these and partis ones to results section
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
-    \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
+    \caption{Frequency polygon plots of each univariate summary distribution for the IGoR datasets.}
     \label{fig:IgorFreqPolys}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_ecdf.pdf}
-    \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
+    \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the IGoR datasets.}
     \label{fig:IgorECDFs}
 \end{figure}
 
@@ -582,7 +573,6 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
-%EM Need some text here describing what was found.
 Figure \ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six BCR datasets based on \texttt{partis} simulations.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
@@ -644,8 +634,6 @@ Contrasting repertoires in the context of antigen response or vaccination design
 Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
-%EM This ref is giving ??. Please check that latex is compiling cleanly.
-Figure \ref{fig:Distributions} displays density estimates of one trial for each of the distributions; visually, it appears that lower tolerances correspond to closer distributions to the true "population" distribution.
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/PairwiseDistance/freqpoly_by_tol.pdf}
@@ -674,7 +662,6 @@ Figure \ref{fig:Distributions} displays density estimates of one trial for each 
 		\label{tab:PDSummaryTable}
     \end{subfigure}
 \end{figure}
-
 Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
 
 
