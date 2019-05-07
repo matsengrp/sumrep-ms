@@ -43,6 +43,7 @@
 \title{Immune receptor repertoire comparison and model validation via summary statistics}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
+\pgfplotsset{compat=1.12}
 \begin{document}
 
 \maketitle
@@ -740,17 +741,8 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:Times}
     \end{subfigure}
-    \begin{subfigure}[H]{\textwidth}
-    	\vspace{1em}
-		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate pairwise distance distribution, and the true pairwise distance distribution.}
-		\label{tab:PDSummaryTable}
-    \end{subfigure}
 \end{figure}
 Figure \ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure \ref{fig:ECDF} shows their empirical cumulative distribution functions.
-
-
-Numerical summaries for each distribution are shown in Table \ref{tab:PDSummaryTable}.
 
 Figure \ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance.
 \begin{figure}
@@ -836,37 +828,30 @@ Figure \ref{fig:NNFreqPoly} shows a frequency polygon of the same distributions.
 Figure \ref{fig:NNECDF} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
 
 \begin{figure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/freqpoly_by_tol.pdf}
    		\caption{Frequency polygons of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNFreqPoly}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/ecdf_by_tol.pdf}
     	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDF}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/div_by_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergences}
 	\end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/CDR3/log_time_by_tol.pdf}
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimes}
     \end{subfigure}
-    \begin{subfigure}[H]{\textwidth}
-    	\vspace{1em}
-		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate nearest neighbor distance distribution, and the true pairwise distance distribution.}
-		\label{tab:NNSummaryTable}
-    \end{subfigure}
 \end{figure}
 
 To assess the effect of sequence lengths on Algorithm \ref{NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned query sequences rather than inferred CDR3 sequences.
-These length distributions are different by about an order of magnitude, as seen in the table below.
-\input{Tables/sequence_lengths.tex}.
+These length distributions are different by about an order of magnitude.
 We note that the \texttt{sequence\_alignment} column is the default for Algorithm \ref{NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
 We run Algorithm \ref{NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
 We compute the nearest neighbor distribution of query sequences for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-5} \right\}$.
@@ -875,31 +860,25 @@ Figure \ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distri
 Moreover, figures \ref{fig:NNDivergencesSequence}
  and \ref{fig:NNTimesSequence} show the KL-divergences to truth and runtimes, respectively.
 \begin{figure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/freqpoly_by_tol.pdf}
    		\caption{Frequency polygons of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNFreqPolySequence}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/ecdf_by_tol.pdf}
     	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDFSequence}
     \end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/div_by_tol.pdf}
     	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergencesSequence}
 	\end{subfigure}
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/Sequence/log_time_by_tol.pdf}
     	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimesSequence}
-    \end{subfigure}
-    \begin{subfigure}[H]{\textwidth}
-    	\vspace{1em}
-		\input{summary.tex}
-		\caption{Numerical summaries of one trial run for each approximate nearest neighbor distance distribution, and the true pairwise distance distribution.}
-		\label{tab:NNSequenceSummaryTable}
     \end{subfigure}
 \end{figure}
 
