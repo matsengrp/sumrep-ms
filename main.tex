@@ -530,6 +530,7 @@ This function displays frequency polygons by default, but can also display empir
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
 Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
+We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
@@ -548,10 +549,7 @@ Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for 
 \end{figure}
 It is seen that IGoR simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
 V, D, and joing VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
-%EM Is this even worth including then? It sounds just like an artifact.
-The least accurately replicated statistic is the pairwise distance distribution, although this is likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations (easily seen from Figures \ref{fig:IgorFreqPolys} and \ref{fig:IgorECDFs}).
-(Nonetheless, IGoR does not currently have an option to output the full variable region nucleotide sequences.)
-The CDR3 length distribution is also not well replicated, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
+The CDR3 length distribution is the least-replicated statistic, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
 Interestingly, the Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
 Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors).
 
