@@ -526,13 +526,22 @@ This function displays frequency polygons by default, but can also display empir
 %BJO - Chaim's and Peji's analyses
 \subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
 
-\subsection*{Principal components analysis of TCR sequences by individual}
-
+\subsection*{Multidimensional scaling of TCR sequences by individual}
+To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences.
+In particular, we computed divergences of each summary between each pair of a set of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
+We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
+Figure \ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint. 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
     \caption{PCA plots of select summaries by donor and timepoint}
-    \label{fig:TCR_PCA}
+    \label{fig:TCR_MDS}
 \end{figure}
+We see that for almost all summaries, these points cluster by donor, with the CDR3 pairwise distance distribution being the only summary which does not decisively cluster according to donor identity.
+The D gene usage distribution has an unusual "cross" pattern, although the points in a given leg of the cross still belong to a common donor.
+The Hill number divergences also form a cross-like pattern, although a looser one, an
+Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
+There are no convincing trends of clusters by timepoint alone.
+Moreover, the level of clustering appears to depend on individual, with clusters belonging to donor Q2 tending to be less contiguous, and clusters belonging to donor S1 being more contiguous.
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
 Figure \ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
