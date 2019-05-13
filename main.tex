@@ -59,7 +59,6 @@
 \begin{abstract}
 The adaptive immune system generates an incredible diversity of antigen receptors for B and T cells to keep dangerous pathogens at bay.
 The DNA sequences coding for these receptors arise by a complex recombination process followed by a series of binding-based filters, as well as affinity maturation for B cells, giving considerable structure to the circulating pool of receptor sequences.
-%EM Sometimes Rep-Seq and sometimes rep-seq. I'm happy with either one.
 Although these data sets hold considerable promise for medical and public health application, the complex structure of the resulting immune repertoire sequencing (Rep-Seq) datasets makes analysis difficult.
 In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
 %BJO Very high level summary here. Need to double check Peji and Chaim's analyses
@@ -89,7 +88,7 @@ These $k$mer distributions can then be compared via a string metric, but still c
 One can then perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
 % Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
-We would like to facilitate the use of summary statistics of repertoires that are biologically interpretable and capture many different aspects of rep-seq data.
+We would like to facilitate the use of summary statistics of repertoires that are biologically interpretable and capture many different aspects of Rep-Seq data.
 In addition to enabling comparison of different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
 Namely one can use a form of model checking that is common in statistics: after fitting a model to data, one compares the real data to data generated from the model.
 In this case, we generate sequences from the models and compare those sequences to real-data sequences via summary statistics.
@@ -101,8 +100,8 @@ Such generative models are used to simulate sequences for benchmarking inferenti
 %EM Putting this reason on hold for the time being.
 % Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
-Currently there are no unified packages dedicated to the task of calculating and comparing summary statistics for rep-seq data sets.
-While the Immcantation pipeline (which includes the \texttt{shazam} and \texttt{alakazam} R packages) contains many summary functions for rep-seq data, it does not have general functionality for retrieving, comparing, and plotting these summaries \cite{Gupta2015-iu}.
+Currently there are no unified packages dedicated to the task of calculating and comparing summary statistics for Rep-Seq data sets.
+While the Immcantation pipeline (which includes the \texttt{shazam} and \texttt{alakazam} R packages) contains many summary functions for Rep-Seq data, it does not have general functionality for retrieving, comparing, and plotting these summaries \cite{Gupta2015-iu}.
 Many summaries of interest are implemented in one package or another, but differences in functionality and data structures make it troublesome to compute and compare summaries across packages.
 Some summaries of interest, such as the positional distance between mutations distribution, are not readily implemented in a package.
 
@@ -144,6 +143,7 @@ Per-base substitution model & Yes & No & No & \texttt{shazam} \\
 %BJO This one doesn't depend on fit-star, right?
 %EM Yes, but we could just count Ts vs Tv, call it a "ratio" and drop the model-based rigor.
 %EM Branden, I'm not actually sure what you ended up doing. Did you do this? If so, worth a line or two in the methods.
+%BJO I believe I got caught up with which sequences to use for this, before we decided on assuming IMGT-gapped mature and germline sequences, which would now be the sensible default. So, this is not currently implemented.  
 Transition/transversion ratio distribution & Yes & No & No & \texttt{sumrep} \\
 Positional distance between mutations distribution & Yes & No & No & \texttt{sumrep}  \\
 Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
@@ -171,7 +171,7 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports BCR and TCR repertoire datasets.
 %EM Perhaps clarify what AIRR compliant means here? Did you ingest AIRR-formatted stuff for this manuscript?
-It is open-source, unit-tested, extensively documented, and AIRR compliant.
+It is open-source, unit-tested, and extensively documented, and uses default dataset fields and definitions that comply with AIRR rearrangement schema.
 Analyses will be reproducible using Docker.
 
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
@@ -198,6 +198,10 @@ A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most sum
 These two resultant distributions can be compared using a divergence $d$ that is tailored to the nature of $s$.
 We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC content, CDR3 length), and the $\ell_1$ divergence to compare categorical distributions (e.g. gene call frequencies, amino acid frequencies).
 %EM Shall we try for an intuitive explanation of JS / KL?
+%BJO I like this description from https://medium.com/@cotra.marko/making-sense-of-the-kullback-leibler-kl-divergence-b0d57ee10e0a:
+% [It's] a measure of how much ?predictive power? or ?evidence? each sample will on average bring when you?re trying to distinguish p(x) from q(x), if you?re sampling from p(x).
+%BJO - Then the JS divergence will be a nice, symmetrized version. 
+%BJO - However, you have a better idea of how much stats background the average immunologist will have.
 
 \begin{figure}
 \begin{gather}
@@ -259,7 +263,7 @@ d
 \end{axis}
 \end{tikzpicture}
 \right)
-= 0.01
+= 0.05
 \end{gather}
 \caption{
 Cartoon of our summary divergence framework.
@@ -275,6 +279,7 @@ For example, the \texttt{getCDR3LengthDistribution} comes with another companion
 \texttt{sumrep} also comes with a ``master'' plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots relevant to the locus in question.
 Currently, these plotting functions support frequency polygons and empirical cumulative distribution functions (ecdfs).
 %EM referring to figures out of order often raises red flags with reviewers. Shrug.
+%BJO We could say something like "Examples of these plots are given in later sections" without actually including explicit refs? It seems "wasteful" to include a separate plot here just to illustrate something that is later illustrated, but it seems wrong to mess with the plot reference numbers as they are.
 Figure~\ref{fig:PartisFreqPolys} shows an example gridded frequency polygon plot from \texttt{plotUnivariateDistributions} computed for a set of six BCR datasets (experimental and observed), and \ref{fig:PartisECDFs} shows ecdfs for the same datasets.
 
 %BJO - Chaim's and Peji's analyses
@@ -292,19 +297,14 @@ Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each spa
 \end{figure}
 We see that for almost all summaries, these points cluster by donor, with the CDR3 pairwise distance distribution being the only summary which does not decisively cluster according to donor identity.
 %EM I'm not totally convinced that the cross is more than just random noise...
-The D gene usage distribution has an unusual "cross" pattern, although the points in a given leg of the cross still belong to a common donor.
-The Hill number divergences also form a cross-like pattern, although a looser one, an %?
-Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
-Although these patterns would require further exploration in the context of a research paper, we feel that they clearly show that \texttt{sumrep} is finding an interesting signal.
-%EM Can we cut the rest of this? I think that we've said enough and the main point is just above.
-% There are no convincing trends of clusters by timepoint alone.
-% Moreover, the level of clustering appears to depend on individual, with clusters belonging to donor Q2 tending to be less contiguous, and clusters belonging to donor S1 being more contiguous.
+The D gene usage distribution has more unusual cross-like pattern, whose structure  is more difficult to assess.
+Other summaries, such as the CDR3 pairwise distance distribution and Hill numbers, yield little to no signal.
+Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint
+Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when covariates differ between datasets.
 
 \subsection*{Comparing observations to model simulations per model}
 \texttt{sumrep} can also be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data.
 Given a repertoire dataset, we infer model parameters using software based on the given model, and use these parameters to generate corresponding simulated datasets.
-%EM The full what?
-This allows us to directly compare the observed and simulated datasets using the full
 Next, we use \texttt{sumrep} to compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
 We score how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
 More details can be found in the Methods.
@@ -323,18 +323,19 @@ an analysis of IGoR \cite{Marcou2018-du} applied to TCR sequences, and an analys
 Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
 We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 %EM Wow, this is pretty interesting that igor has trouble with some simple things like J usage. Can you think of why that might be?
+%BJO Oops -- I inverted these scores recently so that a high positive score means 'good', i.e. a better summary replication. And apparently didn't fully change this everywhere in the ms.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
     	\caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{igor} model inference and simulation.
-        	A low LRD indicates a well-replicated statistic by the simulations.
+        	A high LRD indicates a well-replicated statistic by the simulations.
     	}
     	\label{fig:ObsScoresTCR}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
     	\caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{igor} model inference and simulation.
-    	    A low LRD indicates a well-replicated statistic by the simulations.
+    	    A high LRD indicates a well-replicated statistic by the simulations.
     	}
     	\label{fig:SimScoresTCR}
 	\end{subfigure}
@@ -348,8 +349,6 @@ Other junction-based statistics besides Kidera factors range from mildly good to
 Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
 We still see high scores for gene usage and indel statistics, although now the various Kidera factor and GRAVY index distributions have lower scores.
 This suggests that while the average \texttt{igor} simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure~\ref{fig:IgorFreqPolys}.
-
-%BJO - IGoR freqploy and ecdf plots. Should move both these and partis ones to results section
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the IGoR datasets.}
@@ -367,18 +366,19 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
 Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six BCR datasets based on \texttt{partis} simulations.
 %EM Now I think I'm confused. Partis has a low score for pos dist btw muts, meaning that it fits this distribution very well? It doesn't look great in the other plots...
+%BJO Addressed in above response
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot.pdf}
     	\caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{partis} model inference and simulation.
-     	   A low score indicates a well-replicated statistic by the simulations.
+     	   A high score indicates a well-replicated statistic by the simulations.
     	}
     	\label{fig:ObsScoresBCR}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/sim_score_plot.pdf}
     	\caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{partis} model inference and simulation.
-    	    A low score indicates a well-replicated statistic by the simulations.
+    	    A high score indicates a well-replicated statistic by the simulations.
     	}
     	\label{fig:SimScoresBCR}
 	\end{subfigure}
@@ -406,66 +406,44 @@ The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some
 \end{figure}
 
 
-
-%EM Perhaps this section is part of Methods?
-\subsection*{Materials}
-Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
-The raw data were obtained from \cite{Laserson2014-dx}, and the processed data, courtesy of Jason, are from a paper that isn't out yet.
-These datasets represent repertoires of patients at various time points following an influenza vaccination.
-%EM I think this should go in the supplement.
-\begin{table}
-\makebox[\textwidth][c]{
-\begin{tabular}{c|c|c|c|c|c}
-    %EM igblast's germline database is just IMGT, right?
-	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
-	\hline
-    \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
-    \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
-    \texttt{p\_g1} & Observation &     \texttt{partis} & \texttt{partis} & G & 1 hour \\
-    \texttt{p\_g2} & Observation &     \texttt{partis} & \texttt{partis} & G & 8 days \\
-    \texttt{p\_i1} & Observation &     \texttt{partis} & \texttt{partis} & I & 1 hour \\
-    \texttt{p\_i2} & Observation &     \texttt{partis} & \texttt{partis} & I & 8 days \\
-    \texttt{i\_f1} & Observation &     \texttt{igblast} & \texttt{igblast} & F & 1 hour \\
-    \texttt{i\_f2} & Observation &     \texttt{igblast} & \texttt{igblast} & F & 8 days \\
-    \texttt{i\_g1} & Observation &     \texttt{igblast} & \texttt{igblast} & G & 1 hour\\
-    \texttt{i\_g2} & Observation &     \texttt{igblast} & \texttt{igblast} & G & 8 days\\
-    \texttt{i\_i1} & Observation &     \texttt{igblast} & \texttt{igblast} & I & 1 hour\\
-    \texttt{i\_i2} & Observation &     \texttt{igblast} & \texttt{igblast} & I & 8 days\\
-    \texttt{pi\_f1} & Observation &    \texttt{partis} & \texttt{igblast} & F & 1 hour\\
-    \texttt{pi\_f2} & Observation &    \texttt{partis} & \texttt{igblast} & F & 8 days\\
-    \texttt{pi\_g1} & Observation &    \texttt{partis} & \texttt{igblast} & G & 1 hour\\
-    \texttt{pi\_g2} & Observation &    \texttt{partis} & \texttt{igblast} & G & 8 days\\
-    \texttt{pi\_i1} & Observation &    \texttt{partis} & \texttt{igblast} & I & 1 hour\\
-    \texttt{pi\_i2} & Observation &    \texttt{partis} & \texttt{igblast} & I & 8 days\\
-    \texttt{p\_f1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 1 hour\\
-    \texttt{p\_f2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 8 days\\
-    \texttt{p\_g1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 1 hour\\
-    \texttt{p\_g2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 8 days\\
-    \texttt{p\_i1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 1 hour\\
-    \texttt{p\_i2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 8 days\\
-    \texttt{pi\_f1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 1 hour\\
-    \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & F & 8 days\\
-    \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 1 hour\\
-    \texttt{pi\_g2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & G & 8 days\\
-    \texttt{pi\_i1\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & I & 1 hour\\
-    \texttt{pi\_i2\_sim} & Simulation& \texttt{partis} & \texttt{igblast} & I & 8 days\\
-\end{tabular}
-}
-\caption{Metadata for each dataset used in the analyses.}
-\label{tab:Datasets}
-\end{table}
-In short, the notation is as follows.
-A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default \texttt{igblast} germline databases;
-this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
-finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
-
-For the IGoR model validation analysis, we use several datasets from \cite{Britanova2016-iw}.
-For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads in these six datasets ranged from 37,363 sequences to 243,903 sequences.
-%BJO - Trying to run \texttt{igor} on larger datasets would often throw a segmentation fault. If this is a concern, we could choose a dataset from each of five individuals and subsample each dataset to, say, 50,000 sequences. But I don't think this would change the result that much.
-These datasets consist of consensus RNA sequences assembled using UMIs.
-Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
-
 \section*{Methods}
+\subsection*{Divergence}
+We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
+The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
+\begin{equation}
+\text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
+\end{equation}
+where $M := (P + Q)/2$ and $\text{KLD}(P || M)$ is the usual KL-divergence,
+\begin{equation}
+\text{KLD}\left(P_1 || P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
+\end{equation}
+In the case where $P$ and $Q$ are both discrete distributions, this becomes
+\begin{equation}
+\text{KLD}\left(P_1 || P_2\right) = \sum_{n \in \Omega} p_1(n) \log\left( \frac{p_1(n)}{p_2(n)} \right)
+\end{equation}
+where $\Omega$ is the countable sample space for $P_1$.
+Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
+By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
+We also discard bins which would lead to an infinite KL divergence to increase numerical stability.
+
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
+\begin{equation}\label{eq:SAD}
+    d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
+\end{equation}
+In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
+This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions:
+if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
+defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
+\begin{equation}
+u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
+\end{equation}
+then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ becomes
+\begin{equation}
+d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
+\end{equation}
+This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
+Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
+
 \subsection*{Approximating distributions via subsampling and averaging}
 Computing full summary distributions over large datasets can be intractable.
 However, we can compute a sort of Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values.
@@ -473,9 +451,8 @@ This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends su
 Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
 Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
 \begin{algorithm}
-    \caption{Compute automatic approximate distribution.\\
-        %EM What's this trailing \\. for?
-        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+    \caption{Compute automatic approximate distribution\\
+        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\
         \textbf{Output:} subsampled approximation to $d$}
     \label{DistributionAveraging}
     \begin{algorithmic}
@@ -516,8 +493,8 @@ Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large
 Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
 
 \begin{algorithm}
-    \caption{Compute automatic approximate nearest neighbor distance distribution.\\
-        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\.
+    \caption{Compute automatic approximate nearest neighbor distance distribution\\
+        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\
         \textbf{Output:} subsampled approximation to $d$}
     \label{NNDistributionAveraging}
     \begin{algorithmic}
@@ -543,45 +520,6 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
     \end{algorithmic}
 \end{algorithm}
 
-%EM Shouldn't this go before the previous section?
-\subsection*{Divergence}
-We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
-The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
-\begin{equation}
-\text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
-\end{equation}
-where $M := (P + Q)/2$ and $\text{KLD}(P || M)$ is the usual KL-divergence,
-\begin{equation}
-\text{KLD}\left(P_1 || P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
-\end{equation}
-In the case where $P$ and $Q$ are both discrete distributions, this becomes
-\begin{equation}
-\text{KLD}\left(P_1 || P_2\right) = \sum_{n \in \Omega} p_1(n) \log\left( \frac{p_1(n)}{p_2(n)} \right)
-\end{equation}
-where $\Omega$ is the countable sample space for $P_1$.
-Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
-By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
-We also discard bins which would lead to an infinite KL divergence to increase numerical stability.
-
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
-\begin{equation}\label{eq:SAD}
-    d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
-\end{equation}
-In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
-This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions:
-if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
-defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
-\begin{equation}
-u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
-\end{equation}
-then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ becomes
-\begin{equation}
-d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
-\end{equation}
-This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
-Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
-
-
 \subsection*{Model validation of \texttt{IGoR} and \texttt{partis}}
 Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
 Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
@@ -592,71 +530,11 @@ For example, if we had one clonal family with 1,000 members, and 99 singleton cl
 However, it seems like this is highly contrived to the nature of our experimental sample, and does not clearly mimic the true repertoire dynamics of the individual from which the dataset was obtained.
 Also, there is ambiguity to whether the rearrangement parameters for this size-1,000 clonal family should always match those of the observed size-1,000 clonal family, or if they should be sampled in some random fashion.
 Hence, it seems more principled to subsample to unique clones and examine clonal family dynamics without dealing with abundance biases.
-Figure~\ref{fig:PartisWorkflow} describes the overall workflow of this procedure for a given dataset.
 
 Next, we discuss a similar model validation approach for TCR repertoires using \texttt{IGoR} \cite{Marcou2018-du}.
 Although IGoR is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand IGoR's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
 
 We applied IGoR in this way to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
-Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a given dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
-%EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
-%BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
-% Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
-
-%EM I suggest kicking this to supplementary as well.
-\begin{figure}
-    \begin{subfigure}{0.5\textwidth}
-    \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
-        \begin{tikzpicture}
-            \node[block](fasta){Fasta file};
-            \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
-            \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-            \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
-            \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
-            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
-            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-            \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
-            \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
-            \path[line](fasta) -- (partis);
-            \path[line] (partis) -- (partisdata);
-            \path[line] (partis) -- (params);
-            \path[line] (params) -- (simulate);
-            \path[line] (simulate) -- (sim);
-            \path[line] (partisdata) -- (clones);
-            \path[line] (clones) -- (c1);
-            \path[line] (sim) -- (simclones);
-            \path[line] (simclones) -- (c1);
-        \end{tikzpicture}
-    \end{adjustbox}
-    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
-    \label{fig:PartisWorkflow}
-    \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
-    \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
-        \begin{tikzpicture}
-            \node[block](fasta){Fasta file};
-            \node[cloud, below =0.5 cm of fasta, align=center](igor){\texttt{igor}\\ \texttt{-infer}};
-            \node[block, below left=0.75 cm and 0.2 cm of igor](igordata){Annotated observations};
-            \node[cloud, below=0.75cm of igordata, align=center](igblast){\texttt{igblast}\\ (for CDR3s)} ;
-            \node[block, below right=0.75 cm and 0.2 cm of igor](params){Model parameters};
-            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{igor} \\ \texttt{-generate}};
-            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-            \node[block, below left=0.75 cm  and 0 cm of sim](c1){Comparisons};
-            \path[line](fasta) -- (igor);
-            \path[line] (igor) -- (igordata);
-            \path[line] (igor) -- (params);
-            \path[line] (params) -- (simulate);
-            \path[line] (simulate) -- (sim);
-            \path[line] (igordata) -- (igblast);
-            \path[line] (igblast) -- (c1);
-            \path[line] (sim) -- (c1);
-        \end{tikzpicture}
-    \end{adjustbox}
-    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{igor}.}
-    \label{fig:IgorWorkflow}
-    \end{subfigure}
-\end{figure}
-
 
 \subsection*{Scoring summary statistic replication by model}
 %EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
@@ -712,8 +590,19 @@ A feature of our methodology is that we use the same tool to produce simulations
 To examine the sensitivity of this method, we performed a separate analysis by obtaining dataset annotations from standalone \texttt{igblast} \cite{Ye2013-kl}, and comparing these to simulations based on \texttt{partis} annotations using the \texttt{igblast} germline databases.
 This is discussed in detail in Appendix C.
 
+
+\subsection*{Materials}
+The raw data for the BCR model validation analyses were obtained from \cite{Laserson2014-dx}, and the processed data, courtesy of Jason, are from a paper that isn't out yet.
+These datasets represent repertoires of patients at various time points following an influenza vaccination.
+
+For the TCR model validation analysis, we use several datasets from \cite{Britanova2016-iw}.
+For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads in these six datasets ranged from 37,363 sequences to 243,903 sequences.
+%BJO - Trying to run \texttt{igor} on larger datasets would often throw a segmentation fault. If this is a concern, we could choose a dataset from each of five individuals and subsample each dataset to, say, 50,000 sequences. But I don't think this would change the result that much.
+These datasets consist of consensus RNA sequences assembled using UMIs.
+Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
+
 \section*{Discussion}
-We have presented a general framework for summarizing and comparing rep-seq datasets, and applied it to several questions of scientific interest.
+We have presented a general framework for summarizing and comparing Rep-Seq datasets, and applied it to several questions of scientific interest.
 One can imagine many further applications of \texttt{sumrep}, as well as general avenues of research.
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
@@ -755,6 +644,7 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
     	\label{fig:Times}
     \end{subfigure}
     %EM if we want these to get a "Figure XX" label the overall figure needs a caption.
+    %BJO I don't believe I needed/wanted these sorts of labels for references, but I'm not against it either.
     \caption{Performance of distribution subsampling algorithms.}
 \end{figure}
 Figure~\ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure~\ref{fig:ECDF} shows their empirical cumulative distribution functions.
@@ -960,7 +850,70 @@ While this may depend on the dataset in question, we recommend this as a good po
 
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
-\subsection*{Appendix C: Comparison of summary scores using IgBlast annotations}
+\subsection*{Appendix C: Model validation analysis workflows}
+
+Figure~\ref{fig:PartisWorkflow} describes the overall workflow of this procedure for a given BCR dataset.
+
+Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a given TCR dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
+%EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
+%BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
+% Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
+\begin{figure}
+    \begin{subfigure}{0.5\textwidth}
+    \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
+        \begin{tikzpicture}
+            \node[block](fasta){Fasta file};
+            \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+            \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
+            \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
+            \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
+            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+            \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
+            \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
+            \path[line](fasta) -- (partis);
+            \path[line] (partis) -- (partisdata);
+            \path[line] (partis) -- (params);
+            \path[line] (params) -- (simulate);
+            \path[line] (simulate) -- (sim);
+            \path[line] (partisdata) -- (clones);
+            \path[line] (clones) -- (c1);
+            \path[line] (sim) -- (simclones);
+            \path[line] (simclones) -- (c1);
+        \end{tikzpicture}
+    \end{adjustbox}
+    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
+    \label{fig:PartisWorkflow}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+    \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
+        \begin{tikzpicture}
+            \node[block](fasta){Fasta file};
+            \node[cloud, below =0.5 cm of fasta, align=center](igor){\texttt{igor}\\ \texttt{-infer}};
+            \node[block, below left=0.75 cm and 0.2 cm of igor](igordata){Annotated observations};
+            \node[cloud, below=0.75cm of igordata, align=center](igblast){\texttt{igblast}\\ (for CDR3s)} ;
+            \node[block, below right=0.75 cm and 0.2 cm of igor](params){Model parameters};
+            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{igor} \\ \texttt{-generate}};
+            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+            \node[block, below left=0.75 cm  and 0 cm of sim](c1){Comparisons};
+            \path[line](fasta) -- (igor);
+            \path[line] (igor) -- (igordata);
+            \path[line] (igor) -- (params);
+            \path[line] (params) -- (simulate);
+            \path[line] (simulate) -- (sim);
+            \path[line] (igordata) -- (igblast);
+            \path[line] (igblast) -- (c1);
+            \path[line] (sim) -- (c1);
+        \end{tikzpicture}
+    \end{adjustbox}
+    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{igor}.}
+    \label{fig:IgorWorkflow}
+    \end{subfigure}
+\end{figure}
+
+
+
+\subsection*{Appendix D: Comparison of summary scores using IgBlast annotations}
 
 Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
 Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
@@ -1036,5 +989,54 @@ Hence, it is important to understand that a given annotations-based summary shou
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_ecdf.pdf}
     \caption{Summary distribution empirical cdfs of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
 \end{figure}
+
+\section*{Appendix E: Metadata for partis analysis}
+
+Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
+In short, the notation is as follows.
+A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default \texttt{igblast} germline databases;
+this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
+finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
+\begin{table}
+\makebox[\textwidth][c]{
+\begin{tabular}{c|c|c|c|c|c}
+	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
+	\hline
+    \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
+    \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
+    \texttt{p\_g1} & Observation &     \texttt{partis} & \texttt{partis} & G & 1 hour \\
+    \texttt{p\_g2} & Observation &     \texttt{partis} & \texttt{partis} & G & 8 days \\
+    \texttt{p\_i1} & Observation &     \texttt{partis} & \texttt{partis} & I & 1 hour \\
+    \texttt{p\_i2} & Observation &     \texttt{partis} & \texttt{partis} & I & 8 days \\
+    \texttt{i\_f1} & Observation &     \texttt{igblast} & IMGT & F & 1 hour \\
+    \texttt{i\_f2} & Observation &     \texttt{igblast} & IMGT & F & 8 days \\
+    \texttt{i\_g1} & Observation &     \texttt{igblast} & IMGT & G & 1 hour\\
+    \texttt{i\_g2} & Observation &     \texttt{igblast} & IMGT & G & 8 days\\
+    \texttt{i\_i1} & Observation &     \texttt{igblast} & IMGT & I & 1 hour\\
+    \texttt{i\_i2} & Observation &     \texttt{igblast} & IMGT & I & 8 days\\
+    \texttt{pi\_f1} & Observation &    \texttt{partis} & IMGT & F & 1 hour\\
+    \texttt{pi\_f2} & Observation &    \texttt{partis} & IMGT & F & 8 days\\
+    \texttt{pi\_g1} & Observation &    \texttt{partis} & IMGT & G & 1 hour\\
+    \texttt{pi\_g2} & Observation &    \texttt{partis} & IMGT & G & 8 days\\
+    \texttt{pi\_i1} & Observation &    \texttt{partis} & IMGT & I & 1 hour\\
+    \texttt{pi\_i2} & Observation &    \texttt{partis} & IMGT & I & 8 days\\
+    \texttt{p\_f1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 1 hour\\
+    \texttt{p\_f2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 8 days\\
+    \texttt{p\_g1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 1 hour\\
+    \texttt{p\_g2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 8 days\\
+    \texttt{p\_i1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 1 hour\\
+    \texttt{p\_i2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 8 days\\
+    \texttt{pi\_f1\_sim} & Simulation& \texttt{partis} & IMGT & F & 1 hour\\
+    \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & IMGT & F & 8 days\\
+    \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & IMGT & G & 1 hour\\
+    \texttt{pi\_g2\_sim} & Simulation& \texttt{partis} & IMGT & G & 8 days\\
+    \texttt{pi\_i1\_sim} & Simulation& \texttt{partis} & IMGT & I & 1 hour\\
+    \texttt{pi\_i2\_sim} & Simulation& \texttt{partis} & IMGT & I & 8 days\\
+\end{tabular}
+}
+\caption{Metadata for each dataset used in the analyses.}
+\label{tab:Datasets}
+\end{table}
+
 
 \end{document}
