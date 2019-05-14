@@ -48,6 +48,7 @@
         \renewcommand{\thefigure}{S\arabic{figure}}%
      }
 
+%BJO - Another possible title: A summary statistic framework for immune receptor repertoire comparison and model validation. 
 \title{Immune receptor repertoire comparison and model validation via summary statistics}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
@@ -74,9 +75,10 @@ The random rearrangement process of the genes that construct B cell receptors (B
 We refer to the set of B and T cell receptors present in an individual's immune system as their immune receptor repertoire; this repertoire constantly changes over the course of an individual's lifetime for various reasons including differences in germline gene sets and antigen exposure.
 
 Although immune receptor repertoires are now accessible for scientific research and medical applications through high-throughput sequencing, it is not necessarily straightforward to gain insight from and to compare these data sets.
+%BJO The transition here feels awkward
 Without further processing, repertoires are simply a list of DNA sequences.
 After annotation one can use gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt}, and then use some method to compare CDR3 sequences.
-This is not necessarily easy, and it is common to simply compare CDR3 length distribution of a repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of CDR3 sequence unanalyzed, as well as other interesting aspects of the germline-encoded regions.
+This can be a highly involved task, and so it is common to simply compare CDR3 length distribution of a repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of CDR3 sequence unanalyzed, as well as other interesting aspects of the germline-encoded regions.
 % or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
 % Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
 % commenting because Dash isn't widely used for repertoire comparison
@@ -85,18 +87,19 @@ This is not necessarily easy, and it is common to simply compare CDR3 length dis
 An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
 For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
-One can then perform dimension reduction techniques like t-SNE to project repertoires down to a smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
+One can perform other dimension reduction techniques like t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
+%BJO I basically included the below sentence for the IMGT/HighV-Quest reference which runs on IMGT-particular data formats, for what it's worth
 % Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
-We would like to facilitate the use of summary statistics of repertoires that are biologically interpretable and capture many different aspects of Rep-Seq data.
+We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of Rep-Seq repertoires.
 In addition to enabling comparison of different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
-Namely one can use a form of model checking that is common in statistics: after fitting a model to data, one compares the real data to data generated from the model.
-In this case, we generate sequences from the models and compare those sequences to real-data sequences via summary statistics.
+Namely, one can use a form of model checking that is common in statistics: after fitting a model to data, one assesses the similarity of data generated from the model to the real data.
+In this case, we generate a repertoire of sequences from the models and compare this collection to a real-data repertoire of sequences via summary statistics.
 
 We are motivated to perform such comparison because these probabilistic models are used as part of inference, and because they are used for inferential tool benchmarking.
 %EM Actually I'm not 100% positive that the inferential part will make sense to immunologists. So I'm not filling out this sentence yet.
 For example...
-Such generative models are used to simulate sequences for benchmarking inferential software (refs), and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
+Such generative models are used to simulate sequences to have a ``ground truth'' for benchmarking inferential software (refs), and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
 %EM Putting this reason on hold for the time being.
 % Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
@@ -109,8 +112,8 @@ Some summaries of interest, such as the positional distance between mutations di
 
 In this paper, we gather dozens of meaningful summary statistics on repertoires, derive efficient and robust summary implementations, and identify appropriate comparison methods for each summary.
 We present \texttt{sumrep}, an R package that computes these summary distributions for Rep-Seq datasets and performs repertoire comparisons based on these summaries.
-We show how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \texttt{IGoR} \cite{Marcou2018-du} for TCRs, and \texttt{partis} \cite{Ralph2016-nw, Ralph2016-iz} for BCRs.
-Furthermore, we investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data.
+We investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data, and show that most summaries are able to differentiate between subject as well as time after vaccination within a subject.
+Further, we demonstrate how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \texttt{IGoR} \cite{Marcou2018-du} for TCRs, and \texttt{partis} \cite{Ralph2016-nw, Ralph2016-iz} for BCRs.
 
 
 \section*{Results}
