@@ -166,35 +166,28 @@ Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \end{tabular}
 }
-\caption{Working table of summary statistics grouped by their respective levels of assumed post-processing.}
+\caption{Currently supported summary statistics grouped by their respective levels of assumed post-processing.}
 \label{tab:SummaryStatistics}
 \end{table}
 
 \subsection*{Implementation}
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
-It supports BCR and TCR repertoire datasets.
+It supports the IgH, IgK, and IgL loci for BCR datasets, and the TRA, TRB, TRD, and TRG loci for TCR datasets.
 %EM Perhaps clarify what AIRR compliant means here? Did you ingest AIRR-formatted stuff for this manuscript?
 It is open-source, unit-tested, and extensively documented, and uses default dataset fields and definitions that comply with AIRR rearrangement schema.
 Analyses will be reproducible using Docker.
 
 Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
-The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region.
-This coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
-The second group requires standard sequence annotations, such as inferred germline  ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
+The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region; this coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
+The second group requires standard sequence annotations, such as inferred germline ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 Level three requires clonal family cluster assignments.
-Level four requires an imputed phylogeny for each clonal family and is only relevant for Ig loci.
+Level four requires an imputed phylogeny for each clonal family for Ig loci.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
-\texttt{sumrep} makes it easy to compare each summary statistic between two repertoires by employing a ``divergence'' appropriate for the summary in question.
-For example, the \texttt{getCDR3LengthDistribution} function returns a vector of each sequence's CDR3 length, and the corresponding \texttt{compareCDR3LengthDistributions} function takes two repertoires and returns a numerical summary of the difference between these two length distributions.
+\texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate ``divergence''.
+For example, the \texttt{getCDR3LengthDistribution} function returns a vector of each sequence's CDR3 length, and the corresponding \texttt{compareCDR3LengthDistributions} function takes two repertoires and returns a numerical summary of the dissimilarity between these two length distributions.
 The comparison method depends on the summary, and this is discussed more in the Methods section.
-There is also a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befits the data.
-
-We have designed \texttt{sumrep} to efficiently approximate divergences between repertoires via subsampling, which is especially important for expensive-to-calculate summary statistics.
-Computing full summaries can be computationally inefficient for even moderately sized repertoires.
-When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
-The result is an approximation to the full distribution, which introduces some  extra noise but can yield very high efficiency gains for large datasets.
-We outline a generic distribution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
+There is also a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befit the data.
 
 The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in Figure~\ref{fig:DivergenceCartoon}.
 A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
@@ -205,6 +198,12 @@ We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC c
 % [It's] a measure of how much ?predictive power? or ?evidence? each sample will on average bring when you?re trying to distinguish p(x) from q(x), if you?re sampling from p(x).
 %BJO - Then the JS divergence will be a nice, symmetrized version. 
 %BJO - However, you have a better idea of how much stats background the average immunologist will have.
+
+We have designed \texttt{sumrep} to efficiently approximate computationally inefficient summaries for moderate and large repertoires.
+When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
+The result is an approximation to the full distribution, which introduces some  extra noise but can yield very high efficiency gains for large datasets.
+This in turn allows fast, accurate divergence estimates between dataset summaries.
+We outline a generic distribution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
 
 \begin{figure}
 \begin{gather}
@@ -278,12 +277,12 @@ We have also chosen appropriate divergences for summaries that do not give distr
 \end{figure}
 
 \texttt{sumrep} also contains a plotting function for each univariate summary distribution.
-For example, the \texttt{getCDR3LengthDistribution} comes with another companion plotting function called \texttt{plotCDR3LengthDistribution}.
+For example, the \texttt{getCDR3LengthDistribution} comes with a companion plotting function called \texttt{plotCDR3LengthDistribution}.
 \texttt{sumrep} also comes with a ``master'' plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots relevant to the locus in question.
 Currently, these plotting functions support frequency polygons and empirical cumulative distribution functions (ecdfs).
 %EM referring to figures out of order often raises red flags with reviewers. Shrug.
 %BJO We could say something like "Examples of these plots are given in later sections" without actually including explicit refs? It seems "wasteful" to include a separate plot here just to illustrate something that is later illustrated, but it seems wrong to mess with the plot reference numbers as they are.
-Figure~\ref{fig:PartisFreqPolys} shows an example gridded frequency polygon plot from \texttt{plotUnivariateDistributions} computed for a set of six BCR datasets (experimental and observed), and \ref{fig:PartisECDFs} shows ecdfs for the same datasets.
+Figure~\ref{fig:PartisFreqPolys} shows an example gridded frequency polygon plot from \texttt{plotUnivariateDistributions} computed for a set of six BCR datasets (experimental and observed), and Figure \ref{fig:PartisECDFs} shows ecdfs for the same datasets.
 
 %BJO - Chaim's and Peji's analyses
 \subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
