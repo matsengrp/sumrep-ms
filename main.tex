@@ -127,18 +127,24 @@ Further, we demonstrate how \texttt{sumrep} can be used for model validation thr
     Pairwise distance distribution & No & No & No & \texttt{stringdist} \cite{vanderLoo2014-re} \\
 $k$th nearest neighbor distribution & No & No & No & \texttt{stringdist} \\
     GC-content distribution & No & No & No & \texttt{ape} \cite{Paradis04-hz} \\
-    Hot/cold spot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagas17-bi} \\
+    Hotspot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagas17-bi} \\
+    Coldspot motif count distribution & No & No & No & \texttt{Biostrings} \cite{Pagas17-bi} \\
 \hline
-Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
-%BJO Another one we kind of skipped over.
-$k$th nearest neighbor (V-sequence) distribution & Yes & No & No &\texttt{stringdist},  \texttt{sumrep} \\
+Distance from germline to sequence distribution & Yes & No & No & \texttt{stringdist} \\
 CDR3 length distribution & Yes & No & No & Tool-provided \\
 Joint distribution of germline gene use & Yes & No & No & \texttt{sumrep} \\
 Pairwise CDR3 distance distribution & Yes & No & No & \texttt{stringdist} \\
-    Hydrophobicity distribution & Yes & No & No & \texttt{Peptides} \cite{Osorio15-tv} \\
-    Atchley factors distribution & Yes & No & No & \texttt{HDMD} \cite{McFerrin13-ng} \\
+
+    Atchley factor distributions & Yes & No & No & \texttt{HDMD} \cite{McFerrin13-ng} \\
+    Kidera factor distributions & Yes & No & No & \texttt{Peptides} \cite{McFerrin13-ng} \\
 Aliphatic index distribution & Yes & No & No & \texttt{Peptides} \\
     G.R.A.V.Y. index distribution & Yes & No & No & \texttt{alakazam} \cite{Gupta2015-iu} \\
+    Polarity distribution & Yes & No & No & \texttt{alakazam} \\
+    Charge distribution & Yes & No & No & \texttt{alakazam} \\
+    Basicity distribution & Yes & No & No & \texttt{alakazam} \\
+    Acidity distribution & Yes & No & No & \texttt{alakazam} \\
+    Aromaticity distribution & Yes & No & No & \texttt{alakazam} \\
+    Bulkiness distribution & Yes & No & No & \texttt{alakazam} \\
 Per-gene substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Per-gene-per-position substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Per-base mutability model & Yes & No & No & \texttt{shazam} \cite{Gupta2015-iu} \\
@@ -149,15 +155,24 @@ Per-base substitution model & Yes & No & No & \texttt{shazam} \\
 %BJO I believe I got caught up with which sequences to use for this, before we decided on assuming IMGT-gapped mature and germline sequences, which would now be the sensible default. So, this is not currently implemented.  
 Transition/transversion ratio distribution & Yes & No & No & \texttt{sumrep} \\
 Positional distance between mutations distribution & Yes & No & No & \texttt{sumrep}  \\
-Distance from naive to mature distribution & Yes & No & No & \texttt{stringdist} \\
-V/D/J deletion/insertion lengths distribution & Yes & No & No & Tool-provided \\
-Transition matrix for insertions & Yes & No & No & \texttt{sumrep} \\
+Distance from germline to sequence distribution & Yes & No & No & \texttt{stringdist} \\
+V gene 3' deletion length distribution & Yes & No & No & Tool-provided \\
+V gene 5' deletion length distribution & Yes & No & No & Tool-provided \\
+D gene 3' deletion length distribution & Yes & No & No & Tool-provided \\
+D gene 5' deletion length distribution & Yes & No & No & Tool-provided \\
+J gene 3' deletion length distribution & Yes & No & No & Tool-provided \\
+J gene 5' deletion length distribution & Yes & No & No & Tool-provided \\
+VD (or VJ) insertion length distribution & Yes & No & No & Tool-provided \\
+DJ insertion length distribution & Yes & No & No & Tool-provided \\
+VD (or VJ) insertion transition matrix & Yes & No & No & \texttt{sumrep} \\
+DJ insertion transition matrix & Yes & No & No & \texttt{sumrep} \\
+V/J in-frame percentage & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 \hline
 Cluster size distribution & Yes & Yes & No & Custom \\
 Hill numbers (diversity indices) & Yes & Yes & No & \texttt{alakazam} \\
 Selection estimates & Yes & Yes & No & \texttt{shazam} \\
 %BJO blocked due to fit-star
-Transition/transversion rates & Yes & Yes & No & Tool-provided \\
+%Transition/transversion rates & Yes & Yes & No & Tool-provided \\
 \hline
     Sackin index distribution & Yes & Yes & Yes & \texttt{CollessLike} \cite{Mir2018-lk} \\
 Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
@@ -174,6 +189,7 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports the IgH, IgK, and IgL loci for BCR datasets, and the TRA, TRB, TRD, and TRG loci for TCR datasets.
 %EM Perhaps clarify what AIRR compliant means here? Did you ingest AIRR-formatted stuff for this manuscript?
+%BJO I renamed some partis and IGoR columns which matched the specs, and did what I can with what the tools allowed. Probably should elaborate on this in the partis/igor workflow appendix.
 It is open-source, unit-tested, and extensively documented, and uses default dataset fields and definitions that comply with AIRR rearrangement schema.
 Analyses will be reproducible using Docker.
 
@@ -287,9 +303,9 @@ Figure~\ref{fig:PartisFreqPolys} shows an example gridded frequency polygon plot
 %BJO - Chaim's and Peji's analyses
 \subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
 
-\subsection*{Multidimensional scaling of TCR sequences by individual}
+\subsection*{Multidimensional scaling of TCR summary divergences}
 To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences.
-In particular, we computed divergences of each summary between each pair of a set of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
+In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
 Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint.
 \begin{figure}
@@ -297,12 +313,12 @@ Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each spa
     \caption{PCA plots of select summaries by donor and timepoint}
     \label{fig:TCR_MDS}
 \end{figure}
-We see that for almost all summaries, these points cluster by donor, with the CDR3 pairwise distance distribution being the only summary which does not decisively cluster according to donor identity.
+We see that for almost all summaries, these points cluster according to donor identity, with the CDR3 pairwise distance distribution being the only summary that does not decisively cluster by donor.
 %EM I'm not totally convinced that the cross is more than just random noise...
 The D gene usage distribution has more unusual cross-like pattern, whose structure  is more difficult to assess.
 Other summaries, such as the CDR3 pairwise distance distribution and Hill numbers, yield little to no signal.
-Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint
-Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when covariates differ between datasets.
+Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
+Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when datasets are stratified by covariates.
 
 \subsection*{Comparing observations to model simulations per model}
 \texttt{sumrep} can also be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data.
