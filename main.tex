@@ -440,38 +440,38 @@ The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some
 We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
 \begin{equation}
-\text{JSD}\left(P || Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
+\text{JSD}\left(P \ || \ Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
 \end{equation}
 where $M := (P + Q)/2$ and $\text{KLD}(P || M)$ is the usual KL-divergence,
 \begin{equation}
-\text{KLD}\left(P_1 || P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
+\text{KLD}\left(P_1 \ || \ P_2\right) := \operatorname{E}_{\mathbf X \sim P_1}\left[ \log\left(\frac{p_1(\mathbf X)}{p_2(\mathbf X)}\right) \right].
 \end{equation}
 In the case where $P$ and $Q$ are both discrete distributions, this becomes
 \begin{equation}
-\text{KLD}\left(P_1 || P_2\right) = \sum_{n \in \Omega} p_1(n) \log\left( \frac{p_1(n)}{p_2(n)} \right)
+\text{KLD}\left(P_1 \ || \ P_2\right) = \sum_{i \in \text{supp}(P_1)} p_1(i) \log\left( \frac{p_1(i)}{p_2(i)} \right)
 \end{equation}
 where $\Omega$ is the countable sample space for $P_1$.
 Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
-By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, which scales reasonably with $m$ and $n$ simultaneously.
-We also discard bins which would lead to an infinite KL divergence to increase numerical stability.
+By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, where $m = |\text{supp}(P)|$ and $n = |\text{supp}(Q)|$, which is designed to scale with the complexity of $m$ and $n$ simultaneously.
+We also discard bins which would lead to an infinite KL divergence for numerical stability.
 
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count or categorical data:
+Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count data of categorical variables:
 \begin{equation}\label{eq:SAD}
     d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
 \end{equation}
 In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
-This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions:
-if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
+This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions.
+For example, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
 defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
 \begin{equation}
-u(R; v, d, j) = \#\left\{s \in R: s_v = v \land s_d = d \land s_j = j\right\},
+u(R; v, d, j) = \#\left\{s \in R: s_v = v, s_d = d, s_j = j\right\},
 \end{equation}
-then our comparison metric of joint VDJ gene usage for repertoires $R_1$ and $R_2$ becomes
+where e.g. $s_v = $ the V gene of $s$, then an appropriate divergence for the joint VDJ gene usage for repertoires $R_1$ and $R_2$ is
 \begin{equation}
 d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
 \end{equation}
-This metric is also nice for computing amino acid frequency and 2mer frequency distributions.
-Note that we can normalize the counts to become frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
+This divergence is also relevant for computing amino acid frequency and 2mer frequency distributions.
+Note that we can normalize the counts to become relative frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
 
 \subsection*{Approximating distributions via subsampling and averaging}
 Computing full summary distributions over large datasets can be intractable.
