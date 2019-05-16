@@ -55,6 +55,8 @@
 \pgfplotsset{compat=1.12}
 \begin{document}
 
+%BJO - I realize that I alternate between IGoR and "\texttt{igor}" throughout the document, as well as IgBlast vs \texttt{igblast}. Do you have a preference, Erick? I believe I'm consistent with writing \texttt{partis} throughout.
+
 \maketitle
 
 \begin{abstract}
@@ -321,23 +323,27 @@ Moreover, there does seem to be signal induced by donor-timepoint interactions, 
 Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when datasets are stratified by covariates.
 
 \subsection*{Comparing observations to model simulations per model}
-\texttt{sumrep} can also be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data.
+\texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data.
 Given a repertoire dataset, we infer model parameters using software based on the given model, and use these parameters to generate corresponding simulated datasets.
 Next, we use \texttt{sumrep} to compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
 We score how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
-More details can be found in the Methods.
 
-Applying this methodology to many datasets gives a clear view of characteristics which the model captures well, as well as areas for improvement.
+Applying this methodology using many datasets gives a clear view of which characteristics the model captures well, as well as areas for improvement.
 As described in the introduction, we are motivated to do this because models are often benchmarked on simulated data, and it is important to understand discrepancies between simulated and observed data in order to properly interpret and extrapolate benchmarking results.
 We emphasize that validating the model in this way is different than the usual means of benchmarking model performance-- rather than benchmarking the inferential results of the model, we benchmark the model's ability to generate realistic sequences.
 
 We illustrate this approach with two case studies:
 an analysis of IGoR \cite{Marcou2018-du} applied to TCR sequences, and an analysis of \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz} simulations applied to BCR sequences.
+Both tools are applied to separate sets of experimental repertoires, yielding model-based annotations for each repertoire, as well as simulated datasets from the inferred model parameters for each experimental set.
 
 %EM Agreed here!
 %BJO - TODO: Add quick summaries of the IGoR and partis analyses as summarized form the Methods subsections
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
+We use \texttt{igor} to infer custom generative models for each experimental dataset.
+Since we are interested in many CDR3-based statistics and IGoR does not currently include inferred CDR3 sequences with rearrangement scenarios, we use IgBlast extract CDR3s for each sequence.
+For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by IGoR.
+
 Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
 We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 %EM Wow, this is pretty interesting that igor has trouble with some simple things like J usage. Can you think of why that might be?
@@ -382,6 +388,10 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
+We use \texttt{partis} to infer custom generative models for each experimental dataset.
+We incorporate possible clonal family clustering among sequences during inference, and then collapse each observed and simulated dataset so that each clonal family is represented by one sequence.
+For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by \texttt{partis}.
+
 Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six BCR datasets based on \texttt{partis} simulations.
 %EM Now I think I'm confused. Partis has a low score for pos dist btw muts, meaning that it fits this distribution very well? It doesn't look great in the other plots...
 %BJO Addressed in above response
@@ -401,10 +411,11 @@ Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for 
     	\label{fig:SimScoresBCR}
 	\end{subfigure}
 \end{figure}
-Like \texttt{igor}, we see that \texttt{partis} simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well, but failing to recapitulate VD and DJ insertion matrices.
+Like \texttt{igor}, we see that \texttt{partis} simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well.
+However, \texttt{partis} struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
 This contrasts \texttt{igor} which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
 The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations, and hot and cold spot counts, not being well-captured.
-This is not very surprising as \texttt{partis} does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models.
+This is not very surprising as \texttt{partis} does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
 
 
 Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
