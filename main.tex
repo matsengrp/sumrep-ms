@@ -475,15 +475,14 @@ Note that we can normalize the counts to become relative frequencies and apply t
 
 \subsection*{Approximating distributions via subsampling and averaging}
 Computing full summary distributions over large datasets can be intractable.
-However, we can compute a sort of Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values.
-This idea is laid out in Algorithm~\ref{DistributionAveraging}, which appends subsamples of $d$ to a rolling approximate distribution until successive distributions are sufficiently similar.
-Particularly, the algorithm terminates when successive distribution iterates have a sufficiently small JS divergence.
+However, we can compute a Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values until convergence.
+This idea is laid out in Algorithm~\ref{alg:DistributionAveraging}, which appends batch samples of $d$ to a rolling approximate distribution and terminates when successive distribution iterates have a JS divergence smaller than tolerance $\varepsilon$.
 Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
 \begin{algorithm}
-    \caption{Compute automatic approximate distribution\\
-        \textbf{Input:} repertoire $R$, summary $s$, subsample size $m$, convergence tolerance $\varepsilon$\\
+    \caption{Compute automatic approximate distribution \\
+        \textbf{Input:} repertoire $R$, summary $s$, batch size $m$, convergence tolerance $\varepsilon$\\
         \textbf{Output:} subsampled approximation to $d$}
-    \label{DistributionAveraging}
+    \label{alg:DistributionAveraging}
     \begin{algorithmic}
         \State $R_0 \gets \text{subsample}(R, m)$
         \State $d_0 \gets s(R_0)$
@@ -501,31 +500,34 @@ Note that continually appending values to a rolling vector is analogous to compu
 \end{algorithm}
 
 An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
-The main advantage of Algorithm \ref{DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
-We conduct a performance analysis of Algorithm \ref{DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings.
+The main advantage of Algorithm \ref{alg:DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
+The algorithm can also be tuned according to batch size $m$, which \texttt{sumrep} takes to be 30 by default.
+We conduct a performance analysis of Algorithm \ref{alg:DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings without sacrificing much accuracy.
 
-There are some summaries which induce distributions for which Algorithm \ref{DistributionAveraging} is ill-suited.
-This occurs when a subset of the summary does not follow the same distribution as the full summary.
-For example, consider the nearest neighbor distance of a sequence $s_i$ to a repertoire of sequences $R$,
+There are some summaries which induce distributions for which Algorithm \ref{alg:DistributionAveraging} is ill-suited.
+This occurs when a summary applied to a subset of a dataset does not follow the same distribution as the summary applied to the full dataset.
+For example, consider the nearest neighbor distance of a sequence $s_i$ with respect to a multiset of sequences $R$ (i.e. elements in $R$ can have multiplicity $\ge 1$), 
 \begin{equation}
 d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
 \end{equation}
-where $d(\cdot, \cdot)$ is any string metric, such as the Levenshtein distance.
+where $d(\cdot, \cdot)$ is a string metric (e.g. the Levenshtein distance).
 If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
 
-In this case, we can still approximate the nearest neighbor distance distribution using the following modification, which is explicitly described in Algorithm \ref{NNDistributionAveraging}.
-For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
-This will give an unbiased sample $d_\text{NN}(s_1, R), \dotsc, d_\text{NN}(s_b, R)$ of the true nearest neighbor distance distribution $D_\text{true}$ of $R$, but it may have significant noise depending on the nature of $D_\text{true}$ and the batch size $b$.
-Thus, we append batches to a running distribution until convergence as in Algorithm \ref{DistributionAveraging}, which produces more refined approximations as the tolerance decreases.
 
-Algorithm \ref{NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
+In this case, we can still obtain an unbiased approximate to the nearest neighbor distance distribution using the following modification of Algorithm \ref{alg:DistributionAveraging}.
+For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
+Since each batch $B$ computes the exact nearest neighbor with respect to $R$, we get unbiased estimates of $d_\text{NN}$ for each $s \in B$. 
+Thus, appending batches to a running distribution until convergence as in Algorithm \ref{alg:DistributionAveraging} will produce increasingly refined, unbiased approximations as the tolerance decreases.
+Algorithm \ref{alg:NNDistributionAveraging} explicates this procedure.
+
+Algorithm \ref{alg:NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
 Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
 
 \begin{algorithm}
     \caption{Compute automatic approximate nearest neighbor distance distribution\\
-        \textbf{Input:} repertoire $R$, distance $d$, subsample size $m$, convergence tolerance $\varepsilon$\\
-        \textbf{Output:} subsampled approximation to $d$}
-    \label{NNDistributionAveraging}
+        \textbf{Input:} repertoire $R$, distance $d$, batch size $m$, convergence tolerance $\varepsilon$\\
+        \textbf{Output:} subsampled approximation to $d_\text{NN}$}
+    \label{alg:NNDistributionAveraging}
     \begin{algorithmic}
         \State $d_0 \gets \Call{doBatchStep}{R, m}$
         \State $n \gets 1$
@@ -648,8 +650,8 @@ Contrasting repertoires in the context of antigen response or vaccination design
 \beginsupplement
 
 \section*{Appendix A: Performance of distribution subsampling algorithms}
-Here, we run Algorithm \ref{DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
-We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+Here, we run Algorithm \ref{alg:DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
+We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{alg:DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
@@ -669,7 +671,7 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
 	\end{subfigure}
     \begin{subfigure}{.5\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/PairwiseDistance/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:Times}
     \end{subfigure}
     %EM if we want these to get a "Figure XX" label the overall figure needs a caption.
@@ -689,7 +691,7 @@ For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the
 Figure~\ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.
 Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
 
-Next we investigate the effect of dataset size on the performance of Algorithm \ref{DistributionAveraging}.
+Next we investigate the effect of dataset size on the performance of Algorithm \ref{alg:DistributionAveraging}.
 For sample sizes $s \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.
 We perform this experiment 10 times for each $s$.
 Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure~\ref{fig:PDDivBySize}.
@@ -703,9 +705,9 @@ Boxplots of the runtime (in log-seconds) by log(size) and tolerance are shown in
 		}.
 \end{equation}
 Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
-Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{DistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
+Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{alg:DistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
 We see that while runtime increases superlinearly with dataset size for each tolerance, the efficiency appears to increase exponentially with dataset size.
-Thus, the accuracy of Algorithm \ref{DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency.
+Thus, the accuracy of Algorithm \ref{alg:DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency.
 
 \begin{figure}
     \begin{subfigure}{0.5\textwidth}
@@ -725,7 +727,7 @@ Thus, the accuracy of Algorithm \ref{DistributionAveraging} applied to the pairw
     \end{subfigure}
 \end{figure}
 
-Finally, we investigate the effect of summary statistic on the performance of Algorithm \ref{DistributionAveraging}.
+Finally, we investigate the effect of summary statistic on the performance of Algorithm \ref{alg:DistributionAveraging}.
 We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
 For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-7}\}$.
 We perform this experiment 10 times for each (summary, $\varepsilon$) combination.
@@ -754,9 +756,9 @@ This is likely due to the fact that the full hotspot and coldspot count distribu
 These results suggest that convergence and efficiency will vary by summary, and the user should be aware of this fact when choosing whether to run the approximation routine as well as an appropriate tolerance.
 
 \subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
-This section assesses the performance of the approximation routine \ref{NNDistributionAveraging} modified for the nearest neighbor distribution
-We run Algorithm \ref{NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
-We compute the nearest neighbor distribution of CDR3 sequences (specified via the \texttt{junction} column) for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+This section assesses the performance of the approximation routine \ref{alg:NNDistributionAveraging} modified for the nearest neighbor distribution
+We run Algorithm \ref{alg:NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
+We compute the nearest neighbor distribution of CDR3 sequences (specified via the \texttt{junction} column) for the full subsampled dataset, as well as using Algorithm \ref{alg:NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
 Figure~\ref{fig:NNFreqPoly} shows a frequency polygon of the same distributions.
 Figure~\ref{fig:NNECDF} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
@@ -779,16 +781,16 @@ Figure~\ref{fig:NNECDF} shows their empirical cumulative distribution functions,
 	\end{subfigure}
     \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/CDR3/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimes}
     \end{subfigure}
 \end{figure}
 
-To assess the effect of sequence lengths on Algorithm \ref{NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned query sequences rather than inferred CDR3 sequences.
+To assess the effect of sequence lengths on Algorithm \ref{alg:NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned query sequences rather than inferred CDR3 sequences.
 These length distributions are different by about an order of magnitude.
-We note that the \texttt{sequence\_alignment} column is the default for Algorithm \ref{NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
-We run Algorithm \ref{NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
-We compute the nearest neighbor distribution of query sequences for the full subsampled dataset, as well as using Algorithm \ref{NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-5} \right\}$.
+We note that the \texttt{sequence\_alignment} column is the default for Algorithm \ref{alg:NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
+We run Algorithm \ref{alg:NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
+We compute the nearest neighbor distribution of query sequences for the full subsampled dataset, as well as using Algorithm \ref{alg:NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-5} \right\}$.
 We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
 Figure~\ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distributions, and figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution functions.
 Moreover, figures \ref{fig:NNDivergencesSequence}
@@ -811,12 +813,12 @@ Moreover, figures \ref{fig:NNDivergencesSequence}
 	\end{subfigure}
     \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/Sequence/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimesSequence}
     \end{subfigure}
 \end{figure}
 
-Next we investigate the effect of dataset size on the performance of Algorithm \ref{NNDistributionAveraging}.
+Next we investigate the effect of dataset size on the performance of Algorithm \ref{alg:NNDistributionAveraging}.
 For sample sizes $s \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of \texttt{junction} sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.
 We perform this experiment 5 times for each $s$.
 
@@ -840,11 +842,11 @@ Figures \ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEf
 \end{figure}
 There is not an obvious trend in KL divergence to truth for a given tolerance as sample size increases, although the variability is higher for high tolerances.
 As expected, runtime increases as tolerance decreases, and also increases with the size of the dataset.
-This is reasonable since each batch iteration of \ref{NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which is $\mathcal O(n^2 m)$, where $n = \text{card}(R)$ is the number of sequences in the full repertoire, and $m = \max_{s \in B} \text{length}(s)$ is the largest sequence length in the batch sample.
+This is reasonable since each batch iteration of \ref{alg:NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which is $\mathcal O(n^2 m)$, where $n = \text{card}(R)$ is the number of sequences in the full repertoire, and $m = \max_{s \in B} \text{length}(s)$ is the largest sequence length in the batch sample.
 
 Next we look at the efficiency relative to computing the full distribution.
 Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
-Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{NNDistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
+Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{alg:NNDistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
 We see that efficiency increases with dataset size as well as tolerance.
 The former verifies that the complexity of the approximation routine is lower than that of computing the full distirbution.
 Examining the boxplots near $y = 0$ by $\log(\text{size})$, we see that for a dataset of size $\exp(k)$, we would need a tolerance of at least $\frac{1}{10^{k - 4}}$.
@@ -877,7 +879,7 @@ It turns out that the efficiencies follow the same rule of thumb we derived for 
 In particular, choosing $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$ will on average lead to an increase in efficiency with respect to the full distribution for \texttt{sequence\_alignment} sequences as well as \texttt{junction} sequences.
 While this may depend on the dataset in question, we recommend this as a good point of reference for general use.
 
-The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
+The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
 \subsection*{Appendix C: Model validation analysis workflows}
 
