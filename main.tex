@@ -323,28 +323,25 @@ Moreover, there does seem to be signal induced by donor-timepoint interactions, 
 Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when datasets are stratified by covariates.
 
 \subsection*{Comparing observations to model simulations per model}
-\texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data.
-Given a repertoire dataset, we infer model parameters using software based on the given model, and use these parameters to generate corresponding simulated datasets.
-Next, we use \texttt{sumrep} to compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
-We score how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
+\texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
+First, given a collection of repertoire datasets, infer model parameters using software based on the given model for each repertoire, and use these parameters to generate corresponding simulated datasets.
+Next, use \texttt{sumrep} to compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
+Then, calculate a score of how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
 
-Applying this methodology using many datasets gives a clear view of which characteristics the model captures well, as well as areas for improvement.
+Applying this methodology using many datasets should give a clear view of which characteristics the model captures well, as well as areas for improvement.
 As described in the introduction, we are motivated to do this because models are often benchmarked on simulated data, and it is important to understand discrepancies between simulated and observed data in order to properly interpret and extrapolate benchmarking results.
 We emphasize that validating the model in this way is different than the usual means of benchmarking model performance-- rather than benchmarking the inferential results of the model, we benchmark the model's ability to generate realistic sequences.
 
 We illustrate this approach with two case studies:
-an analysis of IGoR \cite{Marcou2018-du} applied to TCR sequences, and an analysis of \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz} simulations applied to BCR sequences.
+an analysis of IGoR \cite{Marcou2018-du} applied to TRB sequences, and an analysis of \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz} simulations applied to IgH sequences.
 Both tools are applied to separate sets of experimental repertoires, yielding model-based annotations for each repertoire, as well as simulated datasets from the inferred model parameters for each experimental set.
+Relevant scores of each summary for each tool are computed using each observed and simulated dataset.
 
 %EM Agreed here!
 %BJO - TODO: Add quick summaries of the IGoR and partis analyses as summarized form the Methods subsections
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
-We use \texttt{igor} to infer custom generative models for each experimental dataset.
-Since we are interested in many CDR3-based statistics and IGoR does not currently include inferred CDR3 sequences with rearrangement scenarios, we use IgBlast extract CDR3s for each sequence.
-For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by IGoR.
-
-Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TCR datasets based on \texttt{igor} simulations.
+Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TRB datasets based on \texttt{igor} simulations.
 We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 %EM Wow, this is pretty interesting that igor has trouble with some simple things like J usage. Can you think of why that might be?
 %BJO Oops -- I inverted these scores recently so that a high positive score means 'good', i.e. a better summary replication. And apparently didn't fully change this everywhere in the ms.
@@ -388,11 +385,8 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
-We use \texttt{partis} to infer custom generative models for each experimental dataset.
-We incorporate possible clonal family clustering among sequences during inference, and then collapse each observed and simulated dataset so that each clonal family is represented by one sequence.
-For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by \texttt{partis}.
 
-Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six BCR datasets based on \texttt{partis} simulations.
+Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \texttt{partis} simulations.
 %EM Now I think I'm confused. Partis has a low score for pos dist btw muts, meaning that it fits this distribution very well? It doesn't look great in the other plots...
 %BJO Addressed in above response
 \begin{figure}
@@ -551,8 +545,25 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
     \end{algorithmic}
 \end{algorithm}
 
-\subsection*{Model validation of \texttt{IGoR} and \texttt{partis}}
-Since \texttt{partis} returns a list of the top most probable scenarios for each rearrangement event, we use only the most likely for each sequence.
+\subsection*{Model validation of \texttt{IGoR}}
+We use the \texttt{igor -infer} to fit custom, dataset-specific models for each experimental dataset.
+Since we are interested in many CDR3-based statistics and IGoR does not currently include inferred CDR3 sequences with rearrangement scenarios, we use IgBlast extract CDR3s for each sequence.
+For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by IGoR.
+When a list of more than one potential genes is given for the gene call, we restrict to only the first gene.
+Several fields are renamed to match the AIRR specification when the definitions align without ambiguity.
+
+Although IGoR is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand IGoR's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
+
+We applied IGoR in this way to six datasets of TRB sequences from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
+
+\subsection*{Model validation of \texttt{partis}}
+
+We use \texttt{partis} to infer custom generative models for each experimental dataset.
+We use the \texttt{partition} command to incorporate possible clonal family clustering among sequences during inference, and then collapse each observed and simulated dataset so that each clonal family is represented by one sequence.
+Since \texttt{partis} returns a list of the top most likely scenarios for each rearrangement event, we consider only the scenario with the highest model likelihood for each sequence.
+We denote the \texttt{indel\_reversed\_seqs} field as \texttt{sequence\_alignment} and \texttt{naive\_seq} as \texttt{germline\_alignment} as they adhere to these definitions from the AIRR schema.
+Several other fields are renamed to match the AIRR specification when the definitions align without ambiguity.
+
 Then, we compute the comparisons or divergences between each observed-simulated pair as well as between each of the observed datasets.
 For each comparison, we subsample one receptor per clonal family to get a dataset consisting of ``unique clones'', for both the observed and simulated datasets.
 We do this since \texttt{partis simulate} draws from distributions over clonal families for each rearrangement event as inferred from \texttt{partis partition}.
@@ -562,10 +573,6 @@ However, it seems like this is highly contrived to the nature of our experimenta
 Also, there is ambiguity to whether the rearrangement parameters for this size-1,000 clonal family should always match those of the observed size-1,000 clonal family, or if they should be sampled in some random fashion.
 Hence, it seems more principled to subsample to unique clones and examine clonal family dynamics without dealing with abundance biases.
 
-Next, we discuss a similar model validation approach for TCR repertoires using \texttt{IGoR} \cite{Marcou2018-du}.
-Although IGoR is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand IGoR's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
-
-We applied IGoR in this way to six datasets from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 
 \subsection*{Scoring summary statistic replication by model}
 %EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
