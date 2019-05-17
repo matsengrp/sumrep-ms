@@ -661,8 +661,8 @@ Contrasting repertoires in the context of antigen response or vaccination design
 \beginsupplement
 
 \section*{Appendix A: Performance of distribution subsampling algorithms}
-Here, we run Algorithm \ref{alg:DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
-We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, as well as using Algorithm \ref{alg:DistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+Here, we run Algorithm \ref{alg:DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
+We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
@@ -682,43 +682,37 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
 	\end{subfigure}
     \begin{subfigure}{.5\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/PairwiseDistance/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:Times}
     \end{subfigure}
     %EM if we want these to get a "Figure XX" label the overall figure needs a caption.
     %BJO I don't believe I needed/wanted these sorts of labels for references, but I'm not against it either.
-    \caption{Performance of distribution subsampling algorithms.}
+    \caption{Performance of Algorithm \ref{alg:DistributionAveraging} applied to the pairwise distance distribution.}
 \end{figure}
-Figure~\ref{fig:FreqPoly} shows a frequency polygon of the same distributions, and Figure~\ref{fig:ECDF} shows their empirical cumulative distribution functions.
-
-Figure~\ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance.
-\begin{figure}
-
-\end{figure}
-Figure~\ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset.
-
-
-For a tolerance of $\varepsilon = 10^{-3}$, we see that the KL-divergence of the approximate distribution to the true distribution is consistently small, most of the time falling below 0.01.
-Figure~\ref{fig:Times} shows that running the algorithm with this tolerance yields an exponentially faster runtime than when computing the full distribution.
-Even the higher tolerances of $\varepsilon = 0.1, 0.01$ yield low KL divergences, although the variability is higher.
+Figure~\ref{fig:FreqPoly} shows a frequency polygon of each distribution and figure~\ref{fig:ECDF} shows their empirical cumulative distribution functions.
+We see that the approximate distributions appear to converge to the full distribution as the tolerance gets smaller.
+Figure~\ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance, again indicating convergence to the truth.
+Figure~\ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset; while the runtime grows exponentially as $\varepsilon \to 0$, the approximation algorithm is still much faster than computing the full distribution for each considered value of $\varepsilon$.
 
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{alg:DistributionAveraging}.
-For sample sizes $s \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, 0.001\}$.
-We perform this experiment 10 times for each $s$.
-Boxplots of the KL-divergence by log(size) and tolerance over all trials are displayed in Figure~\ref{fig:PDDivBySize}.
+For sample sizes $n \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $n$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, ..., 10^{-5} \}$.
+We perform this experiment 10 times for each $n$.
+Boxplots of the KL-divergence by $\log(n)$ and tolerance over all trials are displayed in Figure~\ref{fig:PDDivBySize}.
 We see no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance for the pairwise distribution.
-Boxplots of the runtime (in log-seconds) by log(size) and tolerance are shown in Figure~\ref{fig:PDTimeBySize}, and boxplots of the log-efficiency by log(size) and tolerance are shown in Figure~\ref{fig:PDEfficiencyBySize}, where we define the efficiency to be
+Boxplots of the runtime (in log-seconds) by log(size) and tolerance are shown in Figure~\ref{fig:PDTimeBySize}, showing that runtime increases with sample size for high tolerance, but tends towards a constant runtime by sample size as tolerance decreases.
+Boxplots of the log-efficiency by log(size) and tolerance are shown in Figure~\ref{fig:PDEfficiencyBySize}, where
 \begin{equation}\label{eq:Efficiency}
 	\text{Efficiency} :=
-		\frac{\text{time to compute the full distribution}
+		\frac{\text{time to compute full distribution}
 		}{
-			  \text{time to compute the approximate distribution}
+			  \text{time to compute approximate distribution}
 		}.
 \end{equation}
-Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
+Here we plot efficiency on a log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
 Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{alg:DistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
-We see that while runtime increases superlinearly with dataset size for each tolerance, the efficiency appears to increase exponentially with dataset size.
-Thus, the accuracy of Algorithm \ref{alg:DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency.
+For moderate to large datasets and reasonable choices of $\varepsilon$, the approximate routine is much more efficient than computing the full distribution.
+Efficiency also appears to increase exponentially with dataset size, although decreases at least exponentially as tolerance decreases.
+Nonetheless, the accuracy of Algorithm \ref{alg:DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency for reasonable choices of $\varepsilon$.
 
 \begin{figure}
     \begin{subfigure}{0.5\textwidth}
@@ -738,6 +732,7 @@ Thus, the accuracy of Algorithm \ref{alg:DistributionAveraging} applied to the p
     \end{subfigure}
 \end{figure}
 
+%BJO - Rerunning this as I think the plot is outdated (1,000 seqs instead of 10,000)
 Finally, we investigate the effect of summary statistic on the performance of Algorithm \ref{alg:DistributionAveraging}.
 We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
 For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-7}\}$.
@@ -751,12 +746,12 @@ Figures \ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:Efficiency
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/Multiple/time_by_summary_and_tol.pdf}
-        \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
+        \caption{Runtime by summary distribution and tolerance, taken over 10 trials of the algorithm}
         \label{fig:TimeBySummary}
     \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/Multiple/efficiency_by_summary_and_tol.pdf}
-        \caption{KL-divergence to true summary distributions by tolerance, taken over 10 trials of the algorithm}
+        \caption{Efficiency by summary distribution and tolerance, taken over 10 trials of the algorithm}
         \label{fig:EfficiencyBySummary}
     \end{subfigure}
 \end{figure}
@@ -1032,6 +1027,8 @@ Hence, it is important to understand that a given annotations-based summary shou
     \caption{Summary distribution empirical cdfs of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
 \end{figure}
 
+%BJO - I'm not actually sure how necessary this table is anymore, since I removed the divergence plot which used these abbreviations as axis labels. Everything just gets rolled up into the score plots and freqpolys/ecdfs now.
+%BJO - p_f1 does show up in the subsampling performance analyses in Appendices A and B.
 \section*{Appendix E: Metadata for partis analysis}
 
 Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
