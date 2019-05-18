@@ -762,13 +762,13 @@ This is likely due to the fact that the full hotspot and coldspot count distribu
 These results suggest that convergence and efficiency will vary by summary, and the user should be aware of this fact when choosing whether to run the approximation routine as well as an appropriate tolerance.
 
 \subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
-This section assesses the performance of the approximation routine \ref{alg:NNDistributionAveraging} modified for the nearest neighbor distribution
-We run Algorithm \ref{alg:NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences.
-We compute the nearest neighbor distribution of CDR3 sequences (specified via the \texttt{junction} column) for the full subsampled dataset, as well as using Algorithm \ref{alg:NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
+Here, we assess the modification of the distribution approximation routine for the nearest neighbor distribution.
+We run Algorithm \ref{alg:NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
+We compute the nearest neighbor distribution of CDR3 nt sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
-Figure~\ref{fig:NNFreqPoly} shows a frequency polygon of the same distributions.
-Figure~\ref{fig:NNECDF} shows their empirical cumulative distribution functions, which reveals bias in the tail of the approximation distributions.
 
+Figure~\ref{fig:NNFreqPoly} shows a frequency polygon of each distribution, and Figure~\ref{fig:NNECDF} shows their empirical cumulative distribution functions.
+Figure~\ref{fig:NNDivergences} shows KL divergences of approximate distributions to the true distribution which decay as $\varepsilon \to 0$.
 \begin{figure}
     \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/freqpoly_by_tol.pdf}
@@ -787,17 +787,19 @@ Figure~\ref{fig:NNECDF} shows their empirical cumulative distribution functions,
 	\end{subfigure}
     \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/CDR3/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:NNDistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimes}
     \end{subfigure}
 \end{figure}
+Indeed, these three figures indicate that the approximate distributions converge to the full distribution as $\varepsilon \to 0$.
+Figure \ref{fig:NNTimes} displays boxplots of the runtime in log-seconds for Algorithm \ref{alg:NNDistributionAveraging} as well as the runtime to compute the full distribution.
+In this case, we see that the Algorithm \ref{alg:NNDistributionAveraging} becomes slower than computing the full distribution when $\varepsilon \lesssim 10^{-5}$.
 
-To assess the effect of sequence lengths on Algorithm \ref{alg:NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned query sequences rather than inferred CDR3 sequences.
+To assess the effect of sequence lengths on Algorithm \ref{alg:NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned VDJ sequences (via the \texttt{sequence\_alignment} column rather than inferred CDR3 sequences.
 These length distributions are different by about an order of magnitude.
-We note that the \texttt{sequence\_alignment} column is the default for Algorithm \ref{alg:NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
+We note that the pairwise aligned VDJ sequences are the default for Algorithm \ref{alg:NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
 We run Algorithm \ref{alg:NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
-We compute the nearest neighbor distribution of query sequences for the full subsampled dataset, as well as using Algorithm \ref{alg:NNDistributionAveraging} with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-5} \right\}$.
-We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
+
 Figure~\ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distributions, and figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution functions.
 Moreover, figures \ref{fig:NNDivergencesSequence}
  and \ref{fig:NNTimesSequence} show the KL-divergences to truth and runtimes, respectively.
@@ -823,12 +825,14 @@ Moreover, figures \ref{fig:NNDivergencesSequence}
     	\label{fig:NNTimesSequence}
     \end{subfigure}
 \end{figure}
+It seems that the KL divergence to the truth may converge more slowly for \texttt{sequence\_alignment} sequences rather than CDR3s, although the approximate procedure seems to outperform the full distribution for a slightly larger range of $\varepsilon$ values (i.e. until $\varepsilon$ nears $10^{-6}$).
+
 
 Next we investigate the effect of dataset size on the performance of Algorithm \ref{alg:NNDistributionAveraging}.
-For sample sizes $s \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $s$ sequences and compute the pairwise distance distribution of \texttt{junction} sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.
-We perform this experiment 5 times for each $s$.
+For sample sizes $n \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $n$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.
+We perform this experiment 5 times for each $n$.
 
-Figures \ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
+Figures \ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEfficiencyBySizeCDR3} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
     	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/div_by_size_and_tol.pdf}
@@ -848,13 +852,9 @@ Figures \ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEf
 \end{figure}
 There is not an obvious trend in KL divergence to truth for a given tolerance as sample size increases, although the variability is higher for high tolerances.
 As expected, runtime increases as tolerance decreases, and also increases with the size of the dataset.
-This is reasonable since each batch iteration of \ref{alg:NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which is $\mathcal O(n^2 m)$, where $n = \text{card}(R)$ is the number of sequences in the full repertoire, and $m = \max_{s \in B} \text{length}(s)$ is the largest sequence length in the batch sample.
+This is reasonable since each batch iteration of \ref{alg:NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which certainly increases in time complexity as $R$ increases.
 
-Next we look at the efficiency relative to computing the full distribution.
-Note the log-log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
-Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{alg:NNDistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
-We see that efficiency increases with dataset size as well as tolerance.
-The former verifies that the complexity of the approximation routine is lower than that of computing the full distirbution.
+Next we look at the efficiency relative to computing the full distribution as defined in Equation \ref{eq:Efficiency}.
 Examining the boxplots near $y = 0$ by $\log(\text{size})$, we see that for a dataset of size $\exp(k)$, we would need a tolerance of at least $\frac{1}{10^{k - 4}}$.
 For example, for $\log(\text{size}) = 6$, we see that tolerances higher than $0.01 = \frac{1}{100} = \frac{1}{10^{6 - 4}}$ would on average yield an efficiency greater than one.
 This suggests that, for a dataset with $n$ CDR3 sequences, a sensible rule of thumb would be to choose $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$.
@@ -879,7 +879,7 @@ Figures \ref{fig:NNDivBySizeFull}, \ref{fig:NNTimeBySizeFull}, and \ref{fig:NNEf
     	\label{fig:NNEfficiencyBySizeFull}
     \end{subfigure}
 \end{figure}
-There is evidence of a positive trend of the KL-divergence as sample size increases for $\varepsilon = 0.1$, although seems to diminish for each other tolerance.
+There is evidence of a positive trend of the KL-divergence as sample size increases for $\varepsilon = 0.1$, although this trend seems to diminish for each other tolerance.
 Runtimes increase with given sample size and tolerance, and are generally higher than they are for \texttt{junction} sequences as expected.
 It turns out that the efficiencies follow the same rule of thumb we derived for the \texttt{junction} sequence situation.
 In particular, choosing $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$ will on average lead to an increase in efficiency with respect to the full distribution for \texttt{sequence\_alignment} sequences as well as \texttt{junction} sequences.
@@ -955,6 +955,7 @@ Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a giv
 Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
 Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
 The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
+%BJO - It might be worth also including a box called "IMGT database" as another input (along with "Fasta file")
 \begin{figure}
     \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
         \begin{tikzpicture}
