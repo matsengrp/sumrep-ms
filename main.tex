@@ -889,9 +889,7 @@ The user should use these results as well as problem-specific considerations whe
 
 \subsection*{Appendix C: Model validation analysis workflows}
 
-Figure~\ref{fig:PartisWorkflow} describes the overall workflow of this procedure for a given BCR dataset.
-
-Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a given TCR dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
+Figure~\ref{fig:PartisWorkflow} illustrates the \texttt{partis} model validation workflow as described in the Methods section.
 %EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
 %BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
 % Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
@@ -947,14 +945,18 @@ Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a giv
     \label{fig:IgorWorkflow}
     \end{subfigure}
 \end{figure}
+We first run \texttt{partis partition} on each fasta file of IgH sequence reads to obtain annotations for each sequence, as well as a directory containing model parameters for inference and simulation.
+We can then run \texttt{partis simulate} with these model parameters as input to generate a synthetic datset of IgH annotations.
+We subsample both the experimental and simulated annotation datasets to unique clones.
+Then, we compare each IgH-relevant summary for the two resultant annotations datasets, yielding a divergence value for each summary.
 
-
+Figure~\ref{fig:IgorWorkflow} illustrates the \texttt{igor} model validation workflow, which is similar to \ref{fig:PartisWorkflow}.
+There are two main differences: first, we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences, and second, there is no need to subsample to unique clones.
 
 \subsection*{Appendix D: Comparison of summary scores using IgBlast annotations}
-
-Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
-Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
-The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
+Recall that for the standard \texttt{partis} model validation procedure, \texttt{partis} is used for both inference as well as simulation.
+Here we examine the influence of using the same tool for inference and simulation by using IgBlast for inference, and comparing the annotations dataset output from IgBlast to the corresponding simulations from \texttt{partis}.
+The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}, which is essentially the diagram in Figure \ref{fig:PartisWorkflow} with an additional path describing the IgBlast/Change-O pipeline.
 %BJO - It might be worth also including a box called "IMGT database" as another input (along with "Fasta file")
 \begin{figure}
     \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
@@ -991,7 +993,10 @@ The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
     \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
     \label{IgblastWorkflow}
 \end{figure}
-The results are displayed in figure \ref{fig:IgBlastScores}.
+Change-O was used to parse the \texttt{igblast} output, as well as partition the sequences into inferred clonal families \cite{Gupta2015-iu}.
+
+Figure \ref{fig:IgBlastScores} shows the results of score$_\text{obs}$ by summary when using IgBlast for annotation and \texttt{partis} for simulation.
+Figure \ref{fig:ScoreDiffs} shows the difference of each score in Figure  \ref{fig:ObsScoresBCR} and each score in Figure \ref{fig:IgBlastScores}.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
    		\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot_igb.pdf}
@@ -1010,13 +1015,11 @@ The results are displayed in figure \ref{fig:IgBlastScores}.
 The plots show a high level of agreement for most summaries, with all but six of them differing by less than one units, and a strong majority of them close to zero.
 Where differences arise, this is likely the result of differences in how partis and IgBlast perform annotations.
 For example, we see that the insertion length distributions highly disagree in scores.
-This is at least partially attributable to the star-tree assumption on which partis operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
+This is at least partially attributable to the star-tree assumption on which \texttt{partis} operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
 Indeed, examining the VD insertion length distribution shows that IgBlast tends to assign a similar distribution to each dataset, whereas partis leads to more variable distributions with right skew due to the star-tree assumption.
 Moreover, if IgBlast tends to assign a similar insertion length distribution to every dataset, then this will make it difficult for a simulator designed to match particular insertion lengths distributions to behave more like the IgBlast distributions.
 Thus, inherent differences in annotation tools will certainly lead to differences in summary scores, regardless of how accurate either tool is.
 Hence, it is important to understand that a given annotations-based summary should be considered in the context of the tool which provided annotations, and not as a ground-truth summary of the actual gene usage/indel statistics.
-
-
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_freqpoly.pdf}
@@ -1034,7 +1037,7 @@ Hence, it is important to understand that a given annotations-based summary shou
 
 Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
 In short, the notation is as follows.
-A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default \texttt{igblast} germline databases;
+A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default IMGT germline databases for IgBlast;
 this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
 finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 \begin{table}
@@ -1074,7 +1077,7 @@ finally, we append the \texttt{sim} suffix if the dataset was simulated from an 
     \texttt{pi\_i2\_sim} & Simulation& \texttt{partis} & IMGT & I & 8 days\\
 \end{tabular}
 }
-\caption{Metadata for each dataset used in the analyses.}
+\caption{Metadata for each dataset used in the BCR analyses}
 \label{tab:Datasets}
 \end{table}
 
