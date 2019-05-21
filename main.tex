@@ -305,7 +305,7 @@ Examples of these plots are given in later sections.
 \subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
 
 \subsection*{Multidimensional scaling of TCR summary divergences}
-To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences.
+To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
 In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
 Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint.
@@ -340,6 +340,9 @@ Relevant scores of each summary for each tool are computed using each observed a
 %BJO - TODO: Add quick summaries of the IGoR and partis analyses as summarized form the Methods subsections
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
+We apply the methodology discussed in the previous section to TRB sequences from \cite{Britanova2016-iw}.
+The full study sequenced experimental TRB repertoires from various donors across the lifespan, although we only examine six datasets here as discussed in the materials section.
+
 Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TRB datasets based on \texttt{igor} simulations.
 We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
@@ -383,6 +386,8 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 
 
 \subsection*{Assessing summary statistic replication for \texttt{partis}}
+We apply the same methodology to IgH sequences from \cite{Gupta2017-ve} (originally published in \cite{Laserson2014-dx}).
+This data consists of longitudinal IgH repertoires of three donors pre- and post-vaccination with influenza; we analyze the one-hour post-vaccination and eight-days post-vaccination repertoires for each donor.
 
 Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \texttt{partis} simulations.
 \begin{figure}
@@ -629,15 +634,19 @@ This is discussed in detail in Appendix C.
 
 
 \subsection*{Materials}
-The raw data for the BCR model validation analyses were obtained from \cite{Laserson2014-dx}, and the processed data, courtesy of Jason, are from a paper that isn't out yet.
-These datasets represent repertoires of three human donors from two separate time points (1 hour and 8 days) following an influenza vaccination.
-The number of reads from these six datasets used in the analysis range from 14,733 to 31,952 sequences.
+The raw data for the TCR summary divergence MDS analysis comes from \cite{Pogorelyy2018-ak}, which was postprocessed into a suitable format for analysis.
 
 For the TCR model validation analysis, we use several datasets from \cite{Britanova2016-iw}.
 For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads from these six datasets used in the analysis ranged from 37,363 sequences to 243,903 sequences.
 %BJO - Trying to run \texttt{igor} on larger datasets would often throw a segmentation fault. If this is a concern, we could choose a dataset from each of five individuals and subsample each dataset to, say, 50,000 sequences. But I don't think this would change the result that much.
 These datasets consist of consensus RNA sequences assembled using UMIs.
 Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
+
+The data for the BCR model validation analyses originated from samples and 454 data published in \cite{Laserson2014-dx}, with the MiSeq data and processed data published in \cite{Gupta2017-ve} used for our analyses.
+These datasets represent repertoires of three human donors from two separate time points (1 hour and 8 days) following an influenza vaccination.
+The number of reads from these six datasets used in the analysis range from 14,733 to 31,952 sequences.
+
+
 
 
 \section*{Discussion}
@@ -653,6 +662,9 @@ Moreover, it would likely be useful to perform separate analyses restricted to d
 
 Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
 \texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones~\cite{Finlay2012}.
+
+\section*{Acknowledgements}
+We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pogorelyy2018-ak}.
 
 
 \bibliographystyle{plain}
@@ -1012,6 +1024,7 @@ Figure~\ref{fig:ScoreDiffs} shows the difference of each score in Figure~\ref{fi
     	\label{fig:ScoreDiffs}
 	\end{subfigure}
 \end{figure}
+Frequency polygons of three pairs of \igblast-annotated and \partis-simulated datasets are shown in Figure~\ref{fig:PartisIgBlastFreqpolys}, and ecdfs of the same datasets are shown in Figure~\ref{fig:PartisIgBlastECDFs}
 The plots show a high level of agreement for most summaries, with all but six of them differing by less than one units, and a strong majority of them close to zero.
 Where differences arise, this is likely the result of differences in how partis and IgBlast perform annotations.
 For example, we see that the insertion length distributions highly disagree in scores.
@@ -1024,11 +1037,13 @@ Hence, it is important to understand that a given annotations-based summary shou
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_freqpoly.pdf}
     \caption{Summary distribution frequency polygons of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+    \label{fig:PartisIgBlastFreqpolys}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_ecdf.pdf}
     \caption{Summary distribution empirical cdfs of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+     \label{fig:PartisIgBlastECDFs}
 \end{figure}
 
 %BJO - I'm not actually sure how necessary this table is anymore, since I removed the divergence plot which used these abbreviations as axis labels. Everything just gets rolled up into the score plots and freqpolys/ecdfs now.
