@@ -445,7 +445,7 @@ In the case where $P$ and $Q$ are both discrete distributions, this becomes
 \begin{equation}
 \text{KLD}\left(P_1 \ || \ P_2\right) = \sum_{i \in \text{supp}(P_1)} p_1(i) \log\left( \frac{p_1(i)}{p_2(i)} \right)
 \end{equation}
-where $\Omega$ is the countable sample space for $P_1$.
+where $\text{supp}(P)$ is the countable support of distribution $P$.
 Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, where $m = |\text{supp}(P)|$ and $n = |\text{supp}(Q)|$, which is designed to scale with the complexity of $m$ and $n$ simultaneously.
 We also discard bins which would lead to an infinite KL divergence for numerical stability.
@@ -499,7 +499,7 @@ The main advantage of Algorithm~\ref{alg:DistributionAveraging} over such an app
 The algorithm can also be tuned according to batch size $m$, which \texttt{sumrep} takes to be 30 by default.
 We conduct a performance analysis of Algorithm~\ref{alg:DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings without sacrificing much accuracy.
 
-There are some summaries which induce distributions for which Algorithm~\ref{alg:DistributionAveraging} is ill-suited.
+Some summaries induce distributions for which Algorithm~\ref{alg:DistributionAveraging} is ill-suited.
 This occurs when a summary applied to a subset of a dataset does not follow the same distribution as the summary applied to the full dataset.
 For example, consider the nearest neighbor distance of a sequence $s_i$ with respect to a multiset of sequences $R$ (i.e. elements in $R$ can have multiplicity $\ge 1$),
 \begin{equation}
