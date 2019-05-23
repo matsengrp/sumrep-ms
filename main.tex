@@ -39,6 +39,9 @@
 
 % Commands
 \newcommand{\alphabet}{\mathcal{A}}
+\newcommand{\partis}{\texttt{partis}}
+\newcommand{\igor}{\texttt{IGoR}}
+\newcommand{\igblast}{\texttt{IgBlast}}
 
 % http://bytesizebio.net/2013/03/11/adding-supplementary-tables-and-figures-in-latex/
 \newcommand{\beginsupplement}{%
@@ -48,14 +51,14 @@
         \renewcommand{\thefigure}{S\arabic{figure}}%
      }
 
-%BJO - Another possible title: A summary statistic framework for immune receptor repertoire comparison and model validation. 
-\title{Immune receptor repertoire comparison and model validation via summary statistics}
+\title{\texttt{sumrep}: a summary statistic framework for immune receptor repertoire comparison and model validation}
 \author{Branden Olson, Software WG folks, Frederick A Matsen IV}
 
 \pgfplotsset{compat=1.12}
 \begin{document}
 
 %BJO - I realize that I alternate between IGoR and "\texttt{igor}" throughout the document, as well as IgBlast vs \texttt{igblast}. Do you have a preference, Erick? I believe I'm consistent with writing \texttt{partis} throughout.
+%EM I prefer \texttt{IGoR} etc. I made you some commands above. Note that you'll need `\igor\ ` with a trailing backslash to get a space after the command.
 
 \maketitle
 
@@ -77,8 +80,7 @@ The random rearrangement process of the genes that construct B cell receptors (B
 We refer to the set of B and T cell receptors present in an individual's immune system as their immune receptor repertoire; this repertoire constantly changes over the course of an individual's lifetime for various reasons including differences in germline gene sets and antigen exposure.
 
 Although immune receptor repertoires are now accessible for scientific research and medical applications through high-throughput sequencing, it is not necessarily straightforward to gain insight from and to compare these data sets.
-%BJO The transition here feels awkward
-Without further processing, repertoires are simply a list of DNA sequences.
+Indeed, if these data sets are not processed, they are simply a list of DNA sequences.
 After annotation one can use gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt}, and then use some method to compare CDR3 sequences.
 This can be a highly involved task, and so it is common to simply compare CDR3 length distribution of a repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of CDR3 sequence unanalyzed, as well as other interesting aspects of the germline-encoded regions.
 % or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
@@ -154,7 +156,7 @@ Per-base substitution model & Yes & No & No & \texttt{shazam} \\
 %BJO This one doesn't depend on fit-star, right?
 %EM Yes, but we could just count Ts vs Tv, call it a "ratio" and drop the model-based rigor.
 %EM Branden, I'm not actually sure what you ended up doing. Did you do this? If so, worth a line or two in the methods.
-%BJO I believe I got caught up with which sequences to use for this, before we decided on assuming IMGT-gapped mature and germline sequences, which would now be the sensible default. So, this is not currently implemented.  
+%BJO I believe I got caught up with which sequences to use for this, before we decided on assuming IMGT-gapped mature and germline sequences, which would now be the sensible default. So, this is not currently implemented.
 Transition/transversion ratio distribution & Yes & No & No & \texttt{sumrep} \\
 Positional distance between mutations distribution & Yes & No & No & \texttt{sumrep}  \\
 Distance from germline to sequence distribution & Yes & No & No & \texttt{stringdist} \\
@@ -190,12 +192,10 @@ Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \subsection*{Implementation}
 The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
 It supports the IgH, IgK, and IgL loci for BCR datasets, and the TRA, TRB, TRD, and TRG loci for TCR datasets.
-%EM Perhaps clarify what AIRR compliant means here? Did you ingest AIRR-formatted stuff for this manuscript?
-%BJO I renamed some partis and IGoR columns which matched the specs, and did what I can with what the tools allowed. Probably should elaborate on this in the partis/igor workflow appendix.
-It is open-source, unit-tested, and extensively documented, and uses default dataset fields and definitions that comply with AIRR rearrangement schema.
+It is open-source, unit-tested, and extensively documented, and uses default dataset fields and definitions that comply with AIRR rearrangement schema \cite{Vander_Heiden2018-mu}.
 Analyses will be reproducible using Docker.
 
-Table \ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
+Table~\ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
 The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region; this coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
 The second group requires standard sequence annotations, such as inferred germline ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 Level three requires clonal family cluster assignments.
@@ -214,8 +214,9 @@ We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC c
 %EM Shall we try for an intuitive explanation of JS / KL?
 %BJO I like this description from https://medium.com/@cotra.marko/making-sense-of-the-kullback-leibler-kl-divergence-b0d57ee10e0a:
 % [It's] a measure of how much ?predictive power? or ?evidence? each sample will on average bring when you?re trying to distinguish p(x) from q(x), if you?re sampling from p(x).
-%BJO - Then the JS divergence will be a nice, symmetrized version. 
+%BJO - Then the JS divergence will be a nice, symmetrized version.
 %BJO - However, you have a better idea of how much stats background the average immunologist will have.
+%EM Hm, yeah, I was dreaming of something simpler, like the weighted average log ratio.
 
 We have designed \texttt{sumrep} to efficiently approximate computationally inefficient summaries for moderate and large repertoires.
 When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
@@ -298,26 +299,24 @@ We have also chosen appropriate divergences for summaries that do not give distr
 For example, the \texttt{getCDR3LengthDistribution} comes with a companion plotting function called \texttt{plotCDR3LengthDistribution}.
 \texttt{sumrep} also comes with a ``master'' plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots relevant to the locus in question.
 Currently, these plotting functions support frequency polygons and empirical cumulative distribution functions (ecdfs).
-%EM referring to figures out of order often raises red flags with reviewers. Shrug.
-%BJO We could say something like "Examples of these plots are given in later sections" without actually including explicit refs? It seems "wasteful" to include a separate plot here just to illustrate something that is later illustrated, but it seems wrong to mess with the plot reference numbers as they are.
-Figure~\ref{fig:PartisFreqPolys} shows an example gridded frequency polygon plot from \texttt{plotUnivariateDistributions} computed for a set of six BCR datasets (experimental and observed), and Figure \ref{fig:PartisECDFs} shows ecdfs for the same datasets.
+Examples of these plots are given in later sections.
 
 %BJO - Chaim's and Peji's analyses
 \subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
 
 \subsection*{Multidimensional scaling of TCR summary divergences}
-To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences.
+To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
 In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
 Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
-    \caption{PCA plots of select summaries by donor and timepoint}
+    \caption{Plots of summary divergence MDS coordinates for the Pogorelyy (2018) data, grouped by donor and timepoint}
     \label{fig:TCR_MDS}
 \end{figure}
 We see that for almost all summaries, these points cluster according to donor identity, with the CDR3 pairwise distance distribution being the only summary that does not decisively cluster by donor.
 %EM I'm not totally convinced that the cross is more than just random noise...
-The D gene usage distribution has more unusual cross-like pattern, whose structure  is more difficult to assess.
+The D gene usage distribution has more unusual cross-like pattern, whose structure is more difficult to assess.
 Other summaries, such as the CDR3 pairwise distance distribution and Hill numbers, yield little to no signal.
 Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
 Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when datasets are stratified by covariates.
@@ -325,7 +324,7 @@ Although these patterns would require further exploration in a particular resear
 \subsection*{Comparing observations to model simulations per model}
 \texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
 First, given a collection of repertoire datasets, infer model parameters using software based on the given model for each repertoire, and use these parameters to generate corresponding simulated datasets.
-Next, use \texttt{sumrep} to compute each summary statistic listed in Table \ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
+Next, use \texttt{sumrep} to compute each summary statistic listed in Table~\ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
 Then, calculate a score of how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
 
 Applying this methodology using many datasets should give a clear view of which characteristics the model captures well, as well as areas for improvement.
@@ -341,35 +340,9 @@ Relevant scores of each summary for each tool are computed using each observed a
 %BJO - TODO: Add quick summaries of the IGoR and partis analyses as summarized form the Methods subsections
 
 \subsection*{Assessing summary statistic replication for \texttt{igor}}
-Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TRB datasets based on \texttt{igor} simulations.
-We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
-%EM Wow, this is pretty interesting that igor has trouble with some simple things like J usage. Can you think of why that might be?
-%BJO Oops -- I inverted these scores recently so that a high positive score means 'good', i.e. a better summary replication. And apparently didn't fully change this everywhere in the ms.
-\begin{figure}
-	\begin{subfigure}{\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
-    	\caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{igor} model inference and simulation.
-        	A high LRD indicates a well-replicated statistic by the simulations.
-    	}
-    	\label{fig:ObsScoresTCR}
-	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
-    	\caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{igor} model inference and simulation.
-    	    A high LRD indicates a well-replicated statistic by the simulations.
-    	}
-    	\label{fig:SimScoresTCR}
-	\end{subfigure}
-\end{figure}
-It is seen that IGoR simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
-V, D, and joing VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
-The CDR3 length distribution is the least-replicated statistic, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
-Interestingly, the Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
-Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors).
-
-Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
-We still see high scores for gene usage and indel statistics, although now the various Kidera factor and GRAVY index distributions have lower scores.
-This suggests that while the average \texttt{igor} simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure~\ref{fig:IgorFreqPolys}.
+We apply the methodology discussed in the previous section to TRB sequences from \cite{Britanova2016-iw}.
+The full study sequenced experimental TRB repertoires from various donors across the lifespan, although we only examine six datasets here as discussed in the materials section.
+Figure~\ref{fig:IgorFreqPolys} displays frequency polygons of each summary for each experimental and simulated repertoire, and Figure~\ref{fig:IgorECDFs} displays the corresponding empirical cdfs.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the IGoR datasets.}
@@ -383,38 +356,42 @@ This suggests that while the average \texttt{igor} simulation yields Kidera fact
 \end{figure}
 
 
-
-\subsection*{Assessing summary statistic replication for \texttt{partis}}
-
-Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \texttt{partis} simulations.
-%EM Now I think I'm confused. Partis has a low score for pos dist btw muts, meaning that it fits this distribution very well? It doesn't look great in the other plots...
-%BJO Addressed in above response
+Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TRB datasets based on \igor\ simulations.
+We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot.pdf}
-    	\caption{$\text{score}_\text{obs}$ of each statistic based on \texttt{partis} model inference and simulation.
-     	   A high score indicates a well-replicated statistic by the simulations.
-    	}
-    	\label{fig:ObsScoresBCR}
+    	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
+    	\caption{$\text{score}_\text{obs}$ values for each statistic.
+        %EM Seems like one more phrase of explanation would help make this figure easier to interpret. It's functional(?) TCR data (and partis is BCR data...)
+        %BJO I added a caption for the full figure and elaborated -- would you like more explanation?
+        }
+    	\label{fig:ObsScoresTCR}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
-    	\includegraphics[width=\linewidth]{Figures/PartisScores/sim_score_plot.pdf}
-    	\caption{$\text{score}_\text{sim}$ of each statistic based on \texttt{partis} model inference and simulation.
-    	    A high score indicates a well-replicated statistic by the simulations.
+    	\includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
+    	\caption{$\text{score}_\text{sim}$ values for each statistic.
     	}
-    	\label{fig:SimScoresBCR}
+    	\label{fig:SimScoresTCR}
 	\end{subfigure}
+	\caption{Summary scores, denoted as "log(Relative average divergence)" due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
 \end{figure}
-Like \texttt{igor}, we see that \texttt{partis} simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well.
-However, \texttt{partis} struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
-This contrasts \texttt{igor} which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
-The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations, and hot and cold spot counts, not being well-captured.
-This is not very surprising as \texttt{partis} does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
+It is seen that IGoR simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
+V, D, and joing VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
+The CDR3 length distribution is the least-replicated statistic, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
+Interestingly, the Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
+Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors).
+
+Figure~\ref{fig:SimScoresTCR} displays the simulation-based summary scores for the same datasets and simulations.
+We still see high scores for gene usage and indel statistics, although now the various Kidera factor and GRAVY index distributions have lower scores.
+This suggests that while the average \texttt{igor} simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure~\ref{fig:IgorFreqPolys}.
 
 
-Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
-The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some summaries like positional distance between mutations and VD/DJ insertion matrices seeing a moderate drop.
 
+\subsection*{Assessing summary statistic replication for \texttt{partis}}
+We apply the same methodology to IgH sequences from \cite{Gupta2017-ve} (originally published in \cite{Laserson2014-dx}).
+%BJO Actually, I ran this on the 1h/8d pre-vaccination sets, not post-vaccination. Happy to hear objections if anyone would rather I run on post-vaccination sets.
+This data consists of longitudinal IgH repertoires of three donors pre- and post-vaccination with influenza; we analyze the one-hour post-vaccination and eight-days post-vaccination repertoires for each donor.
+Figure~\ref{fig:PartisFreqPolys} displays frequency polygons of each summary for each experimental and simulated repertoire, and Figure~\ref{fig:PartisECDFs} displays the corresponding empirical cdfs.
 \begin{figure}
 %EM I think that only one of these should go in the main text, but it's a matter for discussion with the group.
     \includegraphics[width=\linewidth]{Figures/PartisScores/partis_freqpoly.pdf}
@@ -427,6 +404,31 @@ The scores are highly similar to those seen in \ref{fig:ObsScoresBCR}, with some
     \caption{Empirical cumulative distribution function plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:PartisECDFs}
 \end{figure}
+
+
+Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \texttt{partis} simulations.
+\begin{figure}
+	\begin{subfigure}{\textwidth}
+    	\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot.pdf}
+    	\caption{$\text{score}_\text{obs}$ values for each statistic.}
+    	\label{fig:ObsScoresBCR}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+    	\includegraphics[width=\linewidth]{Figures/PartisScores/sim_score_plot.pdf}
+    	\caption{$\text{score}_\text{sim}$ values for each statistic.}
+    	\label{fig:SimScoresBCR}
+	\end{subfigure}
+	\caption{Summary scores, denoted as "log(Relative average divergence)" due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.}
+\end{figure}
+Like \texttt{igor}, we see that \texttt{partis} simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well.
+However, \texttt{partis} struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
+This contrasts \texttt{igor} which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
+The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations, and hot and cold spot counts, not being well-captured.
+This is not very surprising as \texttt{partis} does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
+
+
+Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
+The scores are highly similar to those seen in Figure~\ref{fig:ObsScoresBCR}, with some summaries like positional distance between mutations and VD/DJ insertion matrices seeing a moderate drop.
 
 
 \section*{Methods}
@@ -444,7 +446,7 @@ In the case where $P$ and $Q$ are both discrete distributions, this becomes
 \begin{equation}
 \text{KLD}\left(P_1 \ || \ P_2\right) = \sum_{i \in \text{supp}(P_1)} p_1(i) \log\left( \frac{p_1(i)}{p_2(i)} \right)
 \end{equation}
-where $\Omega$ is the countable sample space for $P_1$.
+where $\text{supp}(P)$ is the countable support of distribution $P$.
 Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, where $m = |\text{supp}(P)|$ and $n = |\text{supp}(Q)|$, which is designed to scale with the complexity of $m$ and $n$ simultaneously.
 We also discard bins which would lead to an infinite KL divergence for numerical stability.
@@ -472,6 +474,7 @@ Computing full summary distributions over large datasets can be intractable.
 However, we can compute a Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values until convergence.
 This idea is laid out in Algorithm~\ref{alg:DistributionAveraging}, which appends batch samples of $d$ to a rolling approximate distribution and terminates when successive distribution iterates have a JS divergence smaller than tolerance $\varepsilon$.
 Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
+%BJO Should we make the algorithms figures?
 \begin{algorithm}
     \caption{Compute automatic approximate distribution \\
         \textbf{Input:} repertoire $R$, summary $s$, batch size $m$, convergence tolerance $\varepsilon$\\
@@ -494,13 +497,13 @@ Note that continually appending values to a rolling vector is analogous to compu
 \end{algorithm}
 
 An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
-The main advantage of Algorithm \ref{alg:DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
+The main advantage of Algorithm~\ref{alg:DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
 The algorithm can also be tuned according to batch size $m$, which \texttt{sumrep} takes to be 30 by default.
-We conduct a performance analysis of Algorithm \ref{alg:DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings without sacrificing much accuracy.
+We conduct a performance analysis of Algorithm~\ref{alg:DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings without sacrificing much accuracy.
 
-There are some summaries which induce distributions for which Algorithm \ref{alg:DistributionAveraging} is ill-suited.
+Some summaries induce distributions for which Algorithm~\ref{alg:DistributionAveraging} is ill-suited.
 This occurs when a summary applied to a subset of a dataset does not follow the same distribution as the summary applied to the full dataset.
-For example, consider the nearest neighbor distance of a sequence $s_i$ with respect to a multiset of sequences $R$ (i.e. elements in $R$ can have multiplicity $\ge 1$), 
+For example, consider the nearest neighbor distance of a sequence $s_i$ with respect to a multiset of sequences $R$ (i.e. elements in $R$ can have multiplicity $\ge 1$),
 \begin{equation}
 d_\text{NN}(s_i, R) := \min_{s \in R \setminus \{s_i\}} d(s_i, s),
 \end{equation}
@@ -508,13 +511,13 @@ where $d(\cdot, \cdot)$ is a string metric (e.g. the Levenshtein distance).
 If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i, R)$ $\forall i$, since $R$ will have the same sequences to iterate over, and possibly more sequences, which can only result in the same or a smaller minimum.
 
 
-In this case, we can still obtain an unbiased approximate to the nearest neighbor distance distribution using the following modification of Algorithm \ref{alg:DistributionAveraging}.
+In this case, we can still obtain an unbiased approximate to the nearest neighbor distance distribution using the following modification of Algorithm~\ref{alg:DistributionAveraging}.
 For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
-Since each batch $B$ computes the exact nearest neighbor with respect to $R$, we get unbiased estimates of $d_\text{NN}$ for each $s \in B$. 
-Thus, appending batches to a running distribution until convergence as in Algorithm \ref{alg:DistributionAveraging} will produce increasingly refined, unbiased approximations as the tolerance decreases.
-Algorithm \ref{alg:NNDistributionAveraging} explicates this procedure.
+Since each batch $B$ computes the exact nearest neighbor with respect to $R$, we get unbiased estimates of $d_\text{NN}$ for each $s \in B$.
+Thus, appending batches to a running distribution until convergence as in Algorithm~\ref{alg:DistributionAveraging} will produce increasingly refined, unbiased approximations as the tolerance decreases.
+Algorithm~\ref{alg:NNDistributionAveraging} explicates this procedure.
 
-Algorithm \ref{alg:NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
+Algorithm~\ref{alg:NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
 Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
 
 \begin{algorithm}
@@ -582,7 +585,7 @@ One approach is to score the statistic $s$ based on the average divergence of ob
 Suppose we have $k$ different experimental repertoires of immune receptor sequences, and let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$, $1 \le i \le k$, denote the $i$th observed and simulated repertoire, respectively.
 For a given statistic $s$, let $\mathcal D_s(R_1, R_2)$ be the divergence of repertoires $R_1$ and $R_2$ with respect to $s$.
 We can score a simulator's ability to recapitulate $s$ from the observed repertoire to the simulated via
-\begin{equation}
+\begin{equation}\label{eq:ScoreObs}
     \text{score}_\text{obs}(s) :=
     \log \left(
         \frac{
@@ -601,11 +604,11 @@ We can score a simulator's ability to recapitulate $s$ from the observed reperto
 For a given summary $s$, score$_\text{obs}$ will be positive if the simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and negative if experimental repertoires tend to look more like other experimental repertoires than they do their simulated counterparts.
 In other words, this scores how well a simulator can differentiate $s$ from an experimental repertoire among other repertoires, and recapitulate $s$ into its simulation.
 %BJO Does the below sentence make sense? For example, If the numerator is twice as high as the denominator, the score would be "2", and inverting the ratio would give "1/2". However, taking the log would yield 0.301 and -0.301, respectively. This makes the bar charts above easier to interpret.
-Applying the log to the ratio allows for the magnitudes of scores to be directly comparable (so that a summary with score $a > 0$ does as well as a summary with score $-a < 0$ does poorly). 
+Applying the log to the ratio allows for the magnitudes of scores to be directly comparable (so that a summary with score $a > 0$ does as well as a summary with score $-a < 0$ does poorly).
 
 Another related score would be comparing the average divergence of observations to their simulated counterparts, and the average divergence of simulations to other simulations.
 Formally, this is
-\begin{equation}
+\begin{equation}\label{eq:ScoreSim}
     \text{score}_\text{sim}(s) :=
     \log \left(
         \frac{
@@ -624,7 +627,7 @@ Formally, this is
 This value for a given summary will be negative if simulated repertoires tend to look more like their experimental counterparts (small $\mathcal D$ on the denominator) in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
 We compute these scores for the analyses of \texttt{partis} and \texttt{igor} simulations in the Results section.
-However, this framework can be used to validate any immune receptor repertoire simulator which outputs the fields compatible with the summaries in \ref{tab:SummaryStatistics}, or more generally any set of summaries outside of the scope of \texttt{sumrep}, for any model-based simulator.
+However, this framework can be used to validate any immune receptor repertoire simulator which outputs the fields compatible with the summaries in Table~\ref{tab:SummaryStatistics}, or more generally any set of summaries outside of the scope of \texttt{sumrep}, for any model-based simulator.
 
 A feature of our methodology is that we use the same tool to produce simulations that we used to produce the annotations.
 To examine the sensitivity of this method, we performed a separate analysis by obtaining dataset annotations from standalone IgBlast \cite{Ye2013-kl}, and comparing these to simulations based on \texttt{partis} annotations using IMGT germline databases.
@@ -633,9 +636,7 @@ This is discussed in detail in Appendix C.
 
 
 \subsection*{Materials}
-The raw data for the BCR model validation analyses were obtained from \cite{Laserson2014-dx}, and the processed data, courtesy of Jason, are from a paper that isn't out yet.
-These datasets represent repertoires of three human donors from two separate time points (1 hour and 8 days) following an influenza vaccination.
-The number of reads from these six datasets used in the analysis range from 14,733 to 31,952 sequences.
+The raw data for the TCR summary divergence MDS analysis comes from \cite{Pogorelyy2018-ak}, which was postprocessed into a suitable format for analysis.
 
 For the TCR model validation analysis, we use several datasets from \cite{Britanova2016-iw}.
 For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads from these six datasets used in the analysis ranged from 37,363 sequences to 243,903 sequences.
@@ -643,9 +644,19 @@ For tractability purposes, we chose the six datasets with the fewest number of s
 These datasets consist of consensus RNA sequences assembled using UMIs.
 Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
 
+The data for the BCR model validation analyses originated from samples and 454 data published in \cite{Laserson2014-dx}, with the MiSeq data and processed data published in \cite{Gupta2017-ve} used for our analyses.
+These datasets represent repertoires of three human donors from two separate time points (1 hour and 8 days) following an influenza vaccination.
+The number of reads from these six datasets used in the analysis range from 14,733 to 31,952 sequences.
+
+
+
+
 \section*{Discussion}
 We have presented a general framework for efficiently summarizing, comparing, and visualizing Rep-Seq datasets, and applied it to several questions of scientific interest.
 One can imagine many further applications of \texttt{sumrep}, as well as promising avenues of research.
+
+Similar tools: \cite{Nazarov2015-ok,Shugay2015-ur}.
+TODO: Look for others.
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
 Moreover, it would likely be useful to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
@@ -654,6 +665,9 @@ Moreover, it would likely be useful to perform separate analyses restricted to d
 Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
 \texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones~\cite{Finlay2012}.
 
+\section*{Acknowledgements}
+We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pogorelyy2018-ak}.
+
 
 \bibliographystyle{plain}
 \bibliography{main}
@@ -661,7 +675,7 @@ Contrasting repertoires in the context of antigen response or vaccination design
 \beginsupplement
 
 \section*{Appendix A: Performance of distribution subsampling algorithms}
-Here, we run Algorithm \ref{alg:DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
+Here, we run Algorithm~\ref{alg:DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
 \begin{figure}
@@ -682,19 +696,20 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
 	\end{subfigure}
     \begin{subfigure}{.5\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/PairwiseDistance/log_time_by_tol.pdf}
-    	\caption{Runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in log-seconds) for Algorithm~\ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:Times}
     \end{subfigure}
     %EM if we want these to get a "Figure XX" label the overall figure needs a caption.
     %BJO I don't believe I needed/wanted these sorts of labels for references, but I'm not against it either.
-    \caption{Performance of Algorithm \ref{alg:DistributionAveraging} applied to the pairwise distance distribution.}
+    %EM It looks quite strange to me to have (a), etc, but no figure number. Sorry!
+    \caption{Performance of Algorithm~\ref{alg:DistributionAveraging} by tolerance applied to the pairwise distance distribution.}
 \end{figure}
 Figure~\ref{fig:FreqPoly} shows a frequency polygon of each distribution and figure~\ref{fig:ECDF} shows their empirical cumulative distribution functions.
 We see that the approximate distributions appear to converge to the full distribution as the tolerance gets smaller.
 Figure~\ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance, again indicating convergence to the truth.
 Figure~\ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true "population" runtime for the full dataset; while the runtime grows exponentially as $\varepsilon \to 0$, the approximation algorithm is still much faster than computing the full distribution for each considered value of $\varepsilon$.
 
-Next we investigate the effect of dataset size on the performance of Algorithm \ref{alg:DistributionAveraging}.
+Next we investigate the effect of dataset size on the performance of Algorithm~\ref{alg:DistributionAveraging}.
 For sample sizes $n \in \{\exp(5), \dotsc, \exp(9)\}$, we subsample \texttt{p\_f1} without replacement to $n$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, ..., 10^{-5} \}$.
 We perform this experiment 10 times for each $n$.
 Boxplots of the KL-divergence by $\log(n)$ and tolerance over all trials are displayed in Figure~\ref{fig:PDDivBySize}.
@@ -709,10 +724,10 @@ Boxplots of the log-efficiency by log(size) and tolerance are shown in Figure~\r
 		}.
 \end{equation}
 Here we plot efficiency on a log scale, so that the line $y=0$ corresponds to instances when the true and approximate routines have identical runtimes.
-Thus, the region $y > 0$ corresponds to instances when Algorithm \ref{alg:DistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
+Thus, the region $y > 0$ corresponds to instances when Algorithm~\ref{alg:DistributionAveraging} outperforms the computation of the full nearest neighbor distribution.
 For moderate to large datasets and reasonable choices of $\varepsilon$, the approximate routine is much more efficient than computing the full distribution.
 Efficiency also appears to increase exponentially with dataset size, although decreases at least exponentially as tolerance decreases.
-Nonetheless, the accuracy of Algorithm \ref{alg:DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency for reasonable choices of $\varepsilon$.
+Nonetheless, the accuracy of Algorithm~\ref{alg:DistributionAveraging} applied to the pairwise distance distribution is scalable to large datasets while leading to large gains in runtime efficiency for reasonable choices of $\varepsilon$.
 
 \begin{figure}
     \begin{subfigure}{0.5\textwidth}
@@ -730,14 +745,15 @@ Nonetheless, the accuracy of Algorithm \ref{alg:DistributionAveraging} applied t
         \caption{Efficiency by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
         \label{fig:PDEfficiencyBySize}
     \end{subfigure}
+    \caption{Performance of Algorithm~\ref{alg:DistributionAveraging} by sample size and tolerance applied to the pairwise distance distribution.}
 \end{figure}
 
 %BJO - Rerunning this as I think the plot is outdated (1,000 seqs instead of 10,000)
-Finally, we investigate the effect of summary statistic on the performance of Algorithm \ref{alg:DistributionAveraging}.
+Finally, we investigate the effect of summary statistic on the performance of Algorithm~\ref{alg:DistributionAveraging}.
 We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
 For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-7}\}$.
 We perform this experiment 10 times for each (summary, $\varepsilon$) combination.
-Figures \ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:EfficiencyBySummary} show the KL-divergence to the full dataset distributions, runtimes, and efficiencies, respectively, by summary and tolerance over all trials.
+Figures~\ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:EfficiencyBySummary} show the KL-divergence to the full dataset distributions, runtimes, and efficiencies, respectively, by summary and tolerance over all trials.
 \begin{figure}
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/Multiple/div_by_summary_and_tol.pdf}
@@ -754,6 +770,7 @@ Figures \ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:Efficiency
         \caption{Efficiency by summary distribution and tolerance, taken over 10 trials of the algorithm}
         \label{fig:EfficiencyBySummary}
     \end{subfigure}
+    \caption{Performance of Algorithm~\ref{alg:DistributionAveraging} by summary statistic and tolerance applied to the pairwise distance distribution.}
 \end{figure}
 We see that the KL divergence, runtime, and efficiency of the approximation routine depends on the summary in question.
 In particular, the approximation routine for hotspot and coldspot count distributions does not yield as high of an efficiency for moderately low tolerance, and struggles to minimize the KL-divergence to the true distribution for higher tolerances.
@@ -763,7 +780,7 @@ These results suggest that convergence and efficiency will vary by summary, and 
 
 \subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
 Here, we assess the modification of the distribution approximation routine for the nearest neighbor distribution.
-We run Algorithm \ref{alg:NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
+We run Algorithm~\ref{alg:NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
 We compute the nearest neighbor distribution of CDR3 nt sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials in the same manner as detailed in Appendix A.
 
@@ -785,24 +802,25 @@ Figure~\ref{fig:NNDivergences} shows KL divergences of approximate distributions
     	\caption{KL-divergence to true nearest neighbor distance distribution by tolerance, taken over 10 trials of the algorithm.}
     	\label{fig:NNDivergences}
 	\end{subfigure}
+	%BJO The captions aren't horizontally aligned -- way to fix?
     \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/CDR3/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:NNDistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm~\ref{alg:NNDistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimes}
     \end{subfigure}
+    \caption{Performance of Algorithm~\ref{alg:NNDistributionAveraging} by tolerance applied to the nearest neighbor distribution of CDR3nt sequences.}
 \end{figure}
 Indeed, these three figures indicate that the approximate distributions converge to the full distribution as $\varepsilon \to 0$.
-Figure \ref{fig:NNTimes} displays boxplots of the runtime in log-seconds for Algorithm \ref{alg:NNDistributionAveraging} as well as the runtime to compute the full distribution.
-In this case, we see that the Algorithm \ref{alg:NNDistributionAveraging} becomes slower than computing the full distribution when $\varepsilon \lesssim 10^{-5}$.
+Figure~\ref{fig:NNTimes} displays boxplots of the runtime in log-seconds for Algorithm~\ref{alg:NNDistributionAveraging} as well as the runtime to compute the full distribution.
+In this case, we see that the Algorithm~\ref{alg:NNDistributionAveraging} becomes slower than computing the full distribution when $\varepsilon \lesssim 10^{-5}$.
 
-To assess the effect of sequence lengths on Algorithm \ref{alg:NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned VDJ sequences (via the \texttt{sequence\_alignment} column rather than inferred CDR3 sequences.
+To assess the effect of sequence lengths on Algorithm~\ref{alg:NNDistributionAveraging}, we perform the same experiment as above on pairwise aligned VDJ sequences (via the \texttt{sequence\_alignment} column rather than inferred CDR3 sequences.
 These length distributions are different by about an order of magnitude.
-We note that the pairwise aligned VDJ sequences are the default for Algorithm \ref{alg:NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
-We run Algorithm \ref{alg:NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
+We note that the pairwise aligned VDJ sequences are the default for Algorithm~\ref{alg:NNDistributionAveraging} within \texttt{sumrep}, although we anticipate users to examine this distribution for CDR3s as well as full V(D)J sequences.
+We run Algorithm~\ref{alg:NNDistributionAveraging} on the same subsampled 10,000 sequences of \texttt{p\_f1}.
 
-Figure~\ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distributions, and figure \ref{fig:NNECDFSequence} shows their empirical cumulative distribution functions.
-Moreover, figures \ref{fig:NNDivergencesSequence}
- and \ref{fig:NNTimesSequence} show the KL-divergences to truth and runtimes, respectively.
+Figure~\ref{fig:NNFreqPolySequence} shows a frequency polygon of the same distributions, and Figure~\ref{fig:NNECDFSequence} shows their empirical cumulative distribution functions.
+Moreover, Figures~\ref{fig:NNDivergencesSequence} and \ref{fig:NNTimesSequence} show the KL-divergences to truth and runtimes, respectively.
 \begin{figure}
     \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/freqpoly_by_tol.pdf}
@@ -821,18 +839,19 @@ Moreover, figures \ref{fig:NNDivergencesSequence}
 	\end{subfigure}
     \begin{subfigure}{.49\textwidth}
     	\includegraphics[width=0.9\linewidth]{Figures/NearestNeighbor/Sequence/log_time_by_tol.pdf}
-    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm \ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
+    	\caption{Runtime (in seconds) and log-runtime (in log-seconds) for Algorithm~\ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:NNTimesSequence}
     \end{subfigure}
+    \caption{Performance of Algorithm~\ref{alg:NNDistributionAveraging} by tolerance applied to the nearest neighbor distribution of pairwise-aligned VDJ sequences.}
 \end{figure}
 It seems that the KL divergence to the truth may converge more slowly for \texttt{sequence\_alignment} sequences rather than CDR3s, although the approximate procedure seems to outperform the full distribution for a slightly larger range of $\varepsilon$ values (i.e. until $\varepsilon$ nears $10^{-6}$).
 
 
-Next we investigate the effect of dataset size on the performance of Algorithm \ref{alg:NNDistributionAveraging}.
+Next we investigate the effect of dataset size on the performance of Algorithm~\ref{alg:NNDistributionAveraging}.
 For sample sizes $n \in \{\exp(6), \dots, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $n$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, ..., 10^{-5}\}$.
 We perform this experiment 5 times for each $n$.
 
-Figures \ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEfficiencyBySizeCDR3} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
+Figures~\ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEfficiencyBySizeCDR3} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
     	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/div_by_size_and_tol.pdf}
@@ -849,19 +868,20 @@ Figures \ref{fig:NNDivBySizeCDR3}, \ref{fig:NNTimeBySizeCDR3}, and \ref{fig:NNEf
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     	\label{fig:NNEfficiencyBySizeCDR3}
     \end{subfigure}
+    \caption{Performance of Algorithm~\ref{alg:NNDistributionAveraging} by sample size and tolerance applied to the nearest neighbor distribution of CDR3nt sequences.}
 \end{figure}
 There is not an obvious trend in KL divergence to truth for a given tolerance as sample size increases, although the variability is higher for high tolerances.
 As expected, runtime increases as tolerance decreases, and also increases with the size of the dataset.
-This is reasonable since each batch iteration of \ref{alg:NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which certainly increases in time complexity as $R$ increases.
+This is reasonable since each batch iteration of Algorithm~\ref{alg:NNDistributionAveraging} must compute the nearest neighbor distance from each sequence in batch $B$ to the full repertoire $R$, which certainly increases in time complexity as $R$ increases.
 
-Next we look at the efficiency relative to computing the full distribution as defined in Equation \ref{eq:Efficiency}.
+Next we look at the efficiency relative to computing the full distribution as defined in Equation~\ref{eq:Efficiency}.
 Examining the boxplots near $y = 0$ by $\log(\text{size})$, we see that for a dataset of size $\exp(k)$, we would need a tolerance of at least $\frac{1}{10^{k - 4}}$.
 For example, for $\log(\text{size}) = 6$, we see that tolerances higher than $0.01 = \frac{1}{100} = \frac{1}{10^{6 - 4}}$ would on average yield an efficiency greater than one.
 This suggests that, for a dataset with $n$ CDR3 sequences, a sensible rule of thumb would be to choose $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$.
 This will of course be more or less appropriate for a given dataset depending on the nature of the repertoire from which it was sampled.
 
 Finally, we perfrom the same experiment but using \texttt{sequence\_alignment} sequences for the nearest neighbor distance distribution.
-Figures \ref{fig:NNDivBySizeFull}, \ref{fig:NNTimeBySizeFull}, and \ref{fig:NNEfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
+Figures~\ref{fig:NNDivBySizeFull}, \ref{fig:NNTimeBySizeFull}, and \ref{fig:NNEfficiencyBySizeFull} display boxplots of the KL-divergence to truth, runtime, and time efficiency, respectively.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
     	\includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/div_by_size_and_tol.pdf}
@@ -878,6 +898,7 @@ Figures \ref{fig:NNDivBySizeFull}, \ref{fig:NNTimeBySizeFull}, and \ref{fig:NNEf
     	\caption{KL-divergence to true nearest neighbor distribution by tolerance and log(size) of dataset, taken over 10 trials of the algorithm.}
     	\label{fig:NNEfficiencyBySizeFull}
     \end{subfigure}
+     \caption{Performance of Algorithm~\ref{alg:NNDistributionAveraging} by sample size and tolerance applied to the nearest neighbor distribution of pairwise-aligned VDJ sequences.}
 \end{figure}
 There is evidence of a positive trend of the KL-divergence as sample size increases for $\varepsilon = 0.1$, although this trend seems to diminish for each other tolerance.
 Runtimes increase with given sample size and tolerance, and are generally higher than they are for \texttt{junction} sequences as expected.
@@ -885,17 +906,39 @@ It turns out that the efficiencies follow the same rule of thumb we derived for 
 In particular, choosing $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$ will on average lead to an increase in efficiency with respect to the full distribution for \texttt{sequence\_alignment} sequences as well as \texttt{junction} sequences.
 While this may depend on the dataset in question, we recommend this as a good point of reference for general use.
 
-The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm \ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
+The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm~\ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
 \subsection*{Appendix C: Model validation analysis workflows}
 
-Figure~\ref{fig:PartisWorkflow} describes the overall workflow of this procedure for a given BCR dataset.
-
-Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a given TCR dataset, which is similar to \ref{fig:PartisWorkflow}; the main difference is that we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences.
+Figure~\ref{fig:PartisWorkflow} illustrates the \texttt{partis} model validation workflow as described in the Methods section.
 %EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
 %BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
 % Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
 \begin{figure}
+	\begin{subfigure}{0.5\textwidth}
+        \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
+            \begin{tikzpicture}
+                \node[block](fasta){Fasta file};
+                \node[cloud, below =0.5 cm of fasta, align=center](igor){\texttt{igor}\\ \texttt{-infer}};
+                \node[block, below left=0.75 cm and 0.2 cm of igor](igordata){Annotated observations};
+                \node[cloud, below=0.75cm of igordata, align=center](igblast){\texttt{igblast}\\ (for CDR3s)} ;
+                \node[block, below right=0.75 cm and 0.2 cm of igor](params){Model parameters};
+                \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{igor} \\ \texttt{-generate}};
+                \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
+                \node[block, below left=0.75 cm  and 0 cm of sim](c1){Comparisons};
+                \path[line](fasta) -- (igor);
+                \path[line] (igor) -- (igordata);
+                \path[line] (igor) -- (params);
+                \path[line] (params) -- (simulate);
+                \path[line] (simulate) -- (sim);
+                \path[line] (igordata) -- (igblast);
+                \path[line] (igblast) -- (c1);
+                \path[line] (sim) -- (c1);
+            \end{tikzpicture}
+        \end{adjustbox}
+        \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \igor.}
+        \label{fig:IgorWorkflow}
+    \end{subfigure}
     \begin{subfigure}{0.5\textwidth}
     \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
         \begin{tikzpicture}
@@ -922,39 +965,20 @@ Figure~\ref{fig:IgorWorkflow} describes the workflow of this procedure for a giv
     \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
     \label{fig:PartisWorkflow}
     \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
-    \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
-        \begin{tikzpicture}
-            \node[block](fasta){Fasta file};
-            \node[cloud, below =0.5 cm of fasta, align=center](igor){\texttt{igor}\\ \texttt{-infer}};
-            \node[block, below left=0.75 cm and 0.2 cm of igor](igordata){Annotated observations};
-            \node[cloud, below=0.75cm of igordata, align=center](igblast){\texttt{igblast}\\ (for CDR3s)} ;
-            \node[block, below right=0.75 cm and 0.2 cm of igor](params){Model parameters};
-            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{igor} \\ \texttt{-generate}};
-            \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-            \node[block, below left=0.75 cm  and 0 cm of sim](c1){Comparisons};
-            \path[line](fasta) -- (igor);
-            \path[line] (igor) -- (igordata);
-            \path[line] (igor) -- (params);
-            \path[line] (params) -- (simulate);
-            \path[line] (simulate) -- (sim);
-            \path[line] (igordata) -- (igblast);
-            \path[line] (igblast) -- (c1);
-            \path[line] (sim) -- (c1);
-        \end{tikzpicture}
-    \end{adjustbox}
-    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{igor}.}
-    \label{fig:IgorWorkflow}
-    \end{subfigure}
+    \caption{Workflow diagrams for the \igor\ and \partis\ model validation analyses.}
 \end{figure}
+We first run \texttt{partis partition} on each fasta file of IgH sequence reads to obtain annotations for each sequence, as well as a directory containing model parameters for inference and simulation.
+We can then run \texttt{partis simulate} with these model parameters as input to generate a synthetic datset of IgH annotations.
+We subsample both the experimental and simulated annotation datasets to unique clones.
+Then, we compare each IgH-relevant summary for the two resultant annotations datasets, yielding a divergence value for each summary.
 
-
+Figure~\ref{fig:IgorWorkflow} illustrates the \texttt{igor} model validation workflow, which is similar to Figure~\ref{fig:PartisWorkflow}.
+There are two main differences: first, we must employ IgBlast to obtain CDR3 sequences for the observed sequences, which \texttt{igor} only outputs for generated sequences, and second, there is no need to subsample to unique clones.
 
 \subsection*{Appendix D: Comparison of summary scores using IgBlast annotations}
-
-Change-O was used to parse the \texttt{igblast} output \cite{Gupta2015-iu}.
-Our strategy is analogous to the one above but with the inclusion of a separate path for \texttt{igblast} annotations.
-The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
+Recall that for the standard \texttt{partis} model validation procedure, \texttt{partis} is used for both inference as well as simulation.
+Here we examine the influence of using the same tool for inference and simulation by using IgBlast for inference, and comparing the annotations dataset output from IgBlast to the corresponding simulations from \texttt{partis}.
+The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, which is essentially the diagram in Figure~\ref{fig:PartisWorkflow} with an additional path describing the IgBlast/Change-O pipeline.
 %BJO - It might be worth also including a box called "IMGT database" as another input (along with "Fasta file")
 \begin{figure}
     \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
@@ -988,10 +1012,13 @@ The workflow for this procedure is displayed in figure \ref{IgblastWorkflow}.
             \path[line] (simclones) -- (c2);
         \end{tikzpicture}
     \end{adjustbox}
-    \caption{Workflow for comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
+    \caption{Workflow diagram for \partis\ model validation when comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
     \label{IgblastWorkflow}
 \end{figure}
-The results are displayed in figure \ref{fig:IgBlastScores}.
+Change-O was used to parse the \texttt{igblast} output, as well as partition the sequences into inferred clonal families \cite{Gupta2015-iu}.
+
+Figure~\ref{fig:IgBlastScores} shows the results of score$_\text{obs}$ by summary when using IgBlast for annotation and \texttt{partis} for simulation.
+Figure~\ref{fig:ScoreDiffs} shows the difference of each score in Figure~\ref{fig:ObsScoresBCR} and each score in Figure~\ref{fig:IgBlastScores}.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
    		\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot_igb.pdf}
@@ -1006,35 +1033,41 @@ The results are displayed in figure \ref{fig:IgBlastScores}.
     	}
     	\label{fig:ScoreDiffs}
 	\end{subfigure}
+	\caption{Summary scores for each statistic in the \partis\ model validation experiment when comparing \partis\ simulations to \igblast\ annotations.
+	IMGT IgH germline databases were used during inference for both tools.
+	In both plots, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.
+	Summaries without a score are not readily available from AIRR-formatted \igblast\ output.
+	}
 \end{figure}
+Frequency polygons of three pairs of \igblast-annotated and \partis-simulated datasets are shown in Figure~\ref{fig:PartisIgBlastFreqpolys}, and ecdfs of the same datasets are shown in Figure~\ref{fig:PartisIgBlastECDFs}
 The plots show a high level of agreement for most summaries, with all but six of them differing by less than one units, and a strong majority of them close to zero.
 Where differences arise, this is likely the result of differences in how partis and IgBlast perform annotations.
 For example, we see that the insertion length distributions highly disagree in scores.
-This is at least partially attributable to the star-tree assumption on which partis operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
+This is at least partially attributable to the star-tree assumption on which \texttt{partis} operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
 Indeed, examining the VD insertion length distribution shows that IgBlast tends to assign a similar distribution to each dataset, whereas partis leads to more variable distributions with right skew due to the star-tree assumption.
 Moreover, if IgBlast tends to assign a similar insertion length distribution to every dataset, then this will make it difficult for a simulator designed to match particular insertion lengths distributions to behave more like the IgBlast distributions.
 Thus, inherent differences in annotation tools will certainly lead to differences in summary scores, regardless of how accurate either tool is.
 Hence, it is important to understand that a given annotations-based summary should be considered in the context of the tool which provided annotations, and not as a ground-truth summary of the actual gene usage/indel statistics.
 
-
-
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_freqpoly.pdf}
     \caption{Summary distribution frequency polygons of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+    \label{fig:PartisIgBlastFreqpolys}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_ecdf.pdf}
     \caption{Summary distribution empirical cdfs of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+     \label{fig:PartisIgBlastECDFs}
 \end{figure}
 
 %BJO - I'm not actually sure how necessary this table is anymore, since I removed the divergence plot which used these abbreviations as axis labels. Everything just gets rolled up into the score plots and freqpolys/ecdfs now.
 %BJO - p_f1 does show up in the subsampling performance analyses in Appendices A and B.
 \section*{Appendix E: Metadata for partis analysis}
 
-Table \ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
+Table~\ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
 In short, the notation is as follows.
-A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default \texttt{igblast} germline databases;
+A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default IMGT germline databases for IgBlast;
 this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
 finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 \begin{table}
@@ -1074,7 +1107,7 @@ finally, we append the \texttt{sim} suffix if the dataset was simulated from an 
     \texttt{pi\_i2\_sim} & Simulation& \texttt{partis} & IMGT & I & 8 days\\
 \end{tabular}
 }
-\caption{Metadata for each dataset used in the analyses.}
+\caption{Metadata for each dataset used in the BCR analyses}
 \label{tab:Datasets}
 \end{table}
 
