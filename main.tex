@@ -512,7 +512,7 @@ If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i,
 
 
 In this case, we can still obtain an unbiased approximate to the nearest neighbor distance distribution using the following modification of Algorithm~\ref{alg:DistributionAveraging}.
-For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences (e.g. $b = 50$), and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
+For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences, and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
 Since each batch $B$ computes the exact nearest neighbor with respect to $R$, we get unbiased estimates of $d_\text{NN}$ for each $s \in B$.
 Thus, appending batches to a running distribution until convergence as in Algorithm~\ref{alg:DistributionAveraging} will produce increasingly refined, unbiased approximations as the tolerance decreases.
 Algorithm~\ref{alg:NNDistributionAveraging} explicates this procedure.
@@ -750,8 +750,8 @@ Nonetheless, the accuracy of Algorithm~\ref{alg:DistributionAveraging} applied t
 
 %BJO - Rerunning this as I think the plot is outdated (1,000 seqs instead of 10,000)
 Finally, we investigate the effect of summary statistic on the performance of Algorithm~\ref{alg:DistributionAveraging}.
-We run the algorithm for the pairwise distance, GC content, hotspot count, and coldspot count distributions on \texttt{p\_f1} subsampled without replacement to 5,000 rows.
-For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-7}\}$.
+We run the algorithm for the pairwise distance, GC content, hotspot count, coldspot count, and distance from germline to sequence distributions on \texttt{p\_f1} subsampled without replacement to 10,000 rows.
+For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-5}\}$.
 We perform this experiment 10 times for each (summary, $\varepsilon$) combination.
 Figures~\ref{fig:DivBySummary}, \ref{fig:TimeBySummary}, and \ref{fig:EfficiencyBySummary} show the KL-divergence to the full dataset distributions, runtimes, and efficiencies, respectively, by summary and tolerance over all trials.
 \begin{figure}
