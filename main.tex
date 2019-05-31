@@ -547,6 +547,44 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
     \end{algorithmic}
 \end{algorithm}
 
+\subsection*{Orthogonality analysis}
+\begin{algorithm}
+    \caption{Rank summary statistics by informativeness\\
+        \textbf{Input:} annotations datasets $d_1, \dotsc, d_D$, sequence-level summaries $\mathbf s(\cdot) = [s_1(\cdot), \dotsc, s_S(\cdot)]$, lasso parameters $\lambda_1, \dotsc, \lambda_\Lambda$ \\
+        \textbf{Output:} A vector of ranks for the summaries }
+    \label{alg:Lasso}
+    \begin{algorithmic}
+   		\For{$d = d_1, \dotsc, d_D$}:
+			\State $\mathbf X_d \gets [\mathbf s(d_1), \dotsc, \mathbf s(d_D)]$
+    	\EndFor
+		\State $\mathbf X \gets \begin{bmatrix}
+			 \mathbf X_1 \\ \vdots \\ \mathbf X_D 
+			 \end{bmatrix}$
+		\State $\mathbf y \gets \begin{bmatrix}
+			\text{rep}(1, \text{rows}(d_1))^\mathsf{T}
+			\\ \vdots \\
+			\text{rep}(D, \text{rows}(d_D))^\mathsf{T}
+		\end{bmatrix}$
+        \For{$\lambda = 1, \dotsc, \lambda_\Lambda$}:
+        	\State $(\boldsymbol \beta_1^\lambda, \dotsc, \boldsymbol \beta_D^\lambda) \gets \text{MultinomialLasso}(\mathbf X, \mathbf y; \lambda)$
+        \EndFor
+        \For{$d = 1, \dotsc, D$}:
+        	\For{$s = 1, \dotsc, S$}:
+				\State $t_{d, s} \gets 
+				\min\left( \min \left\{ \lambda_1 \le \lambda \le \lambda_\Lambda: \beta_{d, s}^\lambda > 0 \; 
+					\forall t > \lambda \right\},
+					\infty \right)$
+			\EndFor
+		\State $\text{ranks}(d) = \text{rank}(t_{d, 1}, \dotsc, t_{d, S})$
+        \EndFor
+        \State $\text{ranks} = \text{rank}\left( \overline{\text{ranks}(1)},
+        	 \dotsc, \overline{\text{ranks}(D)} \right)$
+        \Return $d_n$
+    \end{algorithmic}
+\end{algorithm}
+
+
+
 \subsection*{Model validation of \texttt{IGoR}}
 We use the \texttt{igor -infer} to fit custom, dataset-specific models for each experimental dataset.
 Since we are interested in many CDR3-based statistics and IGoR does not currently include inferred CDR3 sequences with rearrangement scenarios, we use IgBlast extract CDR3s for each sequence.
