@@ -962,7 +962,8 @@ Figure~\ref{fig:PartisWorkflow} illustrates the \texttt{partis} model validation
                 \node[block, below right=0.75 cm and 0.2 cm of igor](params){Model parameters};
                 \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{igor} \\ \texttt{-generate}};
                 \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
-                \node[block, below left=0.75 cm  and 0 cm of sim](c1){Comparisons};
+                \node[block, below = 0.75cm of sim](subsample){Subsample to in-frame sequences};
+                \node[block, below left=0.75 cm  and 0 cm of subsample](c1){Comparisons};
                 \path[line](fasta) -- (igor);
                 \path[line] (igor) -- (igordata);
                 \path[line] (igor) -- (params);
@@ -970,7 +971,8 @@ Figure~\ref{fig:PartisWorkflow} illustrates the \texttt{partis} model validation
                 \path[line] (simulate) -- (sim);
                 \path[line] (igordata) -- (igblast);
                 \path[line] (igblast) -- (c1);
-                \path[line] (sim) -- (c1);
+                \path[line] (sim) -- (subsample);
+                \path[line] (subsample) -- (c1);
             \end{tikzpicture}
         \end{adjustbox}
         \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \igor.}
