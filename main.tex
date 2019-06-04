@@ -41,7 +41,7 @@
 \newcommand{\alphabet}{\mathcal{A}}
 \newcommand{\partis}{\texttt{partis}}
 \newcommand{\igor}{\texttt{IGoR}}
-\newcommand{\igblast}{\texttt{IgBlast}}
+\newcommand{\igblast}{\text{IgBlast}}
 \newcommand{\median}{\operatorname{median}}
 
 % http://bytesizebio.net/2013/03/11/adding-supplementary-tables-and-figures-in-latex/
@@ -57,7 +57,7 @@
 
 \begin{document}
 
-%BJO - I realize that I alternate between IGoR and "\texttt{igor}" throughout the document, as well as IgBlast vs \texttt{igblast}. Do you have a preference, Erick? I believe I'm consistent with writing \texttt{partis} throughout.
+%BJO - I realize that I alternate between IGoR and "\texttt{igor}" throughout the document, as well as IgBlast vs \igblast. Do you have a preference, Erick? I believe I'm consistent with writing \partis throughout.
 %EM I prefer \texttt{IGoR} etc. I made you some commands above. Note that you'll need `\igor\ ` with a trailing backslash to get a space after the command.
 
 \maketitle
@@ -117,7 +117,7 @@ Some summaries of interest, such as the positional distance between mutations di
 In this paper, we gather dozens of meaningful summary statistics on repertoires, derive efficient and robust summary implementations, and identify appropriate comparison methods for each summary.
 We present \texttt{sumrep}, an R package that computes these summary distributions for Rep-Seq datasets and performs repertoire comparisons based on these summaries.
 We investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data, and show that most summaries are able to differentiate between subject as well as time after vaccination within a subject.
-Further, we demonstrate how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \texttt{IGoR} \cite{Marcou2018-du} for TCRs, and \texttt{partis} \cite{Ralph2016-nw, Ralph2016-iz} for BCRs.
+Further, we demonstrate how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \igor~\cite{Marcou2018-du} for TCRs, and \partis~\cite{Ralph2016-nw, Ralph2016-iz} for BCRs.
 
 
 \section*{Results}
@@ -329,6 +329,7 @@ The basic idea is that this regression method cuts out all but a few predictor v
 In $\ell_1$ regression, a coefficient is ``allowed'' to be nonzero only when the lasso deems it a relatively meaningful predictor.
 As the regularization parameter $\lambda$ is decreased, more and more coefficients  become nonzero, leading to a natural ordering of summaries as the order in which their coefficient ``branches off'' from zero.
 Since $\ell_1$ multinomial regression outputs a separate coefficient vector $\boldsymbol \beta$ for each response value, we aggregate by taking medians of each dataset-specific lasso ordering for each summary.
+In the case of ties, we randomize rankings to avoid alphabetization biases or other similar artifacts.
 Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
 \begin{algorithm}
     \caption{Rank summary statistics by informativeness\\
@@ -418,14 +419,14 @@ As described in the introduction, we are motivated to do this because models are
 We emphasize that validating the model in this way is different than the usual means of benchmarking model performance-- rather than benchmarking the inferential results of the model, we benchmark the model's ability to generate realistic sequences.
 
 We illustrate this approach with two case studies:
-an analysis of IGoR \cite{Marcou2018-du} applied to TRB sequences, and an analysis of \texttt{partis}\cite{Ralph2016-nw, Ralph2016-iz} simulations applied to IgH sequences.
+an analysis of \igor~\cite{Marcou2018-du} applied to TRB sequences, and an analysis of \partis~\cite{Ralph2016-nw, Ralph2016-iz} simulations applied to IgH sequences.
 Both tools are applied to separate sets of experimental repertoires, yielding model-based annotations for each repertoire, as well as simulated datasets from the inferred model parameters for each experimental set.
 Relevant scores of each summary for each tool are computed using each observed and simulated dataset.
 
 %EM Agreed here!
 %BJO - TODO: Add quick summaries of the IGoR and partis analyses as summarized form the Methods subsections
 
-\subsection*{Assessing summary statistic replication for \texttt{igor}}
+\subsection*{Assessing summary statistic replication for \igor}
 We apply the methodology discussed in the previous section to TRB sequences from \cite{Britanova2016-iw}.
 The full study sequenced experimental TRB repertoires from various donors across the lifespan, although we only examine six datasets here as discussed in the materials section.
 Figure~\ref{fig:IgorFreqPolys} displays frequency polygons of each summary distribution for each experimental and simulated repertoire.
@@ -436,7 +437,7 @@ Figure~\ref{fig:IgorFreqPolys} displays frequency polygons of each summary distr
 \end{figure}
 
 Figure~\ref{fig:ObsScoresTCR} displays the observation-based summary scores for the six TRB datasets based on \igor\ simulations.
-We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and IGoR does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
+We exclude \texttt{sequence\_alignment}-based summaries such as GC content and pairwise distance distributions since they are likely compounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and \igor\ does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
@@ -454,19 +455,19 @@ We exclude \texttt{sequence\_alignment}-based summaries such as GC content and p
 	\end{subfigure}
 	\caption{Log relative average divergence (LRAD) scores for each statistic for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
 \end{figure}
-It is seen that IGoR simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
+It is seen that \igor\ simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
 V, D, and joing VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
-The CDR3 length distribution is the least-replicated statistic, although the level of discrepancy is perhaps compounded by training IGoR on both functional and nonfunctional sequences.
+The CDR3 length distribution is the least-replicated statistic, although the level of discrepancy is perhaps compounded by training \igor\ on both functional and nonfunctional sequences.
 Interestingly, the Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
 Other junction-based statistics besides Kidera factors range from mildly good to mildly bad replication, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors).
 
 Figure~\ref{fig:SimScoresTCR} displays the simulation-based summary scores for the same datasets and simulations.
 We still see high scores for gene usage and indel statistics, although now the various Kidera factor and GRAVY index distributions have lower scores.
-This suggests that while the average \texttt{igor} simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure~\ref{fig:IgorFreqPolys}.
+This suggests that while the average \igor\ simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce similar distributions to each other, as seen in Figure~\ref{fig:IgorFreqPolys}.
 
 
 
-\subsection*{Assessing summary statistic replication for \texttt{partis}}
+\subsection*{Assessing summary statistic replication for \partis}
 We apply the same methodology to IgH sequences from \cite{Gupta2017-ve} (originally published in \cite{Laserson2014-dx}).
 %BJO Actually, I ran this on the 1h/8d pre-vaccination sets, not post-vaccination. Happy to hear objections if anyone would rather I run on post-vaccination sets.
 This data consists of longitudinal IgH repertoires of three donors pre- and post-vaccination with influenza; we analyze the one-hour post-vaccination and eight-days post-vaccination repertoires for each donor.
@@ -480,7 +481,7 @@ Figure~\ref{fig:PartisFreqPolys} displays frequency polygons of each summary dis
 \end{figure}
 
 
-Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \texttt{partis} simulations.
+Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \partis\ simulations.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot.pdf}
@@ -494,11 +495,11 @@ Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for 
 	\end{subfigure}
 	\caption{Summary scores, denoted as "log(Relative average divergence)" due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.}
 \end{figure}
-Like \texttt{igor}, we see that \texttt{partis} simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well.
-However, \texttt{partis} struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
-This contrasts \texttt{igor} which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
+Like \igor, we see that \partis\ simulations also excel at replicating gene usage and indel statistics, while also replicating CDR3 length distributions well.
+However, \partis\ struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
+This contrasts \igor\ which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
 The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations, and hot and cold spot counts, not being well-captured.
-This is not very surprising as \texttt{partis} does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
+This is not very surprising as \partis\ does not incorporate these quantities into the model fitting process, but does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
 
 
 Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
@@ -622,22 +623,22 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
     \end{algorithmic}
 \end{algorithm}
 
-\subsection*{Model validation of \texttt{IGoR}}
+\subsection*{Model validation of \igor}
 We use the \texttt{igor -infer} to fit custom, dataset-specific models for each experimental dataset.
-Since we are interested in many CDR3-based statistics and IGoR does not currently include inferred CDR3 sequences with rearrangement scenarios, we use IgBlast extract CDR3s for each sequence.
-For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by IGoR.
+Since we are interested in many CDR3-based statistics and \igor\ does not currently include inferred CDR3 sequences with rearrangement scenarios, we use \igblast\ to extract CDR3s for each sequence.
+For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by \igor.
 When a list of more than one potential genes is given for the gene call, we restrict to only the first gene.
 Several fields are renamed to match the AIRR specification when the definitions align without ambiguity.
 
-Although IGoR is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand IGoR's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
+Although \igor\ is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand \igor's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
 
 We applied IGoR in this way to six datasets of TRB sequences from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 
-\subsection*{Model validation of \texttt{partis}}
+\subsection*{Model validation of \partis}
 
-We use \texttt{partis} to infer custom generative models for each experimental dataset.
+We use \partis\ to infer custom generative models for each experimental dataset.
 We run the \texttt{partition} subcommand to incorporate underlying clonal family clustering among sequences during inference, and then collapse each observed and simulated dataset so that each clonal family is represented by one sequence (discussed more below).
-Since \texttt{partis} returns a list of the top most likely annotations scenarios for each rearrangement event, we consider only the scenario with the highest model likelihood for each sequence.
+Since \partis\ returns a list of the top most likely annotations scenarios for each rearrangement event, we consider only the scenario with the highest model likelihood for each sequence.
 We denote the \texttt{indel\_reversed\_seqs} field as \texttt{sequence\_alignment} and \texttt{naive\_seq} as \texttt{germline\_alignment} as they adhere to these definitions from the AIRR schema.
 Several other fields are renamed to match the AIRR specification when the definitions align without ambiguity.
 
@@ -701,12 +702,12 @@ Formally, this becomes
 \end{equation}
 This value for a given summary will be negative if simulated repertoires tend to look more like their experimental counterparts (small $\mathcal D$ on the denominator) in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
-We compute these scores for the analyses of \texttt{partis} and \texttt{igor} simulations in the Results section.
+We compute these scores for the analyses of \partis\ and \igor\ simulations in the Results section.
 However, this framework can be used to validate any immune receptor repertoire simulator which outputs the fields compatible with the summaries in Table~\ref{tab:SummaryStatistics}, or more generally any set of summaries outside of the scope of \texttt{sumrep}, for any model-based simulator.
 
 A feature of our methodology is that we use the same tool to produce simulations that we used to produce the annotations.
-To examine the sensitivity of this method, we performed a separate analysis by obtaining dataset annotations from standalone IgBlast \cite{Ye2013-kl}, and comparing these to simulations based on \texttt{partis} annotations using IMGT germline databases.
-We did not perform a similar analysis for \texttt{igor} annotations since IgBlast was used to infer CDR3s within the \texttt{igor} workflow.
+To examine the sensitivity of this method, we performed a separate analysis by obtaining dataset annotations from standalone \igblast~\cite{Ye2013-kl}, and comparing these to simulations based on \partis\ annotations using IMGT germline databases.
+We did not perform a similar analysis for \igor\ annotations since \igblast\ was used to infer CDR3s within the \igor\ workflow.
 This is discussed in detail in Appendix C.
 
 
@@ -717,7 +718,7 @@ For the TCR model validation analysis, we use several datasets from \cite{Britan
 For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads from these six datasets used in the analysis ranged from 37,363 sequences to 243,903 sequences.
 %BJO - Trying to run \texttt{igor} on larger datasets would often throw a segmentation fault. If this is a concern, we could choose a dataset from each of five individuals and subsample each dataset to, say, 50,000 sequences. But I don't think this would change the result that much.
 These datasets consist of consensus RNA sequences assembled using UMIs.
-Most of these sequences are functional; as previously described, for this example application we are benchmarking IGoR's ability to fit complete repertoires rather than only non-functional repertoires as described above.
+Most of these sequences are functional; as previously described, for this example application we are benchmarking \igor's ability to fit complete repertoires rather than only non-functional repertoires as described above.
 
 The data for the BCR model validation analyses originated from samples and 454 data published in \cite{Laserson2014-dx}, with the MiSeq data and processed data published in \cite{Gupta2017-ve} used for our analyses.
 These datasets represent repertoires of three human donors from two separate time points (1 hour and 8 days) following an influenza vaccination.
@@ -984,9 +985,9 @@ While this may depend on the dataset in question, we recommend this as a good po
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm~\ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
 \subsection*{Appendix C: Model validation analysis workflows}
-Figure~\ref{fig:IgorWorkflow} illustrates the \texttt{igor} model validation workflow.
-We employ IgBlast to obtain CDR3 sequences for the observed sequences, which \igor\ only outputs for generated sequences.
-Moreover, because we fit \igor\ models on predominantly functional TRB sequences, we consider only \igor\-generated sequences whose V and J segments are in-frame.  
+Figure~\ref{fig:IgorWorkflow} illustrates the \igor\ model validation workflow.
+We employ \igblast\ to obtain CDR3 sequences for the observed sequences, which \igor\ only outputs for generated sequences.
+Moreover, because we fit \igor\ models on predominantly functional TRB sequences, we consider only \igor-generated sequences whose V and J segments are in-frame.  
 
 %EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
 %BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
@@ -996,11 +997,11 @@ Moreover, because we fit \igor\ models on predominantly functional TRB sequences
         \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
             \begin{tikzpicture}
                 \node[block](fasta){Fasta file};
-                \node[cloud, below =0.5 cm of fasta, align=center](igor){\texttt{igor}\\ \texttt{-infer}};
+                \node[cloud, below =0.5 cm of fasta, align=center](igor){\igor \\ \texttt{-infer}};
                 \node[block, below left=0.75 cm and 0.2 cm of igor](igordata){Annotated observations};
-                \node[cloud, below=0.75cm of igordata, align=center](igblast){\texttt{igblast}\\ (for CDR3s)} ;
+                \node[cloud, below=0.75cm of igordata, align=center](igblast){\igblast \\ (for CDR3s)} ;
                 \node[block, below right=0.75 cm and 0.2 cm of igor](params){Model parameters};
-                \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{igor} \\ \texttt{-generate}};
+                \node[cloud, below=0.75cm of params, align=center](simulate){\igor \\ \texttt{-generate}};
                 \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
                 \node[block, below = 0.75cm of sim](subsample){Subsample to in-frame sequences};
                 \node[block, below left=0.75 cm  and 0 cm of subsample](c1){Comparisons};
@@ -1022,11 +1023,11 @@ Moreover, because we fit \igor\ models on predominantly functional TRB sequences
     \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
         \begin{tikzpicture}
             \node[block](fasta){Fasta file};
-            \node[cloud, below =0.5 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+            \node[cloud, below =0.5 cm of fasta, align=center](partis){\partis \\ \texttt{partition}};
             \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
             \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
             \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
-            \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+            \node[cloud, below=0.75cm of params, align=center](simulate){\partis \\ \texttt{simulate}};
             \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
             \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
             \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
@@ -1041,32 +1042,32 @@ Moreover, because we fit \igor\ models on predominantly functional TRB sequences
             \path[line] (simclones) -- (c1);
         \end{tikzpicture}
     \end{adjustbox}
-    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \texttt{partis}.}
+    \caption{Workflow for comparing a given observed repertoire dataset to an example simulated dataset via \partis.}
     \label{fig:PartisWorkflow}
     \end{subfigure}
     \caption{Workflow diagrams for the \igor\ and \partis\ model validation analyses.}
 \end{figure}
-Figure~\ref{fig:PartisWorkflow} illustrates the \texttt{partis} model validation workflow as described in the Methods section.
+Figure~\ref{fig:PartisWorkflow} illustrates the \partis\ model validation workflow as described in the Methods section.
 We first run \texttt{partis partition} on each fasta file of IgH sequence reads to obtain annotations for each sequence, as well as a directory containing model parameters for inference and simulation.
 We can then run \texttt{partis simulate} with these model parameters as input to generate a synthetic datset of IgH annotations.
 We subsample both the experimental and simulated annotation datasets to unique clones.
 Then, we compare each IgH-relevant summary for the two resultant annotations datasets, yielding a divergence value for each summary.
 
 
-\subsection*{Appendix D: Comparison of summary scores using IgBlast annotations}
-Recall that for the standard \texttt{partis} model validation procedure, \texttt{partis} is used for both inference as well as simulation.
-Here we examine the influence of using the same tool for inference and simulation by using IgBlast for inference, and comparing the annotations dataset output from IgBlast to the corresponding simulations from \texttt{partis}.
-The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, which is essentially the diagram in Figure~\ref{fig:PartisWorkflow} with an additional path describing the IgBlast/Change-O pipeline.
+\subsection*{Appendix D: Comparison of summary scores using \igblast\ annotations}
+Recall that for the standard \partis\ model validation procedure, \partis\ is used for both inference as well as simulation.
+Here we examine the influence of using the same tool for inference and simulation by using \igblast\ for inference, and comparing the annotations dataset output from \igblast\ to the corresponding simulations from \partis.
+The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, which is essentially the diagram in Figure~\ref{fig:PartisWorkflow} with an additional path describing the \igblast/Change-O pipeline.
 %BJO - It might be worth also including a box called "IMGT database" as another input (along with "Fasta file")
 \begin{figure}
     \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
         \begin{tikzpicture}
         \node[block](fasta){Fasta file};
-        \node[cloud, below left=0.5 cm and 1.2 cm of fasta, align=center](partis){\texttt{partis}\\ \texttt{partition}};
+        \node[cloud, below left=0.5 cm and 1.2 cm of fasta, align=center](partis){\partis \\ \texttt{partition}};
         \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
         \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
         \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
-        \node[cloud, below=0.75cm of params, align=center](simulate){\texttt{partis} \\ \texttt{simulate}};
+        \node[cloud, below=0.75cm of params, align=center](simulate){\partis \\ \texttt{simulate}};
         \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
         \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
         \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
@@ -1079,7 +1080,7 @@ The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, wh
         \path[line] (clones) -- (c1);
         \path[line] (sim) -- (simclones);
         \path[line] (simclones) -- (c1);
-            \node[cloud, below right=0.5 cm and 1.2 cm of fasta, align=center](igblast){\texttt{igblast} + \\ \texttt{Change-O}};
+            \node[cloud, below right=0.5 cm and 1.2 cm of fasta, align=center](igblast){\igblast\ + \\ Change-O};
             \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
             \node[block, below = 0.75 cm of igblastdata](igblastclones){Subsample to unique clones};
             \node[block, below right=0.75 and 0.1cm of simclones](c2){Comparisons};
@@ -1090,24 +1091,24 @@ The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, wh
             \path[line] (simclones) -- (c2);
         \end{tikzpicture}
     \end{adjustbox}
-    \caption{Workflow diagram for \partis\ model validation when comparing \texttt{partis} and \texttt{igblast} annotations to partis simulations}
+    \caption{Workflow diagram for \partis\ model validation when comparing \partis\ and \igblast\ annotations to partis simulations}
     \label{IgblastWorkflow}
 \end{figure}
-Change-O was used to parse the \texttt{igblast} output, as well as partition the sequences into inferred clonal families \cite{Gupta2015-iu}.
+Change-O was used to parse the \igblast\ output, as well as partition the sequences into inferred clonal families \cite{Gupta2015-iu}.
 
-Figure~\ref{fig:IgBlastScores} shows the LRAD-data scores by summary when using IgBlast for annotation and \texttt{partis} for simulation.
+Figure~\ref{fig:IgBlastScores} shows the LRAD-data scores by summary when using \igblast\ for annotation and \partis\ for simulation.
 Figure~\ref{fig:ScoreDiffs} shows the difference of each score in Figure~\ref{fig:ObsScoresBCR} and each score in Figure~\ref{fig:IgBlastScores}.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
    		\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot_igb.pdf}
-    	\caption{Comparing divergences for \texttt{igblast} annotations and \texttt{partis} simulations based on the same individual observed repertoires.
-    	    We use the default germline databases in \texttt{igblast} for consistency.
+    	\caption{Comparing divergences for \igblast\ annotations and \partis\ simulations based on the same individual observed repertoires.
+    	    We use the default germline databases in \igblast\ for consistency.
     	}
     	\label{fig:IgBlastScores}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
    		\includegraphics[width=\linewidth]{Figures/PartisScores/score_diff.pdf}
-    	\caption{Difference in LRAD values when using \texttt{igblast} versus \texttt{partis} for annotations.
+    	\caption{Difference in LRAD values when using \igblast\ versus \partis\ for annotations.
     	}
     	\label{fig:ScoreDiffs}
 	\end{subfigure}
@@ -1121,62 +1122,61 @@ Frequency polygons of summary distributions of three pairs of \igblast-annotated
 The plots show a high level of agreement for most summaries, with all but six of them differing by less than one units, and a strong majority of them close to zero.
 Where differences arise, this is likely the result of differences in how \partis\ and \igblast\ perform annotations.
 For example, we see that the insertion length distributions highly disagree in scores.
-This is at least partially attributable to the star-tree assumption on which \texttt{partis} operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
-Indeed, examining the VD insertion length distribution shows that IgBlast tends to assign a similar distribution to each dataset, whereas partis leads to more variable distributions with right skew due to the star-tree assumption.
-Moreover, if IgBlast tends to assign a similar insertion length distribution to every dataset, then this will make it difficult for a simulator designed to match particular insertion lengths distributions to behave more like the IgBlast distributions.
+This is at least partially attributable to the star-tree assumption on which \partis\ operates, which is prone to overestimate insertion lengths in an effort to better estimate the ultimate naive sequence.
+Indeed, examining the VD insertion length distribution shows that \igblast\ tends to assign a similar distribution to each dataset, whereas \partis\ leads to more variable distributions with right skew due to the star-tree assumption.
+Moreover, if \igblast\ tends to assign a similar insertion length distribution to every dataset, then this will make it difficult for a simulator designed to match particular insertion lengths distributions to behave more like the \igblast\ distributions.
 Thus, inherent differences in annotation tools will certainly lead to differences in summary scores, regardless of how accurate either tool is.
 Hence, it is important to understand that a given annotations-based summary should be considered in the context of the tool which provided annotations, and not as a ground-truth summary of the actual gene usage/indel statistics.
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_freqpoly.pdf}
-    \caption{Summary distribution frequency polygons of three datasets based on \texttt{partis} versus \texttt{igblast} annotations.}
+    \caption{Summary distribution frequency polygons of three datasets based on \partis\ versus \igblast\ annotations.}
     \label{fig:PartisIgBlastFreqpolys}
 \end{figure}
 
 %BJO - I'm not actually sure how necessary this table is anymore, since I removed the divergence plot which used these abbreviations as axis labels. Everything just gets rolled up into the score plots and freqpolys/ecdfs now.
 %BJO - p_f1 does show up in the subsampling performance analyses in Appendices A and B.
-\section*{Appendix E: Metadata for partis analysis}
+\section*{Appendix E: Metadata for \partis\ analysis}
 
 Table~\ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
 In short, the notation is as follows.
-A prefix of \texttt{p} corresponds to \texttt{partis} annotations, a prefix of \texttt{i} corresponds to \texttt{igblast} annotations, and a prefix of \texttt{pi} corresponds to \texttt{partis} annotations using the default IMGT germline databases for IgBlast;
-this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
+A prefix of \texttt{p} corresponds to \partis\ annotations, a prefix of \texttt{i} corresponds to \igblast\ annotations, and a prefix of \texttt{pi} corresponds to \partis\ annotations using the default IMGT germline databases for \igblast; this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
 finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
 \begin{table}
 \makebox[\textwidth][c]{
 \begin{tabular}{c|c|c|c|c|c}
 	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
 	\hline
-    \texttt{p\_f1} & Observation &     \texttt{partis} & \texttt{partis} & F & 1 hour \\
-    \texttt{p\_f2} & Observation &     \texttt{partis} & \texttt{partis} & F & 8 days \\
-    \texttt{p\_g1} & Observation &     \texttt{partis} & \texttt{partis} & G & 1 hour \\
-    \texttt{p\_g2} & Observation &     \texttt{partis} & \texttt{partis} & G & 8 days \\
-    \texttt{p\_i1} & Observation &     \texttt{partis} & \texttt{partis} & I & 1 hour \\
-    \texttt{p\_i2} & Observation &     \texttt{partis} & \texttt{partis} & I & 8 days \\
-    \texttt{i\_f1} & Observation &     \texttt{igblast} & IMGT & F & 1 hour \\
-    \texttt{i\_f2} & Observation &     \texttt{igblast} & IMGT & F & 8 days \\
-    \texttt{i\_g1} & Observation &     \texttt{igblast} & IMGT & G & 1 hour\\
-    \texttt{i\_g2} & Observation &     \texttt{igblast} & IMGT & G & 8 days\\
-    \texttt{i\_i1} & Observation &     \texttt{igblast} & IMGT & I & 1 hour\\
-    \texttt{i\_i2} & Observation &     \texttt{igblast} & IMGT & I & 8 days\\
-    \texttt{pi\_f1} & Observation &    \texttt{partis} & IMGT & F & 1 hour\\
-    \texttt{pi\_f2} & Observation &    \texttt{partis} & IMGT & F & 8 days\\
-    \texttt{pi\_g1} & Observation &    \texttt{partis} & IMGT & G & 1 hour\\
-    \texttt{pi\_g2} & Observation &    \texttt{partis} & IMGT & G & 8 days\\
-    \texttt{pi\_i1} & Observation &    \texttt{partis} & IMGT & I & 1 hour\\
-    \texttt{pi\_i2} & Observation &    \texttt{partis} & IMGT & I & 8 days\\
-    \texttt{p\_f1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 1 hour\\
-    \texttt{p\_f2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & F & 8 days\\
-    \texttt{p\_g1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 1 hour\\
-    \texttt{p\_g2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & G & 8 days\\
-    \texttt{p\_i1\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 1 hour\\
-    \texttt{p\_i2\_sim} & Simulation & \texttt{partis} & \texttt{partis} & I & 8 days\\
-    \texttt{pi\_f1\_sim} & Simulation& \texttt{partis} & IMGT & F & 1 hour\\
-    \texttt{pi\_f2\_sim} & Simulation& \texttt{partis} & IMGT & F & 8 days\\
-    \texttt{pi\_g1\_sim} & Simulation& \texttt{partis} & IMGT & G & 1 hour\\
-    \texttt{pi\_g2\_sim} & Simulation& \texttt{partis} & IMGT & G & 8 days\\
-    \texttt{pi\_i1\_sim} & Simulation& \texttt{partis} & IMGT & I & 1 hour\\
-    \texttt{pi\_i2\_sim} & Simulation& \texttt{partis} & IMGT & I & 8 days\\
+    \texttt{p\_f1} & Observation &     \partis & \partis & F & 1 hour \\
+    \texttt{p\_f2} & Observation &     \partis & \partis & F & 8 days \\
+    \texttt{p\_g1} & Observation &     \partis & \partis & G & 1 hour \\
+    \texttt{p\_g2} & Observation &     \partis & \partis & G & 8 days \\
+    \texttt{p\_i1} & Observation &     \partis & \partis & I & 1 hour \\
+    \texttt{p\_i2} & Observation &     \partis & \partis & I & 8 days \\
+    \texttt{i\_f1} & Observation &     \igblast & IMGT & F & 1 hour \\
+    \texttt{i\_f2} & Observation &     \igblast & IMGT & F & 8 days \\
+    \texttt{i\_g1} & Observation &     \igblast & IMGT & G & 1 hour\\
+    \texttt{i\_g2} & Observation &     \igblast & IMGT & G & 8 days\\
+    \texttt{i\_i1} & Observation &     \igblast & IMGT & I & 1 hour\\
+    \texttt{i\_i2} & Observation &     \igblast & IMGT & I & 8 days\\
+    \texttt{pi\_f1} & Observation &    \partis & IMGT & F & 1 hour\\
+    \texttt{pi\_f2} & Observation &    \partis & IMGT & F & 8 days\\
+    \texttt{pi\_g1} & Observation &    \partis & IMGT & G & 1 hour\\
+    \texttt{pi\_g2} & Observation &    \partis & IMGT & G & 8 days\\
+    \texttt{pi\_i1} & Observation &    \partis & IMGT & I & 1 hour\\
+    \texttt{pi\_i2} & Observation &    \partis & IMGT & I & 8 days\\
+    \texttt{p\_f1\_sim} & Simulation & \partis & \partis & F & 1 hour\\
+    \texttt{p\_f2\_sim} & Simulation & \partis & \partis & F & 8 days\\
+    \texttt{p\_g1\_sim} & Simulation & \partis & \partis & G & 1 hour\\
+    \texttt{p\_g2\_sim} & Simulation & \partis & \partis & G & 8 days\\
+    \texttt{p\_i1\_sim} & Simulation & \partis & \partis & I & 1 hour\\
+    \texttt{p\_i2\_sim} & Simulation & \partis & \partis & I & 8 days\\
+    \texttt{pi\_f1\_sim} & Simulation& \partis & IMGT & F & 1 hour\\
+    \texttt{pi\_f2\_sim} & Simulation& \partis & IMGT & F & 8 days\\
+    \texttt{pi\_g1\_sim} & Simulation& \partis & IMGT & G & 1 hour\\
+    \texttt{pi\_g2\_sim} & Simulation& \partis & IMGT & G & 8 days\\
+    \texttt{pi\_i1\_sim} & Simulation& \partis & IMGT & I & 1 hour\\
+    \texttt{pi\_i2\_sim} & Simulation& \partis & IMGT & I & 8 days\\
 \end{tabular}
 }
 \caption{Metadata for each dataset used in the BCR analyses}
