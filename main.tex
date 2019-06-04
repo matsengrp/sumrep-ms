@@ -327,7 +327,7 @@ Due to the large number of summary statistics supported by \texttt{sumrep}, some
 To address this, we employed an $\ell_1$-regularized (a.k.a. lasso) multinomial regression by treating the summaries as covariates and dataset identity as the response.
 The basic idea is that this regression method cuts out all but a few predictor variables to find a smaller collection of informative summary statistics.
 In $\ell_1$ regression, a coefficient is ``allowed'' to be nonzero only when the lasso deems it a relatively meaningful predictor.
-As the regularization parameter $\lambda$ is decreased, more and more coefficients branch become nonzero, leading to a natural ordering of summaries as the order in which their coefficient ``branches off'' from zero.
+As the regularization parameter $\lambda$ is decreased, more and more coefficients  become nonzero, leading to a natural ordering of summaries as the order in which their coefficient ``branches off'' from zero.
 Since $\ell_1$ multinomial regression outputs a separate coefficient vector $\boldsymbol \beta$ for each response value, we aggregate by taking medians of each dataset-specific lasso ordering for each summary.
 Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
 \begin{algorithm}
@@ -369,6 +369,9 @@ This approach only works for sequence-level summaries $s \in \mathbb{R}^n$ for d
 For example, it is unclear how to incorporate the pairwise distance distribution, which is not a sequence-level summary, as a covariate, since this summary in general yields a column of a larger length than the number of sequences. 
 Still, as most summaries considered above can be applied at the sequence level, this method greatly reduces the number of summaries the user needs to examine.
 
+Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analysis as these sets of factors are by construction sets of orthogonal statistics according to particular measures.  
+This also leads to a much smaller design matrix and a largely decreased runtime.
+
 Figure \ref{fig:IgorLasso} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from \cite{Britanova2016-iw}.
 We see that deletion lengths comprise four of the top five summaries, with insertion lengths, CDR3 length, and various physiochemical junction properties scattered over the remaining positions.
 There appears to be high variability throughout the range of rankings, with the bottom three statistics all having a ranking of one for at least one coefficient vector.
@@ -376,16 +379,17 @@ There appears to be high variability throughout the range of rankings, with the 
     \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/igor_lasso_paths.pdf}
 		\caption{Lasso paths of summary coefficients for each of the six datasets.}
+		\label{fig:IgorLassoPaths}
     \end{subfigure}
     \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/igor_lasso_scores.pdf}
-		\caption{Boxplots of summary rank values taken over each dataset.}
+		\caption{Boxplots of summary rank values taken over each dataset, in order of informativeness, as determined by the median order in which the summary branches off from the lasso paths in Figure \ref{fig:IgorLassoPaths}, taken over each of the six paths.}
     \end{subfigure}
-    \caption{Results of applying Algorithm~\ref{alg:Lasso} to the six \igor\-annotated TRB datasets from Britanova (2016).}
+    \caption{Results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from Britanova (2016).}
     \label{fig:IgorLasso}
 \end{figure}
 
-Figure \ref{fig:PartisLasso} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \partis-annotated TRB datasets from \cite{Gupta2017-ve}.
+Figure \ref{fig:PartisLasso} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \partis-annotated IgH datasets from \cite{Gupta2017-ve}.
 We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical junction properties mostly in the bottom half of rankings.
 In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
 
@@ -396,9 +400,9 @@ In contrast to the TCR result, there appears to be less overall variability thro
     \end{subfigure}
     \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/partis_lasso_scores.pdf}
-		\caption{Boxplots of summary rank values taken over each dataset.}
+		\caption{Boxplots of summary rank values taken over each dataset, in order of informativeness, as determined by the median order in which the summary branches off from the lasso paths in Figure \ref{fig:IgorLassoPaths}, taken over each of the six paths.}
     \end{subfigure}
-    \caption{Results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from Gupta (2017).}
+    \caption{Results of applying Algorithm~\ref{alg:Lasso} to the six \partis-annotated IgH datasets from Gupta (2017).}
     \label{fig:PartisLasso}
 \end{figure}
 
@@ -442,7 +446,7 @@ We exclude \texttt{sequence\_alignment}-based summaries such as GC content and p
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
-    	\caption{$\text{score}_\text{obs}$ values for each statistic.
+    	\caption{LRAD-data values for each statistic based on Equation~\ref{eq:ScoreObs}.
         %EM Seems like one more phrase of explanation would help make this figure easier to interpret. It's functional(?) TCR data (and partis is BCR data...)
         %BJO I added a caption for the full figure and elaborated -- would you like more explanation?
         }
@@ -450,11 +454,11 @@ We exclude \texttt{sequence\_alignment}-based summaries such as GC content and p
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
-    	\caption{$\text{score}_\text{sim}$ values for each statistic.
+    	\caption{LRAD-sim values for each statistic based on Equation~\ref{eq:ScoreSim}.
     	}
     	\label{fig:SimScoresTCR}
 	\end{subfigure}
-	\caption{Summary scores, denoted as "log(Relative average divergence)" due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
+	\caption{Log relative average divergence (LRAD) scores for each statistic for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
 \end{figure}
 It is seen that IGoR simulations are able to recapitulate gene usage statistics of an empirical repertoire very well, with J gene usage frequency being the most accurately replicated, followed by various indel length statistics.
 V, D, and joing VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
@@ -491,12 +495,12 @@ Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for 
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot.pdf}
-    	\caption{$\text{score}_\text{obs}$ values for each statistic.}
+    	\caption{LRAD-data values for each statistic based on Equation~\ref{eq:ScoreObs}.}
     	\label{fig:ObsScoresBCR}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/sim_score_plot.pdf}
-    	\caption{$\text{score}_\text{sim}$ values for each statistic.}
+    	\caption{LRAD-sim values for each statistic based on Equation~\ref{eq:ScoreSim}.}
     	\label{fig:SimScoresBCR}
 	\end{subfigure}
 	\caption{Summary scores, denoted as "log(Relative average divergence)" due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.}
@@ -643,8 +647,8 @@ We applied IGoR in this way to six datasets of TRB sequences from \cite{Britanov
 \subsection*{Model validation of \texttt{partis}}
 
 We use \texttt{partis} to infer custom generative models for each experimental dataset.
-We use the \texttt{partition} command to incorporate possible clonal family clustering among sequences during inference, and then collapse each observed and simulated dataset so that each clonal family is represented by one sequence.
-Since \texttt{partis} returns a list of the top most likely scenarios for each rearrangement event, we consider only the scenario with the highest model likelihood for each sequence.
+We run the \texttt{partition} subcommand to incorporate underlying clonal family clustering among sequences during inference, and then collapse each observed and simulated dataset so that each clonal family is represented by one sequence (discussed more below).
+Since \texttt{partis} returns a list of the top most likely annotations scenarios for each rearrangement event, we consider only the scenario with the highest model likelihood for each sequence.
 We denote the \texttt{indel\_reversed\_seqs} field as \texttt{sequence\_alignment} and \texttt{naive\_seq} as \texttt{germline\_alignment} as they adhere to these definitions from the AIRR schema.
 Several other fields are renamed to match the AIRR specification when the definitions align without ambiguity.
 
@@ -655,7 +659,8 @@ While it is possible to simulate multiple leaves for each rearrangement, it is n
 For example, if we had one clonal family with 1,000 members, and 99 singleton clonal families, we could try to coerce the simulator to produce on average a (roughly) size-1,000 clonal family for every 99 singletons.
 However, it seems like this is highly contrived to the nature of our experimental sample, and does not clearly mimic the true repertoire dynamics of the individual from which the dataset was obtained.
 Also, there is ambiguity to whether the rearrangement parameters for this size-1,000 clonal family should always match those of the observed size-1,000 clonal family, or if they should be sampled in some random fashion.
-Hence, it seems more principled to subsample to unique clones and examine clonal family dynamics without dealing with abundance biases.
+Perhaps the most principled but more involved analysis would mimic the clone size distribution in data, potentially with correlations between clone size and other rearrangement parameters, and assess sequence-level statistics within each clonal family.
+Here we opt to subsample to unique clones and abundance biases altogether.
 
 
 \subsection*{Scoring summary statistic replication by model}
@@ -667,7 +672,7 @@ Suppose we have $k$ different experimental repertoires of immune receptor sequen
 For a given statistic $s$, let $\mathcal D_s(R_1, R_2)$ be the divergence of repertoires $R_1$ and $R_2$ with respect to $s$.
 We can score a simulator's ability to recapitulate $s$ from the observed repertoire to the simulated via
 \begin{equation}\label{eq:ScoreObs}
-    \text{score}_\text{obs}(s) :=
+    \text{LRAD-data}(s) :=
     \log \left(
         \frac{
             \frac{1}{\frac{1}{2} k\left(k - 1\right)}
@@ -682,7 +687,7 @@ We can score a simulator's ability to recapitulate $s$ from the observed reperto
         }
     \right).
 \end{equation}
-For a given summary $s$, score$_\text{obs}$ will be positive if the simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and negative if experimental repertoires tend to look more like other experimental repertoires than they do their simulated counterparts.
+For a given summary $s$, LRAD-data will be positive if the simulated repertoires tend to look more like their experimental counterparts in terms of this summary than experimental repertoires look like other experimental repertoires, and negative if experimental repertoires tend to look more like other experimental repertoires than they do their simulated counterparts.
 In other words, this scores how well a simulator can differentiate $s$ from an experimental repertoire among other repertoires, and recapitulate $s$ into its simulation.
 %BJO Does the below sentence make sense? For example, If the numerator is twice as high as the denominator, the score would be "2", and inverting the ratio would give "1/2". However, taking the log would yield 0.301 and -0.301, respectively. This makes the bar charts above easier to interpret.
 Applying the log to the ratio allows for the magnitudes of scores to be directly comparable (so that a summary with score $a > 0$ does as well as a summary with score $-a < 0$ does poorly).
@@ -690,7 +695,7 @@ Applying the log to the ratio allows for the magnitudes of scores to be directly
 Another related score would be comparing the average divergence of observations to their simulated counterparts, and the average divergence of simulations to other simulations.
 Formally, this is
 \begin{equation}\label{eq:ScoreSim}
-    \text{score}_\text{sim}(s) :=
+    \text{LRAD-sim}(s) :=
     \log \left(
         \frac{
             \frac{1}{\frac{1}{2} k\left(k - 1\right)}
@@ -1101,7 +1106,7 @@ The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, wh
 \end{figure}
 Change-O was used to parse the \texttt{igblast} output, as well as partition the sequences into inferred clonal families \cite{Gupta2015-iu}.
 
-Figure~\ref{fig:IgBlastScores} shows the results of score$_\text{obs}$ by summary when using IgBlast for annotation and \texttt{partis} for simulation.
+Figure~\ref{fig:IgBlastScores} shows the LRAD-data scores by summary when using IgBlast for annotation and \texttt{partis} for simulation.
 Figure~\ref{fig:ScoreDiffs} shows the difference of each score in Figure~\ref{fig:ObsScoresBCR} and each score in Figure~\ref{fig:IgBlastScores}.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
@@ -1113,7 +1118,7 @@ Figure~\ref{fig:ScoreDiffs} shows the difference of each score in Figure~\ref{fi
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
    		\includegraphics[width=\linewidth]{Figures/PartisScores/score_diff.pdf}
-    	\caption{Difference in score$_\text{obs}$ values when using \texttt{igblast} versus \texttt{partis} for annotations.
+    	\caption{Difference in LRAD values when using \texttt{igblast} versus \texttt{partis} for annotations.
     	}
     	\label{fig:ScoreDiffs}
 	\end{subfigure}
