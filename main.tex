@@ -340,27 +340,28 @@ Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
 			\State $\mathbf X_d \gets [\mathbf s(d_1), \dotsc, \mathbf s(d_D)]$
     	\EndFor
 		\State $\mathbf X \gets \begin{bmatrix}
-			 \mathbf X_1 \\ \vdots \\ \mathbf X_D 
+			 \mathbf X_{d_1} \\ \vdots \\ \mathbf X_{d_D} 
 			 \end{bmatrix}$
 		\State $\mathbf y \gets \begin{bmatrix}
 			\text{rep}(1, \text{rows}(d_1))^\mathsf{T}
 			\\ \vdots \\
 			\text{rep}(D, \text{rows}(d_D))^\mathsf{T}
 		\end{bmatrix}$
-        \For{$\lambda = 1, \dotsc, \lambda_\Lambda$}:
-        	\State $(\boldsymbol \beta_1^\lambda, \dotsc, \boldsymbol \beta_D^\lambda) \gets \text{MultinomialLasso}(\mathbf X, \mathbf y; \lambda)$
+        \For{$\lambda = \lambda_1, \dotsc, \lambda_\Lambda$}:
+        	\State $(\boldsymbol \beta_{d_1}^\lambda, \dotsc, \boldsymbol \beta_{d_D}^\lambda) \gets \text{MultinomialLasso}(\mathbf X, \mathbf y; \lambda)$
         \EndFor
-        \For{$d = 1, \dotsc, D$}:
-        	\For{$s = 1, \dotsc, S$}:
+        \For{$d = d_1, \dotsc, d_D$}:
+        	\For{$s = s_1, \dotsc, s_S$}:
 				\State $t_{d, s} \gets 
 				\min\left( \min \left\{ \lambda_1 \le \lambda \le \lambda_\Lambda: \beta_{d, s}^\lambda > 0 \; 
 					\forall t > \lambda \right\},
 					\infty \right)$
 			\EndFor
+			\State $\mathbf r_d$ = rank$(t_{d, s_1}, \dotsc, t_{d, s_S})$
         \EndFor
-        \State $\mathbf T = (t_{d, s})_{1 \le d \le D, 1 \le s \le S}$
-        \State $\text{scores} = \text{rank}\left( \median_{s_1}(\mathbf T),
-        	 \dotsc, \median_{s_S}(\mathbf T) \right)$
+        \State $\mathbf R = (\mathbf r_{d_1}, \dotsc, \mathbf r_{d_D})$
+        \State $\text{scores} = \text{rank}\left( \median_{s_1}(\mathbf R),
+        	 \dotsc, \median_{s_S}(\mathbf R) \right)$
        \State \Return scores
     \end{algorithmic}
 \end{algorithm}
