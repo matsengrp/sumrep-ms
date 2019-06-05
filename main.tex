@@ -301,11 +301,8 @@ For example, the \texttt{getCDR3LengthDistribution} comes with a companion plott
 Currently, these plotting functions support frequency polygons and empirical cumulative distribution functions (ecdfs).
 Examples of these plots are given in later sections.
 
-%BJO - Chaim's and Peji's analyses
-\subsection*{Empirical analysis of summary divergences by individual for IgH sequences}
-
 \subsection*{Multidimensional scaling of TCR summary divergences}
-To examine the ability for each summary statistic to distinguish between differences in repertoires across individuals and time points, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
+To examine the ability for various summary statistic to distinguish between differences in TCR repertoires by covariate, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
 In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
 Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint.
@@ -319,8 +316,23 @@ We see that for almost all summaries, these points cluster according to donor id
 The D gene usage distribution has more unusual cross-like pattern, whose structure is more difficult to assess.
 Other summaries, such as the CDR3 pairwise distance distribution and Hill numbers, yield little to no signal.
 Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
-Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when datasets are stratified by covariates.
+Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when TCR datasets are stratified by covariates.
 
+\subsection*{Multidimensional scaling of BCR summary divergencess}
+To examine the ability for various summary statistics to distinguish between differences in BCR repertoires by covariate, we performed a similar MDS analysis of summary divergences using data from \cite{Rubelt2016-tl}.
+We computed divergences of each summary between each pair of a collection of datasets stratified by five pairs of twins as well as B cell classification as memory or naive to form a dissimilarity matrix.
+We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
+Figure~\ref{fig:BCR_MDS} displays plots of the first two coordinates of each space grouped by twin pair identity and cell type.
+\begin{figure}
+    \includegraphics[width=\linewidth]{Figures/bcr_pca.pdf}
+    \caption{Plots of summary divergence MDS coordinates for the Rubelt (2016) data, grouped by twin pair identity and cell type (memory vs naive).}
+    \label{fig:BCR_MDS}
+\end{figure}
+We see that for each summary, points can be mostly separated according to cell type, with some summaries (e.g. V gene usage, AA frequencies, acidity) having clear separation between memory and naive cells, and others (e.g. GRAVY index, DJ insertion length) having lower degrees of separation.
+In addition, the naive repertoires appear to be more tightly clustered than the memory repertoires for each summary.
+Finally, for the gene usage statistics, there is a strong tendency for twins to have higher similarity than unrelated donors, although this tendency is not consistently observed for other statistics.
+For example, points for the amino acid 2mer frequency distribution divergences tend to have high similarity between twins, but the GRAVY index distribution divergences do not.
+Thus, there seem to also be interesting dynamics underlying \texttt{sumrep} divergences when BCR datasets are stratified by covariates, and the observed patterns merit further investigation.
 
 \subsection*{Orthogonality analysis}
 Due to the large number of summary statistics supported by \texttt{sumrep}, some of which are inter-correlated, we sought an approach to identify a set of maximally-informative statistics that are orthogonal by some measure.
@@ -713,6 +725,9 @@ This is discussed in detail in Appendix C.
 
 \subsection*{Materials}
 The raw data for the TCR summary divergence MDS analysis comes from \cite{Pogorelyy2018-ak}, which was postprocessed into a suitable format for analysis.
+
+The raw data for the BCR summary divergence MDS analysis comes from \cite{Rubelt2016-tl}; \igblast-preprocessed data was downloaded from VDJServer in the AIRR format.
+For quality control, sequences with a run of 3 or more \texttt{N} bases in the raw sequence were discarded.
 
 For the TCR model validation analysis, we use several datasets from \cite{Britanova2016-iw}.
 For tractability purposes, we chose the six datasets with the fewest number of sequence reads; the number of reads from these six datasets used in the analysis ranged from 37,363 sequences to 243,903 sequences.
