@@ -334,91 +334,42 @@ Finally, for the gene usage statistics, there is a strong tendency for twins to 
 For example, points for the amino acid 2mer frequency distribution divergences tend to have high similarity between twins, but the GRAVY index distribution divergences do not.
 Thus, there seem to also be interesting dynamics underlying \texttt{sumrep} divergences when BCR datasets are stratified by covariates, and the observed patterns merit further investigation.
 
-\subsection*{Orthogonality analysis}
+\subsection*{Ranking summary statistic informativeness}
 Due to the large number of summary statistics supported by \texttt{sumrep}, some of which are inter-correlated, we sought an approach to identify a set of maximally-informative statistics that are orthogonal by some measure.
-To address this, we employed an $\ell_1$-regularized (a.k.a. lasso) multinomial regression by treating the summaries as covariates and dataset identity as the response.
+To address this, we employed lasso multinomial regression by treating the summaries as covariates and dataset identity as the response.
 The basic idea is that this regression method cuts out all but a few predictor variables to find a smaller collection of informative summary statistics.
 In $\ell_1$ regression, a coefficient is ``allowed'' to be nonzero only when the lasso deems it a relatively meaningful predictor.
 As the regularization parameter $\lambda$ is decreased, more and more coefficients  become nonzero, leading to a natural ordering of summaries as the order in which their coefficient ``branches off'' from zero.
-Since $\ell_1$ multinomial regression outputs a separate coefficient vector $\boldsymbol \beta$ for each response value, we aggregate by taking medians of each dataset-specific lasso ordering for each summary.
-In the case of ties, we randomize rankings to avoid alphabetization biases or other similar artifacts.
-Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
-\begin{algorithm}
-    \caption{Rank summary statistics by informativeness\\
-        \textbf{Input:} annotations datasets $d_1, \dotsc, d_D$, sequence-level summaries $\mathbf s(\cdot) = [s_1(\cdot), \dotsc, s_S(\cdot)]$, lasso parameters $\lambda_1, \dotsc, \lambda_\Lambda$ \\
-        \textbf{Output:} A vector of ranks for the summaries }
-    \label{alg:Lasso}
-    \begin{algorithmic}
-   		\For{$d = d_1, \dotsc, d_D$}:
-			\State $\mathbf X_d \gets [\mathbf s(d_1), \dotsc, \mathbf s(d_D)]$
-    	\EndFor
-		\State $\mathbf X \gets \begin{bmatrix}
-			 \mathbf X_{d_1} \\ \vdots \\ \mathbf X_{d_D} 
-			 \end{bmatrix}$
-		\State $\mathbf y \gets \begin{bmatrix}
-			\text{rep}(1, \text{rows}(d_1))^\mathsf{T}
-			\\ \vdots \\
-			\text{rep}(D, \text{rows}(d_D))^\mathsf{T}
-		\end{bmatrix}$
-        \For{$\lambda = \lambda_1, \dotsc, \lambda_\Lambda$}:
-        	\State $(\boldsymbol \beta_{d_1}^\lambda, \dotsc, \boldsymbol \beta_{d_D}^\lambda) \gets \text{MultinomialLasso}(\mathbf X, \mathbf y; \lambda)$
-        \EndFor
-        \For{$d = d_1, \dotsc, d_D$}:
-        	\For{$s = s_1, \dotsc, s_S$}:
-				\State $t_{d, s} \gets 
-				\min\left( \min \left\{ \lambda_1 \le \lambda \le \lambda_\Lambda: \beta_{d, s}^\lambda > 0 \; 
-					\forall t > \lambda \right\},
-					\infty \right)$
-			\EndFor
-			\State $\mathbf r_d$ = rank$(t_{d, s_1}, \dotsc, t_{d, s_S})$
-        \EndFor
-        \State $\mathbf R = (\mathbf r_{d_1}, \dotsc, \mathbf r_{d_D})$
-        \State $\text{scores} = \text{rank}\left( \median_{s_1}(\mathbf R),
-        	 \dotsc, \median_{s_S}(\mathbf R) \right)$
-       \State \Return scores
-    \end{algorithmic}
-\end{algorithm}
 
-This approach only works for sequence-level summaries $s \in \mathbb{R}^n$ for datasets of $n$ sequences in order to form a well-defined design matrix $\mathbf X \in \mathbb{R}^{\left(\sum_{d=1}^D \text{rows}(d) \right) \times S}$.
-For example, it is unclear how to incorporate the pairwise distance distribution, which is not a sequence-level summary, as a covariate, since this summary in general yields a column of a larger length than the number of sequences. 
-Still, as most summaries considered above can be applied at the sequence level, this method greatly reduces the number of summaries the user needs to examine.
 
 Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analysis as these sets of factors are by construction sets of orthogonal statistics according to particular measures.  
 This also leads to a much smaller design matrix and a largely decreased runtime.
 
-Figure \ref{fig:IgorLasso} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from \cite{Britanova2016-iw}.
+Figure \ref{fig:IgorLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from \cite{Britanova2016-iw}.
 We see that deletion lengths comprise four of the top five summaries, with insertion lengths, CDR3 length, and various physiochemical junction properties scattered over the remaining positions.
 There appears to be high variability throughout the range of rankings, with the bottom three statistics all having a ranking of one for at least one coefficient vector.
 \begin{figure}
-    \begin{subfigure}{\linewidth}
-    	\includegraphics[width=\linewidth]{Figures/Lasso/igor_lasso_paths.pdf}
-		\caption{Lasso paths of summary coefficients for each of the six datasets.}
-		\label{fig:IgorLassoPaths}
-    \end{subfigure}
-    \begin{subfigure}{\linewidth}
+        \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/igor_lasso_scores.pdf}
-		\caption{Boxplots of summary rank values taken over each dataset, in order of informativeness, as determined by the median order in which the summary branches off from the lasso paths in Figure \ref{fig:IgorLassoPaths}, taken over each of the six paths.}
-    \end{subfigure}
-    \caption{Results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from Britanova (2016).}
-    \label{fig:IgorLasso}
-\end{figure}
-
-Figure \ref{fig:PartisLasso} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \partis-annotated IgH datasets from \cite{Gupta2017-ve}.
-We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical junction properties mostly in the bottom half of rankings.
-In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
-
-\begin{figure}
-    \begin{subfigure}{\linewidth}
-    	\includegraphics[width=\linewidth]{Figures/Lasso/partis_lasso_paths.pdf}
-		\caption{Lasso paths of summary coefficients for each of the six datasets.}
+		\caption{Summary rank boxplots using six \igor-annotated Britanova datasets of TRB sequences.}
+		\label{fig:IgorLassoScores}
     \end{subfigure}
     \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/partis_lasso_scores.pdf}
-		\caption{Boxplots of summary rank values taken over each dataset, in order of informativeness, as determined by the median order in which the summary branches off from the lasso paths in Figure \ref{fig:IgorLassoPaths}, taken over each of the six paths.}
+		\caption{Summary rank boxplots using six \partis-annotated Laserson datasets of IgH sequences.}
+		\label{fig:PartisLassoScores}
     \end{subfigure}
-    \caption{Results of applying Algorithm~\ref{alg:Lasso} to the six \partis-annotated IgH datasets from Gupta (2017).}
-    \label{fig:PartisLasso}
+    \caption{Boxplots of summary rank values taken over each dataset, in order of informativeness, as determined by the median order in which the summary branches off from the lasso paths in Figure \ref{fig:LassoPaths}, taken over each of the six paths.}
+    \label{fig:LassoScores}
 \end{figure}
+
+Figure \ref{fig:PartisLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \partis-annotated IgH datasets from \cite{Gupta2017-ve}.
+We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical junction properties mostly in the bottom half of rankings.
+In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
+
+While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, the hope is that the nice properties of least squares plus the penalization of large coefficients leads to a subset of covariates that are informative and orthogonal.
+To validate this intuition, we can examine distributions of high-ranked, moderately-ranked, and low-ranked summaries for a new set of annotated repertoires.
+
 
 \subsection*{Comparing observations to model simulations per model}
 \texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
@@ -634,6 +585,51 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
 	\EndFunction
     \end{algorithmic}
 \end{algorithm}
+
+\subsection*{Summary statistic informativeness ranking}
+To quantify the relative informativeness of various summary statistics in distinguishing between different datasets, employ a multinomial lasso regression where covariates are sequence-level summaries and the response is dataset identity.
+Since $\ell_1$ multinomial regression outputs a separate coefficient vector $\boldsymbol \beta$ for each response value, we aggregate by taking medians of each dataset-specific lasso ordering for each summary.
+In the case of ties, we randomize rankings to avoid alphabetization biases or other similar artifacts.
+Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
+\begin{algorithm}
+    \caption{Rank summary statistics by informativeness\\
+        \textbf{Input:} annotations datasets $d_1, \dotsc, d_D$, sequence-level summaries $\mathbf s(\cdot) = [s_1(\cdot), \dotsc, s_S(\cdot)]$, lasso parameters $\lambda_1, \dotsc, \lambda_\Lambda$ \\
+        \textbf{Output:} A vector of ranks for the summaries }
+    \label{alg:Lasso}
+    \begin{algorithmic}
+   		\For{$d = d_1, \dotsc, d_D$}:
+			\State $\mathbf X_d \gets [\mathbf s(d_1), \dotsc, \mathbf s(d_D)]$
+    	\EndFor
+		\State $\mathbf X \gets \begin{bmatrix}
+			 \mathbf X_{d_1} \\ \vdots \\ \mathbf X_{d_D} 
+			 \end{bmatrix}$
+		\State $\mathbf y \gets \begin{bmatrix}
+			\text{rep}(1, \text{rows}(d_1))^\mathsf{T}
+			\\ \vdots \\
+			\text{rep}(D, \text{rows}(d_D))^\mathsf{T}
+		\end{bmatrix}$
+        \For{$\lambda = \lambda_1, \dotsc, \lambda_\Lambda$}:
+        	\State $(\boldsymbol \beta_{d_1}^\lambda, \dotsc, \boldsymbol \beta_{d_D}^\lambda) \gets \text{MultinomialLasso}(\mathbf X, \mathbf y; \lambda)$
+        \EndFor
+        \For{$d = d_1, \dotsc, d_D$}:
+        	\For{$s = s_1, \dotsc, s_S$}:
+				\State $t_{d, s} \gets 
+				\min\left( \min \left\{ \lambda_1 \le \lambda \le \lambda_\Lambda: \beta_{d, s}^\lambda > 0 \; 
+					\forall t > \lambda \right\},
+					\infty \right)$
+			\EndFor
+			\State $\mathbf r_d$ = rank$(t_{d, s_1}, \dotsc, t_{d, s_S})$
+        \EndFor
+        \State $\mathbf R = (\mathbf r_{d_1}, \dotsc, \mathbf r_{d_D})$
+        \State $\text{scores} = \text{rank}\left( \median_{s_1}(\mathbf R),
+        	 \dotsc, \median_{s_S}(\mathbf R) \right)$
+       \State \Return scores
+    \end{algorithmic}
+\end{algorithm}
+
+This approach only works for sequence-level summaries $s \in \mathbb{R}^n$ for datasets of $n$ sequences in order to form a well-defined design matrix $\mathbf X \in \mathbb{R}^{\left(\sum_{d=1}^D \text{rows}(d) \right) \times S}$.
+For example, it is unclear how to incorporate the pairwise distance distribution, which is not a sequence-level summary, as a covariate, since this summary in general yields a column of a larger length than the number of sequences. 
+Still, as most summaries considered above can be applied at the sequence level, this method greatly reduces the number of summaries the user needs to examine.
 
 \subsection*{Model validation of \igor}
 We use the \texttt{igor -infer} to fit custom, dataset-specific models for each experimental dataset.
@@ -999,7 +995,25 @@ While this may depend on the dataset in question, we recommend this as a good po
 
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm~\ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
 
-\subsection*{Appendix C: Model validation analysis workflows}
+\subsection*{Appendix C: Multinomial lasso path plots}
+Figure~\ref{fig:LassoPaths} displays the lasso path plots which illustrate the coefficient values of each response vector utilized in Algorithm~\ref{alg:Lasso}.
+Figure~\ref{fig:IgorLassoPaths} shows paths for \igor\ annotations of six TRB datasets from \cite{Britanova2016-iw}, and Figure~\ref{fig:PartisLassoPaths} shows paths for \partis\ annotations for six IgH datasets from \cite{Laserson2014-dx}.
+\begin{figure}
+	\begin{subfigure}{\linewidth}
+    	\includegraphics[width=\linewidth]{Figures/Lasso/igor_lasso_paths.pdf}
+		\caption{Lasso paths for six \igor-annotated Britanova datasets.}
+		\label{fig:IgorLassoPaths}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+    	\includegraphics[width=\linewidth]{Figures/Lasso/partis_lasso_paths.pdf}
+		\caption{Lasso paths for six \partis-annotated Laserson datasets.}
+		\label{fig:PartisLassoPaths}
+    \end{subfigure}
+    \caption{Multinomial lasso paths of summary coefficients by dataset identity.}
+    \label{fig:LassoPaths}
+\end{figure}
+
+\subsection*{Appendix D: Model validation analysis workflows}
 Figure~\ref{fig:IgorWorkflow} illustrates the \igor\ model validation workflow.
 We employ \igblast\ to obtain CDR3 sequences for the observed sequences, which \igor\ only outputs for generated sequences.
 Moreover, because we fit \igor\ models on predominantly functional TRB sequences, we consider only \igor-generated sequences whose V and J segments are in-frame.  
@@ -1069,7 +1083,7 @@ We subsample both the experimental and simulated annotation datasets to unique c
 Then, we compare each IgH-relevant summary for the two resultant annotations datasets, yielding a divergence value for each summary.
 
 
-\subsection*{Appendix D: Comparison of summary scores using \igblast\ annotations}
+\subsection*{Appendix E: Comparison of summary scores using \igblast\ annotations}
 Recall that for the standard \partis\ model validation procedure, \partis\ is used for both inference as well as simulation.
 Here we examine the influence of using the same tool for inference and simulation by using \igblast\ for inference, and comparing the annotations dataset output from \igblast\ to the corresponding simulations from \partis.
 The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, which is essentially the diagram in Figure~\ref{fig:PartisWorkflow} with an additional path describing the \igblast/Change-O pipeline.
@@ -1151,7 +1165,7 @@ Hence, it is important to understand that a given annotations-based summary shou
 
 %BJO - I'm not actually sure how necessary this table is anymore, since I removed the divergence plot which used these abbreviations as axis labels. Everything just gets rolled up into the score plots and freqpolys/ecdfs now.
 %BJO - p_f1 does show up in the subsampling performance analyses in Appendices A and B.
-\section*{Appendix E: Metadata for \partis\ analysis}
+\section*{Appendix F: Metadata for \partis\ analysis}
 
 Table~\ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
 In short, the notation is as follows.
