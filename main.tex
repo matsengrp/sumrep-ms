@@ -145,11 +145,6 @@ Per-gene substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Per-gene-per-position substitution rate & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Per-base mutability model & Yes & No & No & \texttt{shazam} \cite{Gupta2015-iu} \\
 Per-base substitution model & Yes & No & No & \texttt{shazam} \\
-%BJO This one doesn't depend on fit-star, right?
-%EM Yes, but we could just count Ts vs Tv, call it a "ratio" and drop the model-based rigor.
-%EM Branden, I'm not actually sure what you ended up doing. Did you do this? If so, worth a line or two in the methods.
-%BJO I believe I got caught up with which sequences to use for this, before we decided on assuming IMGT-gapped mature and germline sequences, which would now be the sensible default. So, this is not currently implemented.
-Transition/transversion ratio distribution & Yes & No & No & \texttt{sumrep} \\
 Positional distance between mutations distribution & Yes & No & No & \texttt{sumrep}  \\
 Distance from germline to sequence distribution & Yes & No & No & \texttt{stringdist} \\
 V gene 3' deletion length distribution & Yes & No & No & Tool-provided \\
@@ -167,15 +162,10 @@ V/J in-frame percentage & Yes & No & No & Tool-provided + \texttt{sumrep} \\
 Cluster size distribution & Yes & Yes & No & Custom \\
 Hill numbers (diversity indices) & Yes & Yes & No & \texttt{alakazam} \\
 Selection estimates & Yes & Yes & No & \texttt{shazam} \\
-%BJO blocked due to fit-star
-%Transition/transversion rates & Yes & Yes & No & Tool-provided \\
 \hline
     Sackin index distribution & Yes & Yes & Yes & \texttt{CollessLike} \cite{Mir2018-lk} \\
 Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
-%BJO To be delineated
-%EM Time to complete or take out.
-Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \end{tabular}
 }
 \caption{Currently supported summary statistics grouped by their respective levels of assumed post-processing.}
@@ -202,14 +192,16 @@ There is also a \texttt{compareRepertoires} function which takes two repertoires
 
 The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in Figure~\ref{fig:DivergenceCartoon}.
 A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
-These two resultant distributions can be compared using a divergence $d$ that is tailored to the nature of $s$.
-We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC content, CDR3 length), and the $\ell_1$ divergence to compare categorical distributions (e.g. gene call frequencies, amino acid frequencies).
+These two resultant distributions can be compared using a divergence $\mathcal D$ that is tailored to the nature of $s$.
+We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC content, CDR3 length), which is a symmetrized version of KL-divergence, a weighted average log-ratio of frequencies widely-used in statistics and machine learning.
+We use the similarly popular $\ell_1$ divergence to compare categorical distributions (e.g. gene call frequencies, amino acid frequencies), which is a sum of absolute differences of counts.
 %EM Shall we try for an intuitive explanation of JS / KL?
 %BJO I like this description from https://medium.com/@cotra.marko/making-sense-of-the-kullback-leibler-kl-divergence-b0d57ee10e0a:
 % [It's] a measure of how much ?predictive power? or ?evidence? each sample will on average bring when you?re trying to distinguish p(x) from q(x), if you?re sampling from p(x).
 %BJO - Then the JS divergence will be a nice, symmetrized version.
 %BJO - However, you have a better idea of how much stats background the average immunologist will have.
 %EM Hm, yeah, I was dreaming of something simpler, like the weighted average log ratio.
+%BJO OK, I gave it a try above. Please modify it as you wish.
 
 We have designed \texttt{sumrep} to efficiently approximate computationally inefficient summaries for moderate and large repertoires.
 When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
@@ -282,8 +274,7 @@ s(R_2) =
 \caption{
 Cartoon of our summary divergence framework.
 Most summary statistics $s$, e.g.\ GC content, yield a distribution of values when applied to each of the sequences in a given repertoire $R$.
-%EM $d$ doesn't match the cartoon
-We can compare these distributions using a statistical divergence $d$, which takes two distributions and outputs a nonnegative scalar.
+We can compare these distributions using a statistical divergence $\mathcal D$, which takes two distributions and outputs a nonnegative scalar.
 We have also chosen appropriate divergences for summaries that do not give distributions (such as substitution rates and diversity indices).
 }
 \label{fig:DivergenceCartoon}
@@ -303,11 +294,11 @@ Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each spa
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
     %EM If this is a MDS plot why are the labels in terms of PCA?
+    %BJO Well, another name for classical MDS (which is done for both of these analyses) is principal coordinates analysis, so these labels can still apply. But, I've changed the labels in both plots to be less ambiguous.
     \caption{Plots of summary divergence MDS coordinates for the Pogorelyy (2018) data, grouped by donor and timepoint}
     \label{fig:TCR_MDS}
 \end{figure}
 We see that for almost all summaries, these points cluster according to donor identity, with the CDR3 pairwise distance distribution being the only summary that does not decisively cluster by donor.
-%EM I'm not totally convinced that the cross is more than just random noise...
 The D gene usage distribution has more unusual cross-like pattern, whose structure is more difficult to assess.
 Other summaries, such as the CDR3 pairwise distance distribution and Hill numbers, yield little to no signal.
 Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
