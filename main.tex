@@ -61,12 +61,12 @@
 
 \begin{abstract}
 The adaptive immune system generates an incredible diversity of antigen receptors for B and T cells to keep dangerous pathogens at bay.
-The DNA sequences coding for these receptors arise by a complex recombination process followed by a series of binding-based filters, as well as affinity maturation for B cells, giving considerable structure to the circulating pool of receptor sequences.
+The DNA sequences coding for these receptors arise by a complex recombination process followed by a series of functionality-based filters, as well as affinity maturation for B cells, giving considerable structure to the circulating pool of receptor sequences.
 Although these data sets hold considerable promise for medical and public health application, the complex structure of the resulting immune repertoire sequencing (Rep-Seq) datasets makes analysis difficult.
 In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
 We find that summaries vary in their ability to differentiate between datasets, although many are able to distinguish between covariates such as donor, timepoint, and cell type for BCR and TCR repertoires.
-We show that deletion and insertion lengths resulting from VDJ recombination tend to be more informative descriptions of a repertoire than summaries characterizing amino acid composition of the junction region.
-Furthermore, we find that state-of-the-art generative models excel at recapitulating gene usage and indel statistics in a given experimental repertoire, but struggle to capture many physiobiological properties of real repertoires.
+We show that deletion and insertion lengths resulting from VDJ recombination tend to be more discriminative characterizations of a repertoire than summaries characterizing amino acid composition of the junction region.
+On the other hand, we find that state-of-the-art generative models excel at recapitulating gene usage and recombination statistics in a given experimental repertoire, but struggle to capture many physiochemical properties of real repertoires.
 \end{abstract}
 
 
@@ -74,7 +74,7 @@ Furthermore, we find that state-of-the-art generative models excel at recapitula
 
 B cells and T cells play critical roles in adaptive immunity through the cooperative identification of and response to antigens.
 The random rearrangement process of the genes that construct B cell receptors (BCRs) and T cell receptors (TCRs) allows for the recognition of a highly diverse set of antigen epitopes.
-We refer to the set of B and T cell receptors present in an individual's immune system as their immune receptor repertoire; this repertoire constantly changes over the course of an individual's lifetime for various reasons including differences in germline gene sets and antigen exposure.
+We refer to the set of B and T cell receptors present in an individual's immune system as their immune receptor repertoire; this dynamic repertoire constantly changes over the course of an individual's lifetime due to antigen exposure and the effects of aging.
 
 Although immune receptor repertoires are now accessible for scientific research and medical applications through high-throughput sequencing, it is not necessarily straightforward to gain insight from and to compare these data sets.
 Indeed, if these data sets are not processed, they are simply a list of DNA sequences.
@@ -88,7 +88,7 @@ This can be a highly involved task, and so it is common to simply compare CDR3 l
 An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
 For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
-One can perform other dimension reduction techniques like t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections lose a lot of information and will have questionable immunological meaning.
+One can perform other dimension reduction techniques like t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also lose a lot of information and can be difficult to interpret biologically.
 %BJO I basically included the below sentence for the IMGT/HighV-Quest reference which runs on IMGT-particular data formats, for what it's worth
 % Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
@@ -98,22 +98,17 @@ Namely, one can use a form of model checking that is common in statistics: after
 In this case, we generate a repertoire of sequences from the models and compare this collection to a real-data repertoire of sequences via summary statistics.
 
 We are motivated to perform such comparison because these probabilistic models are used as part of inference, and because they are used for inferential tool benchmarking.
-%EM Actually I'm not 100% positive that the inferential part will make sense to immunologists. So I'm not filling out this sentence yet.
-For example...
-Such generative models are used to simulate sequences to have a ``ground truth'' for benchmarking inferential software (refs), and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
-%EM Putting this reason on hold for the time being.
-% Simulation tools can also be used to generate a null distribution to compare to data to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
+Such generative models are used to simulate sequences to have a ``ground truth'' for benchmarking inferential software \cite{Ralph2016-iz,Gupta2017-ve,Marcou2018-du}, and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
+Simulation tools can also be used to generate a null distribution used to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
 Currently there are no unified packages dedicated to the task of calculating and comparing summary statistics for Rep-Seq data sets.
 While the Immcantation pipeline (which includes the \texttt{shazam} and \texttt{alakazam} R packages) contains many summary functions for Rep-Seq data, it does not have general functionality for retrieving, comparing, and plotting these summaries \cite{Gupta2015-iu}.
 Many summaries of interest are implemented in one package or another, but differences in functionality and data structures make it troublesome to compute and compare summaries across packages.
-Some summaries of interest, such as the positional distance between mutations distribution, are not readily implemented in a package.
-
-[Cartoon of projecting repertoires in various directions into real space, and comparing the resulting projections?]
+Some summaries of interest, such as the positional distance between mutations distribution, are not readily implemented in any package.
 
 In this paper, we gather dozens of meaningful summary statistics on repertoires, derive efficient and robust summary implementations, and identify appropriate comparison methods for each summary.
 We present \texttt{sumrep}, an R package that computes these summary distributions for Rep-Seq datasets and performs repertoire comparisons based on these summaries.
-We investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data, and show that most summaries are able to differentiate between subject as well as time after vaccination within a subject.
+We investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data, and show that many summaries are able to differentiate between subject as well as time after vaccination within a subject.
 Further, we demonstrate how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \igor~\cite{Marcou2018-du} for TCRs, and \partis~\cite{Ralph2016-nw, Ralph2016-iz} for BCRs.
 
 
@@ -179,6 +174,7 @@ Selection estimates & Yes & Yes & No & \texttt{shazam} \\
 Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 %BJO To be delineated
+%EM Time to complete or take out.
 Graph-theoretical features & Yes & Yes & Yes & TBD \\
 \end{tabular}
 }
@@ -217,7 +213,7 @@ We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC c
 
 We have designed \texttt{sumrep} to efficiently approximate computationally inefficient summaries for moderate and large repertoires.
 When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
-The result is an approximation to the full distribution, which introduces some  extra noise but can yield very high efficiency gains for large datasets.
+The result is an approximation to the full distribution, which trades some noise for very substantial efficiency gains for large datasets.
 This in turn allows fast, accurate divergence estimates between dataset summaries.
 We outline a generic distribution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
 
@@ -286,6 +282,7 @@ s(R_2) =
 \caption{
 Cartoon of our summary divergence framework.
 Most summary statistics $s$, e.g.\ GC content, yield a distribution of values when applied to each of the sequences in a given repertoire $R$.
+%EM $d$ doesn't match the cartoon
 We can compare these distributions using a statistical divergence $d$, which takes two distributions and outputs a nonnegative scalar.
 We have also chosen appropriate divergences for summaries that do not give distributions (such as substitution rates and diversity indices).
 }
@@ -299,12 +296,13 @@ Currently, these plotting functions support frequency polygons and empirical cum
 Examples of these plots are given in later sections.
 
 \subsection*{Multidimensional scaling of TCR summary divergences}
-To examine the ability for various summary statistic to distinguish between differences in TCR repertoires by covariate, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
+To examine the ability of various summary statistic to distinguish between differences in TCR repertoires by covariate, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
 In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
 Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
+    %EM If this is a MDS plot why are the labels in terms of PCA?
     \caption{Plots of summary divergence MDS coordinates for the Pogorelyy (2018) data, grouped by donor and timepoint}
     \label{fig:TCR_MDS}
 \end{figure}
@@ -340,7 +338,7 @@ As the regularization parameter $\lambda$ is decreased, more and more coefficien
 One caveat to this approach is that we can only use sequence-level summary statistics as covariates in order to have a well-defined regression procedure (details can be found in the Methods section).
 However, the majority of summaries considered in this report are applied at the sequence level.
 Thus, between the subset of informative sequence-level statistics and the remaining non-sequence-level statistics, we arrive at a much smaller set.
-Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analyses as these sets of statistics are orthogonal by construction according to particular measures.  
+Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analyses as these sets of statistics are orthogonal by construction according to particular measures.
 This also leads to a much smaller design matrix and a largely decreased runtime.
 
 Figure \ref{fig:IgorLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to the six \igor-annotated TRB datasets from \cite{Britanova2016-iw}.
@@ -373,7 +371,7 @@ Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranke
 	\caption{Empirical cumulative distribution functions for the bottom-, middle-, and top-ranked statistics for \partis-annotated IgH repertoires, as determined by Figure~\ref{fig:PartisLassoScores}.}
 	\label{fig:LassoValidation}
 \end{figure}
-Visually, we see that the acidity curves do not vary much among donors or timepoints; the aromaticity curves have slightly more variation but are still highly similar; and the V 3' deletion length curves are more distinguished between some donors (e.g. FV and IB) as well as some donor-timepoint interactions (e.g. -1 and +7 timepoints for IB). 
+Visually, we see that the acidity curves do not vary much among donors or timepoints; the aromaticity curves have slightly more variation but are still highly similar; and the V 3' deletion length curves are more distinguished between some donors (e.g. FV and IB) as well as some donor-timepoint interactions (e.g. -1 and +7 timepoints for IB).
 Thus, there is some visual evidence that the lasso scores are identifying some degree of informativeness among summaries.
 
 \subsection*{Comparing observations to model simulations per model}
@@ -437,8 +435,6 @@ We apply the same methodology to IgH sequences from \cite{Gupta2017-ve} (origina
 This data consists of longitudinal IgH repertoires of three donors prior to an influenza vaccination; we analyze the one-hour and eight-day pre-vaccination repertoires for each donor.
 Figure~\ref{fig:PartisFreqPolys} displays frequency polygons of each summary distribution for each experimental and simulated repertoire.
 \begin{figure}
-%EM I think that only one of these should go in the main text, but it's a matter for discussion with the group.
-%BJO I went ahead and removed the ecdfs, as I would think the average reader will be more comfortable with a histogram-type plot than an ecdf.
     \includegraphics[width=\linewidth]{Figures/PartisScores/partis_freqpoly.pdf}
     \caption{Frequency polygon plots of each univariate summary distribution for the \texttt{p\_f1}, \texttt{p\_f1\_sim}, \texttt{p\_g1}, and \texttt{p\_g1\_sim} datasets.}
     \label{fig:PartisFreqPolys}
@@ -602,7 +598,7 @@ Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
 			\State $\mathbf X_d \gets [\mathbf s(d_1), \dotsc, \mathbf s(d_D)]$
     	\EndFor
 		\State $\mathbf X \gets \begin{bmatrix}
-			 \mathbf X_{d_1} \\ \vdots \\ \mathbf X_{d_D} 
+			 \mathbf X_{d_1} \\ \vdots \\ \mathbf X_{d_D}
 			 \end{bmatrix}$
 		\State $\mathbf y \gets \begin{bmatrix}
 			\text{rep}(1, \text{rows}(d_1))^\mathsf{T}
@@ -614,8 +610,8 @@ Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
         \EndFor
         \For{$d = d_1, \dotsc, d_D$}:
         	\For{$s = s_1, \dotsc, s_S$}:
-				\State $t_{d, s} \gets 
-				\min\left( \min \left\{ \lambda_1 \le \lambda \le \lambda_\Lambda: \beta_{d, s}^\lambda > 0 \; 
+				\State $t_{d, s} \gets
+				\min\left( \min \left\{ \lambda_1 \le \lambda \le \lambda_\Lambda: \beta_{d, s}^\lambda > 0 \;
 					\forall t > \lambda \right\},
 					\infty \right)$
 			\EndFor
@@ -629,7 +625,7 @@ Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
 \end{algorithm}
 
 This approach only works for sequence-level summaries $s \in \mathbb{R}^n$ for datasets of $n$ sequences in order to form a well-defined design matrix $\mathbf X \in \mathbb{R}^{\left(\sum_{d=1}^D \text{rows}(d) \right) \times S}$.
-For example, it is unclear how to incorporate the pairwise distance distribution, which is not a sequence-level summary, as a covariate, since this summary in general yields a column of a larger length than the number of sequences. 
+For example, it is unclear how to incorporate the pairwise distance distribution, which is not a sequence-level summary, as a covariate, since this summary in general yields a column of a larger length than the number of sequences.
 Still, as most summaries considered above can be applied at the sequence level, this method greatly reduces the number of summaries the user needs to examine.
 
 \subsection*{Model validation of \igor}
@@ -1013,7 +1009,7 @@ Figure~\ref{fig:IgorLassoPaths} shows paths for \igor\ annotations of six TRB da
 \subsection*{Appendix D: Model validation analysis workflows}
 Figure~\ref{fig:IgorWorkflow} illustrates the \igor\ model validation workflow.
 We employ \igblast\ to obtain CDR3 sequences for the observed sequences, which \igor\ only outputs for generated sequences.
-Moreover, because we fit \igor\ models on predominantly functional TRB sequences, we consider only \igor-generated sequences whose V and J segments are in-frame.  
+Moreover, because we fit \igor\ models on predominantly functional TRB sequences, we consider only \igor-generated sequences whose V and J segments are in-frame.
 
 %EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
 %BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
