@@ -57,9 +57,6 @@
 
 \begin{document}
 
-%BJO - I realize that I alternate between IGoR and "\texttt{igor}" throughout the document, as well as IgBlast vs \igblast. Do you have a preference, Erick? I believe I'm consistent with writing \partis throughout.
-%EM I prefer \texttt{IGoR} etc. I made you some commands above. Note that you'll need `\igor\ ` with a trailing backslash to get a space after the command.
-
 \maketitle
 
 \begin{abstract}
@@ -67,8 +64,8 @@ The adaptive immune system generates an incredible diversity of antigen receptor
 The DNA sequences coding for these receptors arise by a complex recombination process followed by a series of binding-based filters, as well as affinity maturation for B cells, giving considerable structure to the circulating pool of receptor sequences.
 Although these data sets hold considerable promise for medical and public health application, the complex structure of the resulting immune repertoire sequencing (Rep-Seq) datasets makes analysis difficult.
 In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
-%BJO Very high level summary here. Need to double check Peji and Chaim's analyses
-We find that summaries vary in their ability to differentiate between datasets, although many are able to distinguish between donor as well as time of vaccination.
+We find that summaries vary in their ability to differentiate between datasets, although many are able to distinguish between covariates such as donor, timepoint, and cell type for BCR and TCR repertoires.
+We show that deletion and insertion lengths resulting from VDJ recombination tend to be more informative descriptions of a repertoire than summaries characterizing amino acid composition of the junction region.
 Furthermore, we find that state-of-the-art generative models excel at recapitulating gene usage and indel statistics in a given experimental repertoire, but struggle to capture many physiobiological properties of real repertoires.
 \end{abstract}
 
@@ -394,9 +391,6 @@ an analysis of \igor~\cite{Marcou2018-du} applied to TRB sequences, and an analy
 Both tools are applied to separate sets of experimental repertoires, yielding model-based annotations for each repertoire, as well as simulated datasets from the inferred model parameters for each experimental set.
 Relevant scores of each summary for each tool are computed using each observed and simulated dataset.
 
-%EM Agreed here!
-%BJO - TODO: Add quick summaries of the IGoR and partis analyses as summarized form the Methods subsections
-
 \subsection*{Assessing summary statistic replication for \igor}
 We apply the methodology discussed in the previous section to TRB sequences from \cite{Britanova2016-iw}.
 The full study sequenced experimental TRB repertoires from various donors across the lifespan, although we only examine six datasets here as discussed in the materials section.
@@ -414,7 +408,7 @@ We exclude \texttt{sequence\_alignment}-based summaries such as GC content and p
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
     	\caption{LRAD-data values for each statistic based on Equation~\ref{eq:ScoreObs}.
         %EM Seems like one more phrase of explanation would help make this figure easier to interpret. It's functional(?) TCR data (and partis is BCR data...)
-        %BJO I added a caption for the full figure and elaborated -- would you like more explanation?
+        %BJO I added a caption for the full figure and elaborated -- lmk if you'd like further explanation about something in particular.
         }
     	\label{fig:ObsScoresTCR}
 	\end{subfigure}
@@ -440,8 +434,7 @@ This suggests that while the average \igor\ simulation yields Kidera factor and 
 
 \subsection*{Assessing summary statistic replication for \partis}
 We apply the same methodology to IgH sequences from \cite{Gupta2017-ve} (originally published in \cite{Laserson2014-dx}).
-%BJO Actually, I ran this on the 1h/8d pre-vaccination sets, not post-vaccination. Happy to hear objections if anyone would rather I run on post-vaccination sets.
-This data consists of longitudinal IgH repertoires of three donors pre- and post-vaccination with influenza; we analyze the one-hour post-vaccination and eight-days post-vaccination repertoires for each donor.
+This data consists of longitudinal IgH repertoires of three donors prior to an influenza vaccination; we analyze the one-hour and eight-day pre-vaccination repertoires for each donor.
 Figure~\ref{fig:PartisFreqPolys} displays frequency polygons of each summary distribution for each experimental and simulated repertoire.
 \begin{figure}
 %EM I think that only one of these should go in the main text, but it's a matter for discussion with the group.
@@ -794,9 +787,6 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
     	\caption{Runtime (in log-seconds) for Algorithm~\ref{alg:DistributionAveraging} by tolerance, taken over 10 trials.}
     	\label{fig:Times}
     \end{subfigure}
-    %EM if we want these to get a "Figure XX" label the overall figure needs a caption.
-    %BJO I don't believe I needed/wanted these sorts of labels for references, but I'm not against it either.
-    %EM It looks quite strange to me to have (a), etc, but no figure number. Sorry!
     \caption{Performance of Algorithm~\ref{alg:DistributionAveraging} by tolerance applied to the pairwise distance distribution.}
 \end{figure}
 Figure~\ref{fig:FreqPoly} shows a frequency polygon of each distribution and figure~\ref{fig:ECDF} shows their empirical cumulative distribution functions.
@@ -843,7 +833,6 @@ Nonetheless, the accuracy of Algorithm~\ref{alg:DistributionAveraging} applied t
     \caption{Performance of Algorithm~\ref{alg:DistributionAveraging} by sample size and tolerance applied to the pairwise distance distribution.}
 \end{figure}
 
-%BJO - Rerunning this as I think the plot is outdated (1,000 seqs instead of 10,000)
 Finally, we investigate the effect of summary statistic on the performance of Algorithm~\ref{alg:DistributionAveraging}.
 We run the algorithm for the pairwise distance, GC content, hotspot count, coldspot count, and distance from germline to sequence distributions on \texttt{p\_f1} subsampled without replacement to 10,000 rows.
 For each summary, we run the algorithm for tolerances $\varepsilon \in \{0.1, \dotsc, 10^{-5}\}$.
