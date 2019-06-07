@@ -182,14 +182,14 @@ Level three requires clonal family cluster assignments.
 Level four requires an imputed phylogeny for each clonal family for Ig loci.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
-\texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate ``divergence''.
+\texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate ``divergence'', or measure of dissimilarity between instances of a summary.
 For example, the \texttt{getCDR3LengthDistribution} function returns a vector of each sequence's CDR3 length, and the corresponding \texttt{compareCDR3LengthDistributions} function takes two repertoires and returns a numerical summary of the dissimilarity between these two length distributions.
-The comparison method depends on the summary, and this is discussed more in the Methods section.
-There is also a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befit the data.
+The comparison method depends on the summary, discussed further in the Methods section.
+\texttt{sumrep} also includes a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befit the data.
 
-The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in Figures~\ref{fig:SummaryCartoon} and \ref{fig:DivergenceCartoon}.
-A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
-These two resultant distributions can be compared using a divergence $\mathcal D$ that is tailored to the nature of $s$.
+Figure~\ref{fig:SummaryFramework} illustrates the general framework of comparing summary statistics between two repertoires $R_1$ and $R_2$.
+A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most summaries yields a distribution of values (Figure~\ref{fig:SummaryCartoon}).
+These two resultant distributions can be compared using a divergence $\mathcal D$ that is tailored to the nature of $s$ (Figure~\ref{fig:DivergenceCartoon}).
 We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC content, CDR3 length), which is a symmetrized version of KL-divergence, a weighted average log-ratio of frequencies widely-used in statistics and machine learning.
 We use the similarly popular $\ell_1$ divergence to compare categorical distributions (e.g. gene call frequencies, amino acid frequencies), which is a sum of absolute differences of counts.
 %EM Shall we try for an intuitive explanation of JS / KL?
@@ -200,11 +200,11 @@ We use the similarly popular $\ell_1$ divergence to compare categorical distribu
 %EM Hm, yeah, I was dreaming of something simpler, like the weighted average log ratio.
 %BJO OK, I gave it a try above. Please modify it as you wish.
 
-We have designed \texttt{sumrep} to efficiently approximate computationally inefficient summaries for moderate and large repertoires.
+We have designed \texttt{sumrep} to efficiently approximate computationally intensive summaries.
 When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
-The result is an approximation to the full distribution, which trades some noise for very substantial efficiency gains for large datasets.
+The result is an approximation to the full distribution; by introducing slight levels of noise, we can gain very substantial efficiency gains for large datasets.
 This in turn allows fast, accurate divergence estimates between dataset summaries.
-We outline a generic distribution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
+We outline a generic distribution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical validation of these algorithms in Appendices A and B.
 
 %BJO I tried aligning the captions nicely to no avail.
 \begin{figure}
@@ -277,7 +277,7 @@ We outline a generic distribution approximation algorithm as well as a modified 
     = 0.05
     $
     \caption{
-    We can compare these distributions using a statistical divergence $\mathcal D$, which takes two distributions and outputs a nonnegative scalar.
+    We can compare summary distributions using a statistical divergence $\mathcal D$, which takes two distributions and outputs a nonnegative scalar.
     }
     \label{fig:DivergenceCartoon}
     \end{subfigure}
@@ -293,43 +293,43 @@ We outline a generic distribution approximation algorithm as well as a modified 
 		\label{fig:DataSimSummary}
     \end{subfigure}
     \caption{Cartoon of our summary statistic and divergence framework, and how this can be applied to validation of repertoire simulators.}
+    \label{fig:SummaryFramework}
 \end{figure}
 
-\texttt{sumrep} also contains a plotting function for each univariate summary distribution.
+\texttt{sumrep} additionally contains a plotting function for each univariate summary distribution.
 For example, the \texttt{getCDR3LengthDistribution} comes with a companion plotting function called \texttt{plotCDR3LengthDistribution}.
-\texttt{sumrep} also comes with a ``master'' plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of univariate distribution plots relevant to the locus in question.
+\texttt{sumrep} also includes a ``master'' plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of all univariate distribution plots relevant to the locus in question which can be computed from the input dataset.
 Currently, these plotting functions support frequency polygons and empirical cumulative distribution functions (ecdfs).
-Examples of these plots are given in later sections.
+Examples of these plots can be found throughout later sections of this report.
 
 \subsection*{Multidimensional scaling of TCR summary divergences}
-To examine the ability of various summary statistic to distinguish between differences in TCR repertoires by covariate, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
-In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination to form a dissimilarity matrix.
+To examine the ability of various summary statistics to distinguish between differences in TCR repertoires by covariate, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
+In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination, with two replicas per donor-timepoint value, to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
-Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each space grouped by donor and timepoint.
+Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each replica grouped by donor and timepoint.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
     %EM If this is a MDS plot why are the labels in terms of PCA?
-    %BJO Well, another name for classical MDS (which is done for both of these analyses) is principal coordinates analysis, so these labels can still apply. But, I've changed the labels in both plots to be less ambiguous.
+    %BJO Well, another name for classical MDS (which is done for both of these analyses) is principal coordinates analysis, so these labels can still apply. But, I've changed the labels in both plots to be less misleading.
     \caption{Plots of summary divergence MDS coordinates for the Pogorelyy (2018) data, grouped by donor and timepoint}
     \label{fig:TCR_MDS}
 \end{figure}
 We see that for almost all summaries, these points cluster according to donor identity, with the CDR3 pairwise distance distribution being the only summary that does not decisively cluster by donor.
-The D gene usage distribution has more unusual cross-like pattern, whose structure is more difficult to assess.
-Other summaries, such as the CDR3 pairwise distance distribution and Hill numbers, yield little to no signal.
-Moreover, there does seem to be signal induced by donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
+The D gene usage distribution has an unusual cross-like pattern, whose structure is more difficult to assess.
+Moreover, many summaries cluster according to donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
 Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when TCR datasets are stratified by covariates.
 
 \subsection*{Multidimensional scaling of BCR summary divergencess}
-To examine the ability for various summary statistics to distinguish between differences in BCR repertoires by covariate, we performed a similar MDS analysis of summary divergences using data from \cite{Rubelt2016-tl}.
+Next we performed a similar MDS analysis of summary divergences of BCR repertoires stratified by covariate, using data from \cite{Rubelt2016-tl}.
 We computed divergences of each summary between each pair of a collection of datasets stratified by five pairs of twins as well as B cell classification as memory or naive to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
-Figure~\ref{fig:BCR_MDS} displays plots of the first two coordinates of each space grouped by twin pair identity and cell type.
+Figure~\ref{fig:BCR_MDS} displays plots of the first two coordinates of each donor grouped by twin pair identity and cell type.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/bcr_pca.pdf}
     \caption{Plots of summary divergence MDS coordinates for the Rubelt (2016) data, grouped by twin pair identity and cell type (memory vs naive).}
     \label{fig:BCR_MDS}
 \end{figure}
-We see that for each summary, points can be mostly separated according to cell type, with some summaries (e.g. V gene usage, AA frequencies, acidity) having clear separation between memory and naive cells, and others (e.g. GRAVY index, DJ insertion length) having lower degrees of separation.
+We see that for each summary, points can be separated according to cell subset, with some summaries (e.g. V gene usage, AA frequencies, acidity) clustering more tightly among cell subset, and others (e.g. GRAVY index, DJ insertion length) clustering more loosely.
 In addition, the naive repertoires appear to be more tightly clustered than the memory repertoires for each summary.
 Finally, for the gene usage statistics, there is a strong tendency for twins to have higher similarity than unrelated donors, although this tendency is not consistently observed for other statistics.
 For example, points for the amino acid 2mer frequency distribution divergences tend to have high similarity between twins, but the GRAVY index distribution divergences do not.
@@ -340,6 +340,7 @@ Due to the large number of summary statistics supported by \texttt{sumrep}, many
 To address this, we employed a lasso multinomial regression treating certain sequence-level summaries as covariates and dataset identity as the response.
 The basic idea is that this regression method cuts out all but a few predictor variables to find a smaller collection of informative summary statistics, as a coefficient is ``allowed'' to be nonzero only when the lasso deems it a relatively meaningful predictor.
 As the regularization parameter $\lambda$ is decreased, more and more coefficients  become nonzero, leading to a natural ordering of summaries as the order in which their coefficient ``branches off'' from zero.
+Then the desired maximally-informative set of $k$ summaries could just be the set of summaries with the $k$ best ranks.
 
 One caveat to this approach is that we can only use sequence-level summary statistics as covariates in order to have a well-defined regression procedure (details can be found in the Methods section).
 However, the majority of summaries considered in this report are applied at the sequence level.
@@ -724,6 +725,7 @@ This is discussed in detail in Appendix C.
 
 \subsection*{Materials}
 The raw data for the TCR summary divergence MDS analysis comes from \cite{Pogorelyy2018-ak}, which was postprocessed into a suitable format for analysis.
+For each donor-timepoint combination, a single blood draw was split in replicas at the level of cell mixture.
 
 The raw data for the BCR summary divergence MDS analysis comes from \cite{Rubelt2016-tl}; \igblast-preprocessed data was downloaded from VDJServer in the AIRR format.
 For quality control, sequences with a run of 3 or more \texttt{N} bases in the raw sequence were discarded.
