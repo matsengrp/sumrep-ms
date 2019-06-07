@@ -62,10 +62,11 @@
 \begin{abstract}
 The adaptive immune system generates an incredible diversity of antigen receptors for B and T cells to keep dangerous pathogens at bay.
 The DNA sequences coding for these receptors arise by a complex recombination process followed by a series of functionality-based filters, as well as affinity maturation for B cells, giving considerable structure to the circulating pool of receptor sequences.
-Although these data sets hold considerable promise for medical and public health application, the complex structure of the resulting immune repertoire sequencing (Rep-Seq) datasets makes analysis difficult.
+%BJO I've noticed that we have used both 'dataset' and 'data set' throughout the doc. Permission to change them all to 'dataset'?
+Although these data sets hold considerable promise for medical and public health applications, the complex structure of the resulting immune repertoire sequencing (Rep-Seq) datasets makes analysis difficult.
 In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
 We find that summaries vary in their ability to differentiate between datasets, although many are able to distinguish between covariates such as donor, timepoint, and cell type for BCR and TCR repertoires.
-We show that deletion and insertion lengths resulting from VDJ recombination tend to be more discriminative characterizations of a repertoire than summaries characterizing amino acid composition of the junction region.
+We show that deletion and insertion lengths resulting from VDJ recombination tend to be more discriminative characterizations of a repertoire than summaries that describe the amino acid composition of the junction region.
 On the other hand, we find that state-of-the-art generative models excel at recapitulating gene usage and recombination statistics in a given experimental repertoire, but struggle to capture many physiochemical properties of real repertoires.
 \end{abstract}
 
@@ -78,19 +79,14 @@ We refer to the set of B and T cell receptors present in an individual's immune 
 
 Although immune receptor repertoires are now accessible for scientific research and medical applications through high-throughput sequencing, it is not necessarily straightforward to gain insight from and to compare these data sets.
 Indeed, if these data sets are not processed, they are simply a list of DNA sequences.
-After annotation one can use gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt}, and then use some method to compare CDR3 sequences.
+After annotation one can compare gene usage frequencies \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt}, and then use some method to compare CDR3 sequences.
 This can be a highly involved task, and so it is common to simply compare CDR3 length distribution of a repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of CDR3 sequence unanalyzed, as well as other interesting aspects of the germline-encoded regions.
-% or diversity measures of clonotype classifications \cite{Aouinti2015-ke, Bischof2016-fn}.
-% Besides the theoretical complexity discussed above, experimental repertoire datasets are a very sparse sample of an individual's dynamic ``population'' repertoire, and these experimental samples are subject to sequencing error, truncated reads, and other sources of uncertainty and censorship.
-% commenting because Dash isn't widely used for repertoire comparison
-% Current approaches to repertoire comparison involve either distance-based methods \cite{Dash2017-rz},
+
 
 An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
 For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
 One can perform other dimension reduction techniques like t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also lose a lot of information and can be difficult to interpret biologically.
-%BJO I basically included the below sentence for the IMGT/HighV-Quest reference which runs on IMGT-particular data formats, for what it's worth
-% Moreover, many of these comparison frameworks rely on a particular tool or pipeline, disallowing for general-purpose rep-seq dataset comparison.
 
 We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of Rep-Seq repertoires.
 In addition to enabling comparison of different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
@@ -98,18 +94,19 @@ Namely, one can use a form of model checking that is common in statistics: after
 In this case, we generate a repertoire of sequences from the models and compare this collection to a real-data repertoire of sequences via summary statistics.
 
 We are motivated to perform such comparison because these probabilistic models are used as part of inference, and because they are used for inferential tool benchmarking.
+%BJO This is a good spot for the ground-truth benchmarking figure, if we want to include it. 
 Such generative models are used to simulate sequences to have a ``ground truth'' for benchmarking inferential software \cite{Ralph2016-iz,Gupta2017-ve,Marcou2018-du}, and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
 Simulation tools can also be used to generate a null distribution used to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
 Currently there are no unified packages dedicated to the task of calculating and comparing summary statistics for Rep-Seq data sets.
-While the Immcantation pipeline (which includes the \texttt{shazam} and \texttt{alakazam} R packages) contains many summary functions for Rep-Seq data, it does not have general functionality for retrieving, comparing, and plotting these summaries \cite{Gupta2015-iu}.
+While the Immcantation pipeline (which includes the \texttt{shazam} and \texttt{alakazam} R packages) contains many summary functions for Rep-Seq data~\cite{Gupta2015-iu}, it does not have general functionality for retrieving, comparing, and plotting these summaries.
 Many summaries of interest are implemented in one package or another, but differences in functionality and data structures make it troublesome to compute and compare summaries across packages.
 Some summaries of interest, such as the positional distance between mutations distribution, are not readily implemented in any package.
 
 In this paper, we gather dozens of meaningful summary statistics on repertoires, derive efficient and robust summary implementations, and identify appropriate comparison methods for each summary.
 We present \texttt{sumrep}, an R package that computes these summary distributions for Rep-Seq datasets and performs repertoire comparisons based on these summaries.
-We investigate the effectiveness of various summary statistics in distinguishing between different observed repertoires as well as between simulated and observed data, and show that many summaries are able to differentiate between subject as well as time after vaccination within a subject.
-Further, we demonstrate how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \igor~\cite{Marcou2018-du} for TCRs, and \partis~\cite{Ralph2016-nw, Ralph2016-iz} for BCRs.
+We investigate the effectiveness of various summary statistics in distinguishing between different experimental repertoires as well as between simulated and experimental data, and show that many summaries are able to differentiate between various covariates by which the datasets are stratified.
+Further, we demonstrate how \texttt{sumrep} can be used for model validation through case studies of two state-of-the-art repertoire simulation tools: \igor~\cite{Marcou2018-du} applied to TRB sequences, and \partis~\cite{Ralph2016-nw, Ralph2016-iz} applied to IgH sequences.
 
 
 \section*{Results}
@@ -663,8 +660,8 @@ While it is possible to simulate multiple leaves for each rearrangement, it is n
 For example, if we had one clonal family with 1,000 members, and 99 singleton clonal families, we could try to coerce the simulator to produce on average a (roughly) size-1,000 clonal family for every 99 singletons.
 However, it seems like this is highly contrived to the nature of our experimental sample, and does not clearly mimic the true repertoire dynamics of the individual from which the dataset was obtained.
 Also, there is ambiguity to whether the rearrangement parameters for this size-1,000 clonal family should always match those of the observed size-1,000 clonal family, or if they should be sampled in some random fashion.
-Perhaps the most principled but more involved analysis would mimic the clone size distribution in data, potentially with correlations between clone size and other rearrangement parameters, and assess sequence-level statistics within each clonal family.
-Here we opt to subsample to unique clones and abundance biases altogether.
+A more involved analysis would mimic the clone size distribution in data, potentially with correlations between clone size and other rearrangement parameters, and assess sequence-level statistics within each clonal family.
+Here we opt to subsample to unique clones and avoid abundance biases altogether.
 
 
 \subsection*{Scoring summary statistic replication by model}
