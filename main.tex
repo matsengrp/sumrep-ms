@@ -190,7 +190,7 @@ For example, the \texttt{getCDR3LengthDistribution} function returns a vector of
 The comparison method depends on the summary, and this is discussed more in the Methods section.
 There is also a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befit the data.
 
-The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in Figure~\ref{fig:DivergenceCartoon}.
+The general framework of comparing summary statistics between repertoires $R_1$ and $R_2$ is illustrated in Figures~\ref{fig:SummaryCartoon} and \ref{fig:DivergenceCartoon}.
 A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most summaries yields a distribution of values.
 These two resultant distributions can be compared using a divergence $\mathcal D$ that is tailored to the nature of $s$.
 We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC content, CDR3 length), which is a symmetrized version of KL-divergence, a weighted average log-ratio of frequencies widely-used in statistics and machine learning.
@@ -209,75 +209,93 @@ The result is an approximation to the full distribution, which trades some noise
 This in turn allows fast, accurate divergence estimates between dataset summaries.
 We outline a generic distribution approximation algorithm as well as a modified version for the nearest neighbor distance distribution in the Methods section, and conduct extensive empirical analyses of these algorithms in Appendices A and B.
 
+%BJO I tried aligning the captions nicely to no avail.
 \begin{figure}
-\begin{gather}
-s(R_1) =
-\begin{tikzpicture}[baseline={(0.5, 0.5)}]
-\begin{axis}[
-  domain=0:8, samples=100,
-  xlabel near ticks,
-  xtick=4,
-  yticklabels={,,},
-  xticklabels={GC content},
-  tick style={draw=none},
-  axis line style={draw=none},
-  height=3cm, width=3cm,
-  enlargelimits=false, clip=false, axis on top
-  ]
-  \addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
-\end{axis}
-\end{tikzpicture}
-\hspace{1em}
-s(R_2) =
-\begin{tikzpicture}[baseline={(0.5, 0.5)}]
-\begin{axis}[
-  no markers, domain=0:11, samples=100,
-  xlabel near ticks,
-  xtick=5.5,
-  yticklabels={,,},
-  xticklabels={GC content},
-  tick style={draw=none},
-  axis line style={draw=none},
-  height=3cm, width=3cm,
-  enlargelimits=false, clip=false, axis on top
-  ]
-  \addplot [very thick,violet, fill=violet!20!] {multimodal(3, 6)};
-\end{axis}
-\end{tikzpicture}
-\\
-\mathcal D_\text{GC-content}
-\left(
-	\begin{tikzpicture}[baseline={(0.5, 0.5)}]
-		\begin{axis}[
-  		domain=0:8, samples=100,
-      	axis lines=none,
-      	height=3cm, width=3cm,
-      	enlargelimits=false, clip=false, axis on top
-      	]
-      	\addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
-    	\end{axis}
+    \begin{subfigure}[c]{0.5\linewidth}
+    \begin{align*}
+    s(R_1) & =
+    \begin{tikzpicture}[baseline={(0.5, 0.5)}]
+    \begin{axis}[
+      domain=0:8, samples=100,
+      xlabel near ticks,
+      xtick=4,
+      yticklabels={,,},
+      xticklabels={GC content},
+      tick style={draw=none},
+      axis line style={draw=none},
+      height=3cm, width=3cm,
+      enlargelimits=false, clip=false, axis on top
+      ]
+      \addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
+    \end{axis}
     \end{tikzpicture}
-,
-\begin{tikzpicture}[baseline={(0.5, 0.5)}]
-\begin{axis}[
-  no markers, domain=0:11, samples=100,
-  axis lines=none,
-  height=3cm, width=3cm,
-  enlargelimits=false, clip=false, axis on top
-  ]
-  \addplot [very thick,violet, fill=violet!20!] {multimodal(3, 6)};
-\end{axis}
-\end{tikzpicture}
-\right)
-= 0.05
-\end{gather}
-\caption{
-Cartoon of our summary divergence framework.
-Most summary statistics $s$, e.g.\ GC content, yield a distribution of values when applied to each of the sequences in a given repertoire $R$.
-We can compare these distributions using a statistical divergence $\mathcal D$, which takes two distributions and outputs a nonnegative scalar.
-We have also chosen appropriate divergences for summaries that do not give distributions (such as substitution rates and diversity indices).
-}
-\label{fig:DivergenceCartoon}
+    \\
+    \hspace{1em}
+    s(R_2) & =
+    \begin{tikzpicture}[baseline={(0.5, 0.5)}]
+    \begin{axis}[
+      no markers, domain=0:11, samples=100,
+      xlabel near ticks,
+      xtick=5.5,
+      yticklabels={,,},
+      xticklabels={GC content},
+      tick style={draw=none},
+      axis line style={draw=none},
+      height=3cm, width=3cm,
+      enlargelimits=false, clip=false, axis on top
+      ]
+      \addplot [very thick,violet, fill=violet!20!] {multimodal(3, 6)};
+    \end{axis}
+    \end{tikzpicture}
+    \end{align*}
+    \caption{Most summary statistics $s$, e.g.\ GC content, yield a distribution of values when applied to each of the sequences in a given repertoire $R$.}
+    \label{fig:SummaryCartoon}
+    \end{subfigure}
+    \begin{subfigure}[c]{0.5\linewidth}
+    $
+    \mathcal D_\text{GC-content}
+    \left(
+    	\begin{tikzpicture}[baseline={(0.5, 0.5)}]
+    		\begin{axis}[
+      		domain=0:8, samples=100,
+          	axis lines=none,
+          	height=3cm, width=3cm,
+          	enlargelimits=false, clip=false, axis on top
+          	]
+          	\addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
+        	\end{axis}
+        \end{tikzpicture}
+    ,
+    \begin{tikzpicture}[baseline={(0.5, 0.5)}]
+    \begin{axis}[
+      no markers, domain=0:11, samples=100,
+      axis lines=none,
+      height=3cm, width=3cm,
+      enlargelimits=false, clip=false, axis on top
+      ]
+      \addplot [very thick,violet, fill=violet!20!] {multimodal(3, 6)};
+    \end{axis}
+    \end{tikzpicture}
+    \right)
+    = 0.05
+    $
+    \caption{
+    We can compare these distributions using a statistical divergence $\mathcal D$, which takes two distributions and outputs a nonnegative scalar.
+    }
+    \label{fig:DivergenceCartoon}
+    \end{subfigure}
+    \begin{subfigure}[c]{0.48\linewidth}
+    	\includegraphics[width=\linewidth]{Figures/data_sim.pdf}
+		\caption{For a given experimental dataset, we use simulator tools to generate a corresponding set of synthetic sequences.}
+		\label{fig:DataSim}
+    \end{subfigure}
+    \;
+    \begin{subfigure}[c]{0.48\linewidth}
+    	\includegraphics[width=\linewidth]{Figures/data_sim_summaries.pdf}
+		\caption{We can compute many summaries of these repertoires yielding distributions for comparison.}
+		\label{fig:DataSimSummary}
+    \end{subfigure}
+    \caption{Cartoon of our summary statistic and divergence framework, and how this can be applied to validation of repertoire simulators.}
 \end{figure}
 
 \texttt{sumrep} also contains a plotting function for each univariate summary distribution.
@@ -365,10 +383,10 @@ Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranke
 Visually, we see that the acidity curves do not vary much among donors or timepoints; the aromaticity curves have slightly more variation but are still highly similar; and the V 3' deletion length curves are more distinguished between some donors (e.g. FV and IB) as well as some donor-timepoint interactions (e.g. -1 and +7 timepoints for IB).
 Thus, there is some visual evidence that the lasso scores are identifying some degree of informativeness among summaries.
 
-\subsection*{Comparing observations to model simulations per model}
+\subsection*{Comparing experimental observations to model simulations}
 \texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
-First, given a collection of repertoire datasets, infer model parameters using software based on the given model for each repertoire, and use these parameters to generate corresponding simulated datasets.
-Next, use \texttt{sumrep} to compute each summary statistic listed in Table~\ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets.
+First, given a collection of repertoire datasets, infer model parameters using software based on the given model for each repertoire, and use these parameters to generate corresponding simulated datasets (Figure~\ref{fig:DataSim}).
+Next, use \texttt{sumrep} to compute each summary statistic listed in Table~\ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets (Figure~\ref{fig:DataSimSummary}.
 Then, calculate a score of how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
 
 Applying this methodology using many datasets should give a clear view of which characteristics the model captures well, as well as areas for improvement.
