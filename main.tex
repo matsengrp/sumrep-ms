@@ -794,7 +794,7 @@ We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pog
 \beginsupplement
 
 \section*{Appendix A: Performance of distribution subsampling algorithms}
-Here, we run Algorithm~\ref{alg:DistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
+Here, we run Algorithm~\ref{alg:DistributionAveraging} on the \partis-annotated FV -1h dataset (henceforth referred to as \texttt{p\_f1}), subsampled without replacement to 10,000 sequences for tractability.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
 \begin{figure}
@@ -1190,55 +1190,5 @@ Hence, it is important to understand that a given annotations-based summary shou
     \caption{Summary distribution frequency polygons of three datasets based on \partis\ versus \igblast\ annotations.}
     \label{fig:PartisIgBlastFreqpolys}
 \end{figure}
-
-%BJO - I'm not actually sure how necessary this table is anymore, since I removed the divergence plot which used these abbreviations as axis labels. Everything just gets rolled up into the score plots and freqpolys/ecdfs now.
-%BJO - p_f1 does show up in the subsampling performance analyses in Appendices A and B.
-\section*{Appendix F: Metadata for \partis\ analysis}
-
-Table~\ref{tab:Datasets} gives metadata for each dataset used in the following analyses.
-In short, the notation is as follows.
-A prefix of \texttt{p} corresponds to \partis\ annotations, a prefix of \texttt{i} corresponds to \igblast\ annotations, and a prefix of \texttt{pi} corresponds to \partis\ annotations using the default IMGT germline databases for \igblast; this is followed by a letter representing the individual succeeded by a number corresponding to the time point;
-finally, we append the \texttt{sim} suffix if the dataset was simulated from an individual's inferred model parameters.
-\begin{table}
-\makebox[\textwidth][c]{
-\begin{tabular}{c|c|c|c|c|c}
-	Dataset label & Dataset type & Annotation tool & Germline set & Individual & Time point \\
-	\hline
-    \texttt{p\_f1} & Observation &     \partis & \partis & F & 1 hour \\
-    \texttt{p\_f2} & Observation &     \partis & \partis & F & 8 days \\
-    \texttt{p\_g1} & Observation &     \partis & \partis & G & 1 hour \\
-    \texttt{p\_g2} & Observation &     \partis & \partis & G & 8 days \\
-    \texttt{p\_i1} & Observation &     \partis & \partis & I & 1 hour \\
-    \texttt{p\_i2} & Observation &     \partis & \partis & I & 8 days \\
-    \texttt{i\_f1} & Observation &     \igblast & IMGT & F & 1 hour \\
-    \texttt{i\_f2} & Observation &     \igblast & IMGT & F & 8 days \\
-    \texttt{i\_g1} & Observation &     \igblast & IMGT & G & 1 hour\\
-    \texttt{i\_g2} & Observation &     \igblast & IMGT & G & 8 days\\
-    \texttt{i\_i1} & Observation &     \igblast & IMGT & I & 1 hour\\
-    \texttt{i\_i2} & Observation &     \igblast & IMGT & I & 8 days\\
-    \texttt{pi\_f1} & Observation &    \partis & IMGT & F & 1 hour\\
-    \texttt{pi\_f2} & Observation &    \partis & IMGT & F & 8 days\\
-    \texttt{pi\_g1} & Observation &    \partis & IMGT & G & 1 hour\\
-    \texttt{pi\_g2} & Observation &    \partis & IMGT & G & 8 days\\
-    \texttt{pi\_i1} & Observation &    \partis & IMGT & I & 1 hour\\
-    \texttt{pi\_i2} & Observation &    \partis & IMGT & I & 8 days\\
-    \texttt{p\_f1\_sim} & Simulation & \partis & \partis & F & 1 hour\\
-    \texttt{p\_f2\_sim} & Simulation & \partis & \partis & F & 8 days\\
-    \texttt{p\_g1\_sim} & Simulation & \partis & \partis & G & 1 hour\\
-    \texttt{p\_g2\_sim} & Simulation & \partis & \partis & G & 8 days\\
-    \texttt{p\_i1\_sim} & Simulation & \partis & \partis & I & 1 hour\\
-    \texttt{p\_i2\_sim} & Simulation & \partis & \partis & I & 8 days\\
-    \texttt{pi\_f1\_sim} & Simulation& \partis & IMGT & F & 1 hour\\
-    \texttt{pi\_f2\_sim} & Simulation& \partis & IMGT & F & 8 days\\
-    \texttt{pi\_g1\_sim} & Simulation& \partis & IMGT & G & 1 hour\\
-    \texttt{pi\_g2\_sim} & Simulation& \partis & IMGT & G & 8 days\\
-    \texttt{pi\_i1\_sim} & Simulation& \partis & IMGT & I & 1 hour\\
-    \texttt{pi\_i2\_sim} & Simulation& \partis & IMGT & I & 8 days\\
-\end{tabular}
-}
-\caption{Metadata for each dataset used in the BCR analyses}
-\label{tab:Datasets}
-\end{table}
-
 
 \end{document}
