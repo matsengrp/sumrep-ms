@@ -495,7 +495,7 @@ The scores are highly similar to those seen in Figure~\ref{fig:ObsScoresBCR}, wi
 
 \section*{Methods}
 \subsection*{Divergence}
-We elect the Jenson-Shannon (JS) divergence for most of our comparison functions.
+We elect the Jenson-Shannon (JS) divergence for comparing distributions of scalar quantities, which constitutes most summaries in \texttt{sumrep}.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
 \begin{equation}
 \text{JSD}\left(P \ || \ Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
@@ -509,32 +509,32 @@ In the case where $P$ and $Q$ are both discrete distributions, this becomes
 \text{KLD}\left(P_1 \ || \ P_2\right) = \sum_{i \in \text{supp}(P_1)} p_1(i) \log\left( \frac{p_1(i)}{p_2(i)} \right)
 \end{equation}
 where $\text{supp}(P)$ is the countable support of distribution $P$.
-Because the discrete formulation is much nicer to worth with than the continuous one, we discretize continuous samples and treat them as discrete data.
+Because the discrete formulation has computational benefits over the continuous one, we discretize continuous samples and treat them as discrete data.
 By default, we use $B = \max\left(\left\lceil \sqrt{\min(m, n)} \right \rceil, 2\right)$ bins of equal length, where $m = |\text{supp}(P)|$ and $n = |\text{supp}(Q)|$, which is designed to scale with the complexity of $m$ and $n$ simultaneously.
 We also discard bins which would lead to an infinite KL divergence for numerical stability.
 
-Sometimes it makes more sense to use other distance metrics, such as the sum of absolute differences, or $\ell_1$ divergence, for count data of categorical variables:
+For counts of categorical data, we instead appeal to the sum of absolute differences, or $\ell_1$ divergence, for comparison:
 \begin{equation}\label{eq:SAD}
     d_{\ell_1}(R_1, R_2; c, \mathcal S) = \sum_{s \in \mathcal S} \left| c(s; R_1) - c(s; R_2) \right|.
 \end{equation}
 In words, \eqref{eq:SAD} iterates over each element $s$ in some set $\mathcal S$, calculates the count $c$ of $s$ within repertoires $R_1$ and $R_2$ respectively, takes the absolute difference of counts, and appends this to a rolling sum.
 This metric is well suited for comparing marginal or joint V/D/J-gene usage distributions.
-For example, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively,
-defining define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
+For example, if $\mathcal V$, $\mathcal D$, and $\mathcal J$ represent the germline sets of V, D, and J genes, respectively, define usage $u$ of gene triple $(v, d, j) \in \mathcal V \times \mathcal D \times \mathcal J$ for repertoire $R$ as
 \begin{equation}
 u(R; v, d, j) = \#\left\{s \in R: s_v = v, s_d = d, s_j = j\right\},
 \end{equation}
-where e.g. $s_v = $ the V gene of $s$, then an appropriate divergence for the joint VDJ gene usage for repertoires $R_1$ and $R_2$ is
+where e.g. $s_v = $ the V gene of $s$.
+Then an appropriate divergence for the joint VDJ gene usage for repertoires $R_1$ and $R_2$ is
 \begin{equation}
 d(R_1, R_2; u, \mathcal V, \mathcal D, \mathcal J) = \sum_{v \in \mathcal V} \sum_{d \in \mathcal D} \sum_{j \in \mathcal J} \left| u(v, d, j; R_1) - u(v, d, j; R_2) \right|.
 \end{equation}
-This divergence is also relevant for computing amino acid frequency and 2mer frequency distributions.
-Note that we can normalize the counts to become relative frequencies and apply the $\ell_1$ metric on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
+The $\ell_1$ divergence is also relevant for computing amino acid frequency and 2mer frequency distributions.
+Note that we can normalize the counts to become relative frequencies and apply \eqref{eq:SAD} on the resultant scale which may be better suited to the application, especially when dataset sizes differ notably.
 
 \subsection*{Approximating distributions via subsampling and averaging}
 Computing full summary distributions over large datasets can be intractable.
 However, we can compute a Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values until convergence.
-This idea is laid out in Algorithm~\ref{alg:DistributionAveraging}, which appends batch samples of $d$ to a rolling approximate distribution and terminates when successive distribution iterates have a JS divergence smaller than tolerance $\varepsilon$.
+Algorithm~\ref{alg:DistributionAveraging} formalizes this idea, appending batch samples of $d$ to a rolling approximate distribution and terminating when successive distribution iterates have a JS divergence smaller than tolerance $\varepsilon$.
 Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
 %BJO Should we make the algorithms figures?
 \begin{algorithm}
@@ -558,12 +558,12 @@ Note that continually appending values to a rolling vector is analogous to compu
     \Return $d_n$
 \end{algorithm}
 
-An alternative would be to simply compute the distribution on one subsample of the data and use this as an approximate distribution.
-The main advantage of Algorithm~\ref{alg:DistributionAveraging} over such an approach is that it provides a sense of how close the approximation is to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the subsample.
+An alternative would be to simply compute the distribution on one subsample of the data and use this as a proxy distribution.
+The main advantage of Algorithm~\ref{alg:DistributionAveraging} over such an approach is that it provides a sense of convergence to the full distirbution via the tuning parameter $\varepsilon$, while automatically determining the size of the necessary subsample.
 The algorithm can also be tuned according to batch size $m$, which \texttt{sumrep} takes to be 30 by default.
 We conduct a performance analysis of Algorithm~\ref{alg:DistributionAveraging} in Appendix A and empirically demonstrate efficiency gains in a variety of realistic settings without sacrificing much accuracy.
 
-Some summaries induce distributions for which Algorithm~\ref{alg:DistributionAveraging} is ill-suited.
+Some summaries induce distributions for which Algorithm~\ref{alg:DistributionAveraging} is inherently ill-suited.
 This occurs when a summary applied to a subset of a dataset does not follow the same distribution as the summary applied to the full dataset.
 For example, consider the nearest neighbor distance of a sequence $s_i$ with respect to a multiset of sequences $R$ (i.e. elements in $R$ can have multiplicity $\ge 1$),
 \begin{equation}
@@ -575,12 +575,13 @@ If we take any subset $S$ of $R$, then $d_\text{NN}(s_i, S) \ge d_\text{NN}(s_i,
 
 In this case, we can still obtain an unbiased approximate to the nearest neighbor distance distribution using the following modification of Algorithm~\ref{alg:DistributionAveraging}.
 For each iteration, sample a small batch $B = (s_1, \dotsc, s_b)$ of $b$ sequences, and compute $d_\text{NN}$ of each $s_i$ to the full repertoire $R$.
-Since each batch $B$ computes the exact nearest neighbor with respect to $R$, we get unbiased estimates of $d_\text{NN}$ for each $s \in B$.
+Since each batch $B$ computes the exact nearest neighbor with respect to $R$, we get the true value of $d_\text{NN}$ for each $s \in B$.
+The gain in efficiency stems from the fact that we only compute this true $d_\text{NN}$ for a subsample of the sequences of the full repertoire $R$.
 Thus, appending batches to a running distribution until convergence as in Algorithm~\ref{alg:DistributionAveraging} will produce increasingly refined, unbiased approximations as the tolerance decreases.
 Algorithm~\ref{alg:NNDistributionAveraging} explicates this procedure.
 
 Algorithm~\ref{alg:NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
-Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm can be more than 100 times faster than computing the full distribution on $R$.
+Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm is orders of magnitude faster than computing the full distribution over $R$.
 
 \begin{algorithm}
     \caption{Compute automatic approximate nearest neighbor distance distribution\\
