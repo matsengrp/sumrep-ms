@@ -56,16 +56,16 @@
 \begin{document}
 
 \title{\texttt{sumrep}: a summary statistic framework for immune receptor repertoire comparison and model validation}
-%BJO Is it possible/sensible to make both corresponding authors have the same symbol? Currently mine is an asterisk and Erick's is a dagger
 \author[1, 2]{Branden Olson\thanks{Corresponding author}}
 \author[3]{Pejvak Moghimi}
+\author[1]{Duncan Ralph}
 \author[4]{Chaim Schramm}
 \author[5, 6]{Anna Obraztsova}
 \author[7]{Jason Vander Heiden}
 \author[6,8,9,10]{Mikhail Shugay}
 \author[3]{Adrian Shepherd}
 \author[3]{William Lees}
-\author[1]{Frederick A Matsen IV\thanks{Corresponding author}}
+\author[1]{Frederick A Matsen IV$^*$}
 \affil[1]{Fred Hutchinson Cancer Research Center, Seattle, WA}
 \affil[2]{Department of Statistics, University of Washington, Seattle, WA}
 \affil[3]{Department of Biological Sciences and Institute of Structural and Molecular Biology, Birkbeck, University of London, UK}
@@ -106,7 +106,7 @@ This can be a highly involved task, and so it is common to simply compare CDR3 l
 An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
 For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
-One can perform other dimension reduction techniques like t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also lose a lot of information and can be difficult to interpret biologically.
+One can perform other dimension reduction techniques such as t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also lose a lot of information and can be difficult to interpret biologically.
 
 We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of Rep-Seq repertoires.
 In addition to enabling comparison of different sequencing data sets, summary statistics can also be used to compare sequencing data sets to probabilistic models to which they have been fit.
@@ -114,7 +114,7 @@ Namely, one can use a form of model checking that is common in statistics: after
 In this case, we generate a repertoire of sequences from the models and compare this collection to a real-data repertoire of sequences via summary statistics.
 
 We are motivated to perform such comparison because these probabilistic models are used as part of inference, and because they are used for inferential tool benchmarking.
-%BJO This is a good spot for the ground-truth benchmarking figure, if we want to include it. 
+%BJO This is a good spot for the ground-truth benchmarking figure, if we want to include it.
 Such generative models are used to simulate sequences to have a ``ground truth'' for benchmarking inferential software \cite{Ralph2016-iz,Gupta2017-ve,Marcou2018-du}, and thus the accuracy of such benchmarks depends on the realism of the generated sequences.
 Simulation tools can also be used to generate a null distribution used to look for a specific effect, such as natural selection \cite{Yaari2012-kk}.
 
@@ -185,24 +185,24 @@ Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 \end{tabular}
 }
-\caption{Currently supported summary statistics grouped by their respective levels of assumed post-processing.}
+\caption{Currently supported summary statistics grouped by their respective degrees of assumed post-processing.}
 \label{tab:SummaryStatistics}
 \end{table}
 
 \subsection*{Implementation}
-The full \texttt{sumrep} package along with the following analyses can be found at \texttt{https://github.com/matsengrp/sumrep}.
+The full \texttt{sumrep} package along with the following analyses can be found at \url{https://github.com/matsengrp/sumrep}.
 It supports the IgH, IgK, and IgL loci for BCR datasets, and the TRA, TRB, TRD, and TRG loci for TCR datasets.
 It is open-source, unit-tested, and extensively documented, and uses default dataset fields and definitions that comply with AIRR rearrangement schema \cite{Vander_Heiden2018-mu}.
 A reproducible installation procedure of \texttt{sumrep} is available using Docker \cite{Boettiger2015-ya}.
 
-Table~\ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed level of annotation, clustering, and phylogenetic inference for each summary.
+Table~\ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed degree of annotation, clustering, and phylogenetic inference for each summary.
 The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region; this coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
 The second group requires standard sequence annotations, such as inferred germline ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
-Level three requires clonal family cluster assignments.
-Level four requires an imputed phylogeny for each clonal family for Ig loci.
+The third group requires clonal family cluster assignments.
+The fourth group requires a inferred phylogeny for each clonal family of an Ig data set.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
-\texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate ``divergence'', or measure of dissimilarity between instances of a summary.
+\texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate ``divergence,'' or measure of dissimilarity between instances of a summary.
 For example, the \texttt{getCDR3LengthDistribution} function returns a vector of each sequence's CDR3 length, and the corresponding \texttt{compareCDR3LengthDistributions} function takes two repertoires and returns a numerical summary of the dissimilarity between these two length distributions.
 The comparison method depends on the summary, discussed further in the Methods section.
 \texttt{sumrep} also includes a \texttt{compareRepertoires} function which takes two repertoires and returns as many summary comparisons as befit the data.
@@ -212,13 +212,6 @@ A given summary $s$ is applied separately to $R_1$ and $R_2$, which for most sum
 These two resultant distributions can be compared using a divergence $\mathcal D$ that is tailored to the nature of $s$ (Figure~\ref{fig:DivergenceCartoon}).
 We use Jenson-Shannon (JS) divergence to compare scalar distributions (e.g. GC content, CDR3 length), which is a symmetrized version of KL-divergence, a weighted average log-ratio of frequencies widely-used in statistics and machine learning.
 We use the similarly popular $\ell_1$ divergence to compare categorical distributions (e.g. gene call frequencies, amino acid frequencies), which is a sum of absolute differences of counts.
-%EM Shall we try for an intuitive explanation of JS / KL?
-%BJO I like this description from https://medium.com/@cotra.marko/making-sense-of-the-kullback-leibler-kl-divergence-b0d57ee10e0a:
-% [It's] a measure of how much ?predictive power? or ?evidence? each sample will on average bring when you?re trying to distinguish p(x) from q(x), if you?re sampling from p(x).
-%BJO - Then the JS divergence will be a nice, symmetrized version.
-%BJO - However, you have a better idea of how much stats background the average immunologist will have.
-%EM Hm, yeah, I was dreaming of something simpler, like the weighted average log ratio.
-%BJO OK, I gave it a try above. Please modify it as you wish.
 
 We have designed \texttt{sumrep} to efficiently approximate computationally intensive summaries.
 When the target summary is a distribution, we can gain efficiency by repeatedly subsampling from the distribution until our estimate has stabilized.
@@ -307,12 +300,13 @@ We outline a generic distribution approximation algorithm as well as a modified 
 		\label{fig:DataSim}
     \end{subfigure}
     \;
+    %EM It'd seem to me to make more sense to use https://github.com/matsen/talks/blob/gh-pages/figures/sumrep/paired-summary-stats.svg here. What do you think?
     \begin{subfigure}[c]{0.48\linewidth}
     	\includegraphics[width=\linewidth]{Figures/data_sim_summaries.pdf}
 		\caption{We can compute many summaries of these repertoires yielding distributions for comparison.}
 		\label{fig:DataSimSummary}
     \end{subfigure}
-    \caption{Cartoon of our summary statistic and divergence framework, and how this can be applied to validation of repertoire simulators.}
+    \caption{Cartoon of our summary statistic and divergence framework, and how this can be applied to validation of repertoire simulators. Steps (a) and (b) can be applied to compare arbitrary data sets, while (c) and (d) show how sumrep can be used for model comparison.}
     \label{fig:SummaryFramework}
 \end{figure}
 
@@ -324,20 +318,18 @@ Examples of these plots can be found throughout later sections of this report.
 
 \subsection*{Multidimensional scaling of TCR summary divergences}
 To examine the ability of various summary statistics to distinguish between differences in TCR repertoires by covariate, we performed a multidimensional scaling (MDS) analysis of summary divergences using data from \cite{Pogorelyy2018-ak}.
-In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination, with two replicas per donor-timepoint value, to form a dissimilarity matrix.
+In particular, we computed divergences of each summary between each pair of a collection of datasets stratified by two individuals and five timepoints post-vaccination, with two replicate per donor-timepoint value, to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
-Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each replica grouped by donor and timepoint.
+Figure~\ref{fig:TCR_MDS} displays plots of the first two coordinates of each replicate grouped by donor and timepoint.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/tcr_pca.pdf}
-    %EM If this is a MDS plot why are the labels in terms of PCA?
-    %BJO Well, another name for classical MDS (which is done for both of these analyses) is principal coordinates analysis, so these labels can still apply. But, I've changed the labels in both plots to be less misleading.
     \caption{Plots of summary divergence MDS coordinates for the Pogorelyy (2018) data, grouped by donor and timepoint}
     \label{fig:TCR_MDS}
 \end{figure}
 We see that for almost all summaries, these points cluster according to donor identity, with the CDR3 pairwise distance distribution being the only summary that does not decisively cluster by donor.
 The D gene usage distribution has an unusual cross-like pattern, whose structure is more difficult to assess.
 Moreover, many summaries cluster according to donor-timepoint interactions, although the tightness of clustering varies by summary, with some summaries (e.g. DJ insertion length distribution) being tightly clustered by a given donor/timepoint value and some summaries (e.g. Kidera factor 4) not obviously clustering by donor/timepoint.
-Although these patterns would require further exploration in a particular research context, there seem to be interesting dynamics underlying \texttt{sumrep} divergences when TCR datasets are stratified by covariates.
+Although these patterns would require further exploration in a particular research context, these \texttt{sumrep} divergences show interesting patterns when TCR datasets are stratified by covariates.
 
 \subsection*{Multidimensional scaling of BCR summary divergencess}
 Next we performed a similar MDS analysis of summary divergences of BCR repertoires stratified by covariate, using data from \cite{Rubelt2016-tl}.
@@ -356,7 +348,7 @@ For example, points for the amino acid 2mer frequency distribution divergences t
 Thus, there seem to also be interesting dynamics underlying \texttt{sumrep} divergences when BCR datasets are stratified by covariates, and the observed patterns merit further investigation.
 
 \subsection*{Ranking summary statistic informativeness}
-Due to the large number of summary statistics supported by \texttt{sumrep}, many of which are correlated, we sought an approach to identify a set of maximally-informative statistics that are orthogonal by some measure.
+Due to the large number of summary statistics supported by \texttt{sumrep}, many of which are correlated, we sought an approach to identify a set of maximally-informative statistics that provide complimentary information to one another.
 To address this, we employed a lasso multinomial regression treating certain sequence-level summaries as covariates and dataset identity as the response.
 The basic idea is that this regression method cuts out all but a few predictor variables to find a smaller collection of informative summary statistics, as a coefficient is ``allowed'' to be nonzero only when the lasso deems it a relatively meaningful predictor.
 As the regularization parameter $\lambda$ is decreased, more and more coefficients  become nonzero, leading to a natural ordering of summaries as the order in which their coefficient ``branches off'' from zero.
@@ -367,7 +359,7 @@ One caveat to this approach is that we can only use sequence-level summary stati
 However, the majority of summaries considered in this report are applied at the sequence level.
 Thus, between the subset of informative sequence-level statistics and the remaining non-sequence-level statistics, we arrive at a considerably smaller set.
 Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analyses as these sets of statistics are orthogonal by construction according to particular measures.
-This also leads to a much smaller design matrix and a largely decreased runtime.
+This also leads to a much smaller design matrix and a substantially decreased runtime.
 
 Figure \ref{fig:IgorLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to \igor\ annotations of TRB sequences from datasets A4\_i107, A4\_i194, A5\_S9, A5\_S10, A5\_S15, and A5\_S22 from Britanova et al. (2016)~\cite{Britanova2016-iw}.
 We see that recombination-based deletion lengths comprise four of the top five summaries, with recombination-based insertion lengths, CDR3 length, and various physiochemical junction properties scattered over the remaining positions.
@@ -375,12 +367,12 @@ There appears to be high variability throughout the range of rankings, with the 
 \begin{figure}
         \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/igor_lasso_scores.pdf}
-		\caption{Summary rank boxplots using six \igor-annotated Britanova (2016) datasets of TRB sequences.}
+		\caption{Summary informativeness rank boxplots using six \igor-annotated Britanova (2016) datasets of TRB sequences.}
 		\label{fig:IgorLassoScores}
     \end{subfigure}
     \begin{subfigure}{\linewidth}
     	\includegraphics[width=\linewidth]{Figures/Lasso/partis_lasso_scores.pdf}
-		\caption{Summary rank boxplots using six \partis-annotated Gupta (2017) datasets of IgH sequences.}
+		\caption{Summary informativeness rank boxplots using six \partis-annotated Gupta (2017) datasets of IgH sequences.}
 		\label{fig:PartisLassoScores}
     \end{subfigure}
     \caption{Boxplots of summary rank values taken over each dataset, in order of informativeness, as determined by the median order in which the summary branches off from the lasso paths in Figure \ref{fig:LassoPaths}, taken over each of the six paths.}
@@ -391,7 +383,8 @@ Figure \ref{fig:PartisLassoScores} displays the results of applying Algorithm~\r
 We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical junction properties mostly in the bottom half of rankings.
 In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
 
-While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, the hope is that the nice properties of least squares plus the penalization of large coefficients leads to a subset of covariates that are informative.
+While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, the hope is that the nice properties of least squares plus the penalization of large coefficients leads to a subset of covariates that are generally informative.
+%EM When you say "new set" it sounds like this would be a different set of data, but it seems like it's the same Gupta data, no? Please clarify.
 To validate this intuition, we can examine distributions of particularly ranked summaries applied to a new set of annotated repertoires.
 Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranked), aromaticity (middle-ranked), and V 3' deletion length (top-ranked) distributions for the FV, GMC, and IB donors at +1h, +7d, and +28d following an influenza vaccination, where the ranks are as determined by Figure~\ref{fig:PartisLassoScores} for \partis-annotated IgH repertoires.
 \begin{figure}
@@ -419,6 +412,10 @@ Summary divergences are applied to each dataset, allowing for scores for each su
 
 \subsection*{Assessing summary statistic replication for \igor}
 We apply the methodology discussed in the previous section to TRB sequences from datasets A4\_i107, A4\_i194, A5\_S9, A5\_S10, A5\_S15, and A5\_S22 from Britanova et al. (2016)~\cite{Britanova2016-iw}.
+Although \igor\ is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand \igor's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
+%EM Did you actually restrict to productive sequences for the fitting? If so, fix the below.
+Thus we fit the \igor\ model with all sequences (which are dominated by productive sequences) and during simulation restricted to productive sequences.
+
 Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distribution for each experimental and simulated repertoire.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
@@ -427,14 +424,14 @@ Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distr
 \end{figure}
 
 %BJO Is it worth referencing the equations here? They are referenced in the figure, but not presented until the Methods.
+%EM Definitely. Provide a high-level overview of what the LRADs are here so folks don't have to refer to methods.
+%EM I'd suggest pulling the equation refs out of the caption into the text here.
 Figure~\ref{fig:ObsScoresTCR} displays the resultant observation-based summary scores (LRAD-data).
 We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC content  pairwise distance distributions) since they are likely confounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and \igor\ does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
     	\caption{LRAD-data values for each statistic using Equation~\ref{eq:ScoreObs}.
-        %EM Seems like one more phrase of explanation would help make this figure easier to interpret. It's functional(?) TCR data (and partis is BCR data...)
-        %BJO I added a caption for the full figure and elaborated -- lmk if you'd like further explanation about something in particular.
         }
     	\label{fig:ObsScoresTCR}
 	\end{subfigure}
@@ -447,7 +444,7 @@ We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC conte
 	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD'' due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
 	\label{fig:TCRScores}
 \end{figure}
-It is seen that \igor\ simulations are able to recapitulate gene usage statistics of an empirical repertoire well, with J gene usage frequency being the most accurately replicated, followed by various recombination-based indel statistics.
+We see that \igor\ simulations are able to recapitulate gene usage statistics of an empirical repertoire well, with J gene usage frequency being the most accurately replicated, followed by various recombination-based indel statistics.
 V, D, and joint VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
 Conversely, the CDR3 length distribution is the least-replicated statistic among rearrangement statistics.
 The Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
@@ -497,7 +494,7 @@ The scores are highly similar to those seen in Figure~\ref{fig:ObsScoresBCR}, wi
 
 \section*{Methods}
 \subsection*{Divergence}
-We elect the Jenson-Shannon (JS) divergence for comparing distributions of scalar quantities, which constitutes most summaries in \texttt{sumrep}.
+We use the Jenson-Shannon (JS) divergence for comparing distributions of scalar quantities, which constitutes most summaries in \texttt{sumrep}.
 The Jenson-Shannon divergence of probability distributions $P$ and $Q$ with densities $p(\cdot)$ and $q(\cdot)$ is a symmetrized Kullbeck-Leiber divergence, defined as
 \begin{equation}
 \text{JSD}\left(P \ || \ Q\right) := \frac{\text{KLD}\left(P || M\right) + \text{KLD}\left(Q || M\right)}{2}
@@ -665,8 +662,7 @@ Since we are interested in many CDR3-based statistics and \igor\ does not curren
 For each sequence, we consider only the rearrangement scenario with the highest likelihood as determined by \igor.
 When a list of more than one potential genes is given as the gene call, we consider only the first gene in the list.
 Several fields are renamed to match the AIRR specification when the definitions align without ambiguity.
-
-Although \igor\ is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand \igor's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
+As described in Results, we train on productive sequences and restrict to productive sequences for simulation.
 
 We applied IGoR in this way to six datasets of TRB sequences from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 
@@ -735,7 +731,7 @@ Formally, this becomes
         }
     \right)
 \end{equation}
-where the difference from \eqref{eq:ScoreObs} is that the divergences in the numerator are applied to simulated-simulated dataset pairs rather than observed-observed dataset pairs. 
+where the difference from \eqref{eq:ScoreObs} is that the divergences in the numerator are applied to simulated-simulated dataset pairs rather than observed-observed dataset pairs.
 LRAD-sim for a given summary will be positive if simulated repertoires tend to look more like their experimental counterparts in terms of this summary than simulated repertoires look like other simulated repertoires, and positive if the simulated repertoires tend to look more alike.
 
 These scores underlie the model validation analyses of \partis\ and \igor\ simulations in the Results section, and comprise the values displayed in Figures~\ref{fig:TCRScores} and \ref{fig:BCRScores}.
@@ -760,32 +756,33 @@ For tractability purposes, we chose the six datasets with the fewest number of s
 These datasets consist of consensus RNA sequences assembled using UMIs.
 Most of these sequences are functional; as previously described, for this example application we are benchmarking \igor's ability to fit complete repertoires rather than only non-functional repertoires.
 
-The data for the BCR model validation analyses originated from samples and 454 data published in \cite{Laserson2014-dx}, with the MiSeq data and processed data published in \cite{Gupta2017-ve} used for our analyses.
+The data for the BCR model validation analyses originated from samples first sequenced and published in \cite{Laserson2014-dx}, although we used MiSeq data published in \cite{Gupta2017-ve} for our analyses.
 These datasets represent repertoires of three human donors from multiple time points following an influenza vaccination.
-We use datasets from time points $-$1h and $-$8d for the FV, GMC, and IB donors for the summary orthogonality and \partis\ model validation analyses; the +1h, +7d, and +28d datasets for the FV, GMC, and IB donors for the summary orthogonality validation; and the FV -1h dataset for the approximation routine performance analyses in appendices 1 and 2.
+We use datasets from time points $-$1h and $-$8d for the FV, GMC, and IB donors for the summary informativeness and \partis\ model validation analyses; the +1h, +7d, and +28d datasets for the FV, GMC, and IB donors for the summary informativeness validation; and the FV -1h dataset for the approximation routine performance analyses in appendices 1 and 2.
 The number of reads from these six datasets used in the analysis range from 14,733 to 31,952 sequences.
 
 
 
 \section*{Discussion}
 We have presented a general framework for efficiently summarizing, comparing, and visualizing Rep-Seq datasets, and applied it to several questions of scientific interest.
-One can imagine many further applications of \texttt{sumrep}, as well as promising avenues of research.
+One can imagine many further applications of \texttt{sumrep}, as well as promising avenues of research: contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
+\texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones~\cite{Finlay2012}.
 
 There are several other packages dedicated to detailed summaries and visualization of immune receptor repertoires.
-The \texttt{tcR} package for R includes methods for retrieving and comparing gene usage summaries, computing clonotype diversity indices, and visualizing various repertoire summaries~\cite{Nazarov2015-ok}.
-\texttt{VDJtools} is a command line tool which performs similar repertoire summarization, comparison, and visualization tasks~\cite{Shugay2015-ur}.
+The \texttt{tcR}~\cite{Nazarov2015-ok} package for R includes methods for retrieving and comparing gene usage summaries, computing clonotype diversity indices, and visualizing various repertoire summaries.
+\texttt{VDJtools}~\cite{Shugay2015-ur} is a command line tool which performs similar repertoire summarization, comparison, and visualization tasks for TCR data.
+These tools have a subset of the summary statistics described here, and do not provide efficient means of summary statistic distribution comparison.
 %BJO - Erick, this was your todo, FYI. I could try but I'm sure you have a better idea of where to look than I do.
+%EM Let's open the question up to the group.
 TODO: Look for others.
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
 Moreover, it would likely be useful to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
 
 
-Contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
-\texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones~\cite{Finlay2012}.
 
 \section*{Acknowledgements}
-We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pogorelyy2018-ak}.
+We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pogorelyy2018-ak}, and Quentin Marcou for help running \igor.
 
 
 \bibliographystyle{plain}
