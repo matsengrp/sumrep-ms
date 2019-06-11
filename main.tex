@@ -294,14 +294,17 @@ We outline a generic distribution approximation algorithm as well as a modified 
     \label{fig:DivergenceCartoon}
     \end{subfigure}
     \begin{subfigure}[c]{0.48\linewidth}
+    	\begin{center}
     	\includegraphics[width=\linewidth]{Figures/data_sim.pdf}
+		\end{center}
 		\caption{For a given experimental dataset, we use simulator tools to generate a corresponding set of synthetic sequences.}
 		\label{fig:DataSim}
     \end{subfigure}
     \;
-    %EM It'd seem to me to make more sense to use https://github.com/matsen/talks/blob/gh-pages/figures/sumrep/paired-summary-stats.svg here. What do you think?
     \begin{subfigure}[c]{0.48\linewidth}
-    	\includegraphics[width=\linewidth]{Figures/data_sim_summaries.pdf}
+    	\begin{center}
+    		\includegraphics[width=\linewidth]{Figures/paired_summaries.pdf}
+		\end{center}
 		\caption{We can compute many summaries of these repertoires yielding distributions for comparison.}
 		\label{fig:DataSimSummary}
     \end{subfigure}
@@ -383,9 +386,8 @@ We see that deletion lengths, insertion lengths, and CDR3 length comprise the to
 In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
 
 While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, the hope is that the nice properties of least squares plus the penalization of large coefficients leads to a subset of covariates that are generally informative.
-%EM When you say "new set" it sounds like this would be a different set of data, but it seems like it's the same Gupta data, no? Please clarify.
-To validate this intuition, we can examine distributions of particularly ranked summaries applied to a new set of annotated repertoires.
-Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranked), aromaticity (middle-ranked), and V 3' deletion length (top-ranked) distributions for the FV, GMC, and IB donors at +1h, +7d, and +28d following an influenza vaccination, where the ranks are as determined by Figure~\ref{fig:PartisLassoScores} for \partis-annotated IgH repertoires.
+To validate this intuition, we can examine distributions of particularly ranked summaries applied to a test set of annotated repertoires not used in the model fitting.
+Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranked), aromaticity (middle-ranked), and V 3' deletion length (top-ranked) distributions for the FV, GMC, and IB donors at timepoints +1h, +7d, and +28d following an influenza vaccination (which differ from the $-$1h and $-$8d timepoints used for fitting), where the ranks are as determined by Figure~\ref{fig:PartisLassoScores} for \partis-annotated IgH repertoires.
 \begin{figure}
 	\includegraphics[width=\linewidth]{Figures/Lasso/validation_ecdfs.pdf}
 	\caption{Empirical cumulative distribution functions for the bottom-, middle-, and top-ranked statistics for \partis-annotated IgH repertoires, as determined by Figure~\ref{fig:PartisLassoScores}.}
@@ -412,8 +414,7 @@ Summary divergences are applied to each dataset, allowing for scores for each su
 \subsection*{Assessing summary statistic replication for \igor}
 We apply the methodology discussed in the previous section to TRB sequences from datasets A4\_i107, A4\_i194, A5\_S9, A5\_S10, A5\_S15, and A5\_S22 from Britanova et al. (2016)~\cite{Britanova2016-iw}.
 Although \igor\ is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand \igor's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
-%EM Did you actually restrict to productive sequences for the fitting? If so, fix the below.
-Thus we fit the \igor\ model with all sequences (which are dominated by productive sequences) and during simulation restricted to productive sequences.
+Thus we fit the \igor\ model with all sequences (which we expect to be dominated by productive sequences) and during simulation restricted to productive sequences.
 
 Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distribution for each experimental and simulated repertoire.
 \begin{figure}
@@ -422,25 +423,22 @@ Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distr
     \label{fig:IgorFreqPolys}
 \end{figure}
 
-%BJO Is it worth referencing the equations here? They are referenced in the figure, but not presented until the Methods.
-%EM Definitely. Provide a high-level overview of what the LRADs are here so folks don't have to refer to methods.
-%EM I'd suggest pulling the equation refs out of the caption into the text here.
-Figure~\ref{fig:ObsScoresTCR} displays the resultant observation-based summary scores (LRAD-data).
+Observation-based summary scores are computed using a log ratio of average divergences (referred to as LRAD-data, and defined in \eqref{eq:ScoreObs}) for a variety of TRB-relevant summaries (Figure~\ref{fig:ObsScoresTCR}). 
 We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC content  pairwise distance distributions) since they are likely confounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and \igor\ does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
-    	\caption{LRAD-data values for each statistic using Equation~\ref{eq:ScoreObs}.
+    	\caption{LRAD-data values for each relevant TRB statistic available from \igor\ or \igblast.
         }
     	\label{fig:ObsScoresTCR}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/sim_score_plot.pdf}
-    	\caption{LRAD-sim values for each statistic using Equation~\ref{eq:ScoreSim}.
+    	\caption{LRAD-sim values for each relevant TRB statistic available from \igor\ or \igblast.
     	}
     	\label{fig:SimScoresTCR}
 	\end{subfigure}
-	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD'' due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
+	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD,'' for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
 	\label{fig:TCRScores}
 \end{figure}
 We see that \igor\ simulations are able to recapitulate gene usage statistics of an empirical repertoire well, with J gene usage frequency being the most accurately replicated, followed by various recombination-based indel statistics.
@@ -449,7 +447,7 @@ Conversely, the CDR3 length distribution is the least-replicated statistic among
 The Kidera factors of the junction region are also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
 Scores for other junction-based statistics besides Kidera factors range from mildly good to mildly bad, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors) and charge distribution being the worst.
 
-Figure~\ref{fig:SimScoresTCR} displays the simulation-based summary scores for the same datasets and simulations.
+We also compute simulation-based summary scores (LRAD-sim, defined in \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresTCR}).
 We still see high scores for gene usage and indel statistics, although now the CDR3 length distribution and various Kidera factor and GRAVY index distributions have much lower scores.
 This suggests that while the average \igor\ simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce more similar distributions to each other than to their observed counterparts.
 
@@ -465,19 +463,19 @@ Figure~\ref{fig:PartisFreqPolys} displays frequency polygons of each summary dis
 \end{figure}
 
 
-Figure~\ref{fig:ObsScoresBCR} displays the observation-based summary scores for the six IgH datasets based on \partis\ simulations.
+Observation-based summary scores are computed using the LRAD-data equation \eqref{eq:ScoreObs} for a variety of IgH-relevant summaries (Figure~\ref{fig:ObsScoresBCR}). 
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/obs_score_plot.pdf}
-    	\caption{LRAD-data values for each statistic using Equation~\ref{eq:ScoreObs}.}
+    	\caption{LRAD-data values for each relevant IgH statistic available from \partis.}
     	\label{fig:ObsScoresBCR}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/PartisScores/sim_score_plot.pdf}
-    	\caption{LRAD-sim values for each statistic using Equation~\ref{eq:ScoreSim}.}
+    	\caption{LRAD-sim values for each relevant IgH statistic available from \partis.}
     	\label{fig:SimScoresBCR}
 	\end{subfigure}
-	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD'' due to the form of Equations \ref{eq:ScoreObs} and \ref{eq:ScoreSim}, for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.}
+	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD,'' for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.}
 	\label{fig:BCRScores}
 \end{figure}
 Like \igor, we see that \partis\ simulations also excel at replicating gene usage and recombination statistics, while additionally replicating CDR3 length distributions well.
@@ -486,8 +484,7 @@ This contrasts \igor\ which incorporates these insertion matrices during model f
 The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations and hot and cold spot counts being poorly-captured.
 Indeed, \partis\ does not incorporate these quantities into the model fitting process, but this does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
 
-
-Figure~\ref{fig:SimScoresBCR} displays the simulation-based summary scores for the same datasets and simulations.
+We also compute simulation-based summary scores (LRAD-sim, defined in \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresBCR}).
 The scores are highly similar to those seen in Figure~\ref{fig:ObsScoresBCR}, with some summaries seeing a moderate drop.
 
 
@@ -684,8 +681,6 @@ Here we opt to subsample to unique clones and avoid abundance biases altogether.
 
 
 \subsection*{Scoring summary statistic replication by model}
-%EM Would it be worth using some of these figures https://github.com/matsen/talks/tree/gh-pages/figures/sumrep ? (I just invited you.) I think that we're used to this framework but it may be a little strange for others.
-%BJO Yes! Though I might have to put this off until after the WG meeting.
 We wish to measure how well a given statistic is replicated when a model performs simulations using parameters inferred from an observed repertoire dataset.
 One approach is to score the statistic $s$ based on the average divergence of observations to their simulated counterparts when applying $s(\cdot)$, and the average divergence of observations to other observations when applying $s(\cdot)$.
 Suppose we have $k$ experimental repertoires of immune receptor sequences, and let $R_{i, \text{obs}}$ and $R_{i, \text{sim}}$, $1 \le i \le k$, denote the $i$th observed and simulated repertoire, respectively.
@@ -1183,7 +1178,7 @@ Hence, it is important to understand that a given annotations-based summary shou
 
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/PartisScores/pi_freqpoly.pdf}
-    \caption{Summary distribution frequency polygons of three datasets based on \partis\ versus \igblast\ annotations.}
+    \caption{Summary distribution frequency polygons of \partis\ versus \igblast\ annotations of experimental datasets from three donors at time point -1h.}
     \label{fig:PartisIgBlastFreqpolys}
 \end{figure}
 
