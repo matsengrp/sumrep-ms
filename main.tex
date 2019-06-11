@@ -424,6 +424,7 @@ Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distr
 \end{figure}
 
 Observation-based summary scores are computed using a log ratio of average divergences (referred to as LRAD-data, and defined in \eqref{eq:ScoreObs}) for a variety of TRB-relevant summaries (Figure~\ref{fig:ObsScoresTCR}). 
+The LRAD-data score of a summary will be high when simulations look like their corresponding observations with respect to that summary, and low when observations look more like other observations than their corresponding simulations.
 We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC content  pairwise distance distributions) since they are likely confounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and \igor\ does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
@@ -441,6 +442,7 @@ We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC conte
 	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD,'' for each statistic in the \igor\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional TRB sequences.}
 	\label{fig:TCRScores}
 \end{figure}
+
 We see that \igor\ simulations are able to recapitulate gene usage statistics of an empirical repertoire well, with J gene usage frequency being the most accurately replicated, followed by various recombination-based indel statistics.
 V, D, and joint VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
 Conversely, the CDR3 length distribution is the least-replicated statistic among rearrangement statistics.
@@ -448,6 +450,7 @@ The Kidera factors of the junction region are also replicated well, despite CDR3
 Scores for other junction-based statistics besides Kidera factors range from mildly good to mildly bad, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors) and charge distribution being the worst.
 
 We also compute simulation-based summary scores (LRAD-sim, defined in \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresTCR}).
+The LRAD-sim score of a summary will be high when simulations look like their corresponding observations with respect to that summary, and low when simulations look more like other simulations than their corresponding observations.
 We still see high scores for gene usage and indel statistics, although now the CDR3 length distribution and various Kidera factor and GRAVY index distributions have much lower scores.
 This suggests that while the average \igor\ simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce more similar distributions to each other than to their observed counterparts.
 
