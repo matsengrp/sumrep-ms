@@ -764,13 +764,17 @@ One can imagine many further applications of \texttt{sumrep}, as well as promisi
 There are several other packages dedicated to detailed summaries and visualization of immune receptor repertoires.
 The \texttt{tcR}~\cite{Nazarov2015-ok} package for R includes methods for retrieving and comparing gene usage summaries, computing clonotype diversity indices, and visualizing various repertoire summaries.
 \texttt{VDJtools}~\cite{Shugay2015-ur} is a command line tool which performs similar repertoire summarization, comparison, and visualization tasks for TCR data.
-These tools have a subset of the summary statistics described here, and do not provide efficient means of summary statistic distribution comparison.
+These tools have a subset of the summary statistics described here, yet do not focus on building probabilistic models and performing comparative analysis for them.
+The \igor~\cite{Marcou2018-du} software features an algorithm for summarizing statistics of the V(D)J rearrangement process, however, the its main focus is on learning the basic model for non-functional T- and B-cell repertoire and it does not provide any built-in methods for comparing inferred models between datasets.
 %BJO - Erick, this was your todo, FYI. I could try but I'm sure you have a better idea of where to look than I do.
 %EM Let's open the question up to the group.
 TODO: Look for others.
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
+The tool can be also used to detect systemic biases between different library preparation protocols and control for batch effects that can confound meta-analysis of Rep-Seq data.
 Moreover, it would likely be useful to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
+%MS - some of the factors are already computed for CDR3 only, so better say extending the analysis to regions other than CDR3
+%MS - maybe we should say that we plan to integrate with AIRR format and provide an easy-to-use R markdown template that only requires AIRR-format dataset with certain mandatory fields, so that sumrep can be in future used as a downstream analysis method for any AIRR-compliant software/workflow
 
 
 
