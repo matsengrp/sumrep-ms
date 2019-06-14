@@ -108,7 +108,7 @@ These $k$mer distributions can then be compared via a string metric, but still c
 One can perform other dimension reduction techniques such as t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also lose a lot of information and can be difficult to interpret biologically.
 
 We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of Rep-Seq repertoires.
-In addition to enabling comparison of different sequencing datasets, summary statistics can also be used to compare sequencing datasets to probabilistic models to which they have been fit.
+In addition to enabling comparison of different sequencing datasets, summary statistics can also be used to compare sequencing datasets to probabilistic models to which they have been fitted.
 Namely, one can use a form of model checking that is common in statistics: after fitting a model to data, one assesses the similarity of data generated from the model to the real data.
 In this case, we generate a repertoire of sequences from the models and compare this collection to a real-data repertoire of sequences via summary statistics.
 
@@ -196,6 +196,7 @@ A reproducible installation procedure of \texttt{sumrep} is available using Dock
 
 Table~\ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed degree of annotation, clustering, and phylogenetic inference for each summary.
 The first group of statistics only requires the input sequences to be pairwise aligned and constrained to the variable region; this coincides with the \texttt{sequence\_alignment} field in the AIRR schema.
+%WDL 'pairwise aligned' does not feel right to me. I think it should be IMGT-aligned. or aligned to the IMGT numbering system (in other words, what the other half of the pair is)
 The second group requires standard sequence annotations, such as inferred germline ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 The third group requires clonal family cluster assignments.
 The fourth group requires a inferred phylogeny for each clonal family of an Ig dataset.
@@ -481,10 +482,14 @@ Observation-based summary scores are computed using the LRAD-data equation \eqre
 	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD,'' for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IgH sequences.}
 	\label{fig:BCRScores}
 \end{figure}
+
 Like \igor, we see that \partis\ simulations also excel at replicating gene usage and recombination statistics, while additionally replicating CDR3 length distributions well.
 However, \partis\ struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
 This contrasts \igor\ which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
 The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations and hot and cold spot counts being poorly-captured.
+
+%WDL poor capture of positional distance between mutations and pairwise distance may be related to the decision to select a single representative from each clonal family (or rather, the inability of partis to model clonal abundance, if I have got that right. I think this is an important limitation that is worth drawing out.
+
 Indeed, \partis\ does not incorporate these quantities into the model fitting process, but this does suggest that these sorts of quantities may need to be more explicitly accounted for in BCR generative models if more realistic simulations are desired.
 
 We also compute simulation-based summary scores (LRAD-sim, defined in \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresBCR}).
@@ -678,10 +683,14 @@ We do this since \texttt{partis simulate} draws from distributions over clonal f
 While it is possible to simulate multiple leaves for each rearrangement, it is not obvious how to best synchronize this with the observed clonal family distributions.
 As an extreme example, if we had one clonal family with 1,000 members, and 99 singleton clonal families, we could try to coerce the simulator to produce on average a (roughly) size-1,000 clonal family for every 99 singletons.
 However, it seems like this is highly contrived to the nature of our experimental sample, and does not clearly mimic the true repertoire dynamics of the individual from which the dataset was obtained.
+
+%WDL If I've understood this correctly, we're not attempting to compare the size distribution of clonal families in the simulated and observed datasets, because we know they won't correspond. That feels like an important limitation to me and I think we should mention it in the Results section. The justification here seems a little weak (what do we mean by 'true repertoire dynamics'?) but in any case I don't see why we would try to justify it: sumrep's job is to do the comparison.
+
 Also, there is ambiguity to whether the rearrangement parameters for this size-1,000 clonal family should always match those of the observed size-1,000 clonal family, or if they should be sampled in some random fashion.
 A more involved analysis would mimic the clone size distribution in data, potentially with correlations between clone size and other rearrangement parameters, and assess sequence-level statistics within each clonal family.
 Here we opt to subsample to unique clones and avoid abundance biases altogether.
 
+%WDL for consistency, suggest you list here the studies partis was applied to
 
 \subsection*{Scoring summary statistic replication by model}
 We wish to measure how well a given statistic is replicated when a model performs simulations using parameters inferred from an observed repertoire dataset.
