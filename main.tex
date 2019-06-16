@@ -59,10 +59,10 @@
 \author[1, 2]{Branden Olson\thanks{Corresponding author}}
 \author[3]{Pejvak Moghimi}
 \author[4]{Chaim Schramm}
-\author[5, 6]{Anna Obraztsova}
+\author[5]{Anna Obraztsova}
 \author[1]{Duncan Ralph}
-\author[7]{Jason Vander Heiden}
-\author[6,8,9,10]{Mikhail Shugay}
+\author[6]{Jason Vander Heiden}
+\author[5,7,8]{Mikhail Shugay}
 \author[3]{Adrian Shepherd}
 \author[3]{William Lees}
 \author[1]{Frederick A Matsen IV$^*$}
@@ -70,12 +70,10 @@
 \affil[2]{Department of Statistics, University of Washington, Seattle, WA}
 \affil[3]{Department of Biological Sciences and Institute of Structural and Molecular Biology, Birkbeck, University of London, UK}
 \affil[4]{Vaccine Research Center, National Institute of Allergy and Infectious Diseases, National Institutes of Health, Bethesda, MD, USA}
-\affil[5]{Faculty of Bioengineering and Bioinformatics, Lomonosov Moscow State University, Moscow, Russia}
-\affil[6]{Center of Life Sciences, Skolkovo Institute of Science and Technology, Moscow, Russia}
-\affil[7]{Department of Bioinformatics and Computational Biology, Genentech}
-\affil[8]{Genomics of Adaptive Immunity Department, Shemyakin and Ovchinnikov Institute of Bioorganic Chemistry, Moscow, Russia}
-\affil[9]{Department of Molecular Technologies, Pirogov Russian National Research Medical University, Moscow, Russia}
-\affil[10]{Laboratory of Genomics of Antitumor Adaptive Immunity, Privolzhsky Research Medical University, Nizhny Novgorod, Russia}
+\affil[5]{Center of Life Sciences, Skolkovo Institute of Science and Technology, Moscow, Russia}
+\affil[6]{Department of Bioinformatics and Computational Biology, Genentech}
+\affil[7]{Genomics of Adaptive Immunity Department, Shemyakin and Ovchinnikov Institute of Bioorganic Chemistry, Moscow, Russia}
+\affil[8]{Department of Molecular Technologies, Pirogov Russian National Research Medical University, Moscow, Russia}
 
 \maketitle
 
@@ -304,7 +302,8 @@ We outline a generic distribution approximation algorithm as well as a modified 
     \;
     \begin{subfigure}[c]{0.48\linewidth}
     	\begin{center}
-    		\includegraphics[width=\linewidth]{Figures/paired_summaries.pdf}
+	% MS - figure missing from repo
+     	\includegraphics[width=\linewidth]{Figures/paired_summaries.pdf}
 		\end{center}
 		\caption{We can compute many summaries of these repertoires yielding distributions for comparison.}
 		\label{fig:DataSimSummary}
@@ -775,13 +774,17 @@ One can imagine many further applications of \texttt{sumrep}, as well as promisi
 There are several other packages dedicated to detailed summaries and visualization of immune receptor repertoires.
 The \texttt{tcR}~\cite{Nazarov2015-ok} package for R includes methods for retrieving and comparing gene usage summaries, computing clonotype diversity indices, and visualizing various repertoire summaries.
 \texttt{VDJtools}~\cite{Shugay2015-ur} is a command line tool which performs similar repertoire summarization, comparison, and visualization tasks for TCR data.
-These tools have a subset of the summary statistics described here, and do not provide efficient means of summary statistic distribution comparison.
+These tools have a subset of the summary statistics described here, yet do not focus on building probabilistic models and performing comparative analysis for them.
+The \igor~\cite{Marcou2018-du} software features an algorithm for summarizing statistics of the V(D)J rearrangement process, however, the its main focus is on learning the basic model for non-functional T- and B-cell repertoire and it does not provide any built-in methods for comparing inferred models between datasets.
 %BJO - Erick, this was your todo, FYI. I could try but I'm sure you have a better idea of where to look than I do.
 %EM Let's open the question up to the group.
 TODO: Look for others.
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
+The tool can be also used to detect systemic biases between different library preparation protocols and control for batch effects that can confound meta-analysis of Rep-Seq data.
 Moreover, it would likely be useful to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
+%MS - some of the factors are already computed for CDR3 only, so better say extending the analysis to regions other than CDR3
+%MS - maybe we should say that we plan to integrate with AIRR format and provide an easy-to-use R markdown template that only requires AIRR-format dataset with certain mandatory fields, so that sumrep can be in future used as a downstream analysis method for any AIRR-compliant software/workflow
 
 
 
