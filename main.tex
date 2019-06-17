@@ -403,7 +403,7 @@ Thus, there is some visual evidence that the lasso scores can identify some degr
 \subsection*{Comparing experimental observations to model simulations}
 \texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
 First, given a collection of Rep-Seq datasets, infer model parameters using software based on the given model for each repertoire, and use these parameters to generate corresponding simulated datasets (Figure~\ref{fig:DataSim}).
-Next, use \texttt{sumrep} to compute each summary statistic listed in Table~\ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets (Figure~\ref{fig:DataSimSummary}.
+Next, use \texttt{sumrep} to compute each summary statistic listed in Table~\ref{tab:SummaryStatistics} for each dataset, and compare these summaries between each pair of datasets (Figure~\ref{fig:DataSimSummary}).
 Then, calculate a score of how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
 
 Applying this methodology using many datasets should give a clear view of which characteristics the model captures well, as well as areas for improvement.
@@ -489,7 +489,7 @@ Observation-based summary scores are computed using the LRAD-data equation \eqre
 
 Like \igor, we see that \partis\ simulations also excel at replicating gene usage and recombination statistics, while additionally replicating CDR3 length distributions well.
 However, \partis\ struggles to recapitulate VD and DJ insertion matrices, which are not explicitly included in the model.
-This contrasts \igor\ which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
+This contrasts with \igor\ which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
 The other statistics yield scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations and hot and cold spot counts being poorly-captured.
 
 %WDL poor capture of positional distance between mutations and pairwise distance may be related to the decision to select a single representative from each clonal family (or rather, the inability of partis to model clonal abundance, if I have got that right. I think this is an important limitation that is worth drawing out.
@@ -773,7 +773,7 @@ We use datasets from time points $-$1h and $-$8d for the FV, GMC, and IB donors 
 
 \section*{Discussion}
 We have presented a general framework for efficiently summarizing, comparing, and visualizing Rep-Seq datasets, and applied it to several questions of scientific interest.
-One can imagine many further applications of \texttt{sumrep}, as well as promising avenues of research: contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates.
+One can imagine many further applications of \texttt{sumrep}, as well as promising avenues of research: contrasting repertoires in the context of antigen response or vaccination design and evaluation may shed some light on which summaries can distinguish between such covariates; and comparing the summary distributions of naive repertoires from multiple healthy individuals is likely to aid our understanding of the patterns of variability exhibited by "normal" repertoires, which in turn may aid the detection of repertoire abnormalities.
 \texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones~\cite{Finlay2012}.
 
 There are several other packages dedicated to detailed summaries and visualization of immune receptor repertoires.
