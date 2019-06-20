@@ -97,7 +97,7 @@ We refer to the set of B and T cell receptors present in an individual's immune 
 Although immune receptor repertoires are now accessible for scientific research and medical applications through high-throughput sequencing, it is not necessarily straightforward to gain insight from and to compare these datasets.
 Indeed, if these datasets are not processed, they are simply a list of DNA sequences.
 After annotation one can compare gene usage \cite{Hou2016-qc, Martin2015-ho, Corcoran2016-nw, Gadala2015-wq, Boyd2010-hd, Bolen2017-xt} and CDR3 sequences.
-This can be a highly involved task, and so it is common to simply compare the gene usage frequencies and CDR3 length distributions of repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of CDR3 sequence and potentially interesting aspects of the germline-encoded regions unanalyzed.
+This can be a highly involved task, and so it is common to simply compare the gene usage frequencies and CDR3 length distributions of repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of the CDR3 sequence and potentially interesting aspects of the germline-encoded regions unanalyzed.
 
 
 An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
@@ -105,7 +105,7 @@ For example, several studies reduce a set of nucleotide sequences to $k$mer dist
 These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
 One can perform other dimension reduction techniques such as t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also discard a lot of information and can be difficult to interpret biologically.
 
-We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of AIRR-seq repertoires.
+We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of AIRR-seq data.
 In addition to enabling comparison of different sequencing datasets, summary statistics can also be used to compare sequencing datasets to probabilistic models to which they have been fitted.
 Namely, one can use a form of model checking that is common in statistics: after fitting a model to data, one assesses the similarity of the model-generated data to the real data.
 In this case, we generate a repertoire of sequences from models and compare this collection to a real-data repertoire of sequences via summary statistics.
@@ -181,7 +181,7 @@ Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 \end{tabular}
 }
-\caption{Currently supported summary statistics grouped by their respective degrees of assumed post-processing. Annotation denotes whether annotation of the V(D)J germline segment is required, Clustering denotes whether clonal clustering is required, and Phylogenic denotes whether lineage tree inference is required.}
+\caption{Currently supported summary statistics grouped by their respective degrees of assumed post-processing. Annotation denotes whether annotation of the V(D)J germline segment is required, Clustering denotes whether clonal clustering is required, and Phylogeny denotes whether lineage tree inference is required.}
 \label{tab:SummaryStatistics}
 \end{table}
 
@@ -403,7 +403,7 @@ Thus, there is some visual evidence that the lasso scores can identify some degr
 \subsection*{Comparing experimental observations to model simulations}
 \texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
 First, given a collection of AIRR-seq datasets, model parameters are inferred using the modeling software tool for each repertoire, and then these parameters are used to generate corresponding simulated datasets (Figure~\ref{fig:DataSim}).
-Next, \texttt{sumrep} is used compute the summary statistics listed in Table~\ref{tab:SummaryStatistics} for each dataset and compare these summaries between each pair of datasets (Figure~\ref{fig:DataSimSummary}).
+Next, \texttt{sumrep} is used to compute the summary statistics listed in Table~\ref{tab:SummaryStatistics} for each dataset and compare these summaries between each pair of datasets (Figure~\ref{fig:DataSimSummary}).
 Then, a score is calculated for how well the software's simulation replicates a given summary based on how small the divergences of observed/simulated dataset pairs are compared to divergences between arbitrary observed/observed or simulated/simulated pairs.
 
 Applying this methodology using many datasets should give a clear view of which characteristics the model captures well, as well as areas for improvement.
@@ -418,7 +418,7 @@ Summary divergences are applied to each dataset, allowing for scores for each su
 \subsection*{Assessing summary statistic replication for \igor}
 We apply the methodology discussed in the previous section to TRB sequences from datasets A4\_i107, A4\_i194, A5\_S9, A5\_S10, A5\_S15, and A5\_S22 from Britanova et al, 2016~\cite{Britanova2016-iw}.
 Although \igor\ is typically applied to non-productive sequences in order to capture the pre-selection recombination process, for this example application we wished to understand \igor's ability to fit the complete repertoire directly without the need for an additional selection model (e.g.\ \cite{Elhanati2014-mf}).
-Thus, we fit the \igor\ model with all sequences (which we expect to be dominated by productive sequences) and during simulation restricted to productive sequences.
+Thus, we fit the \igor\ model with all sequences (which we expect to be dominated by productive sequences) and restricted the simulation to productive sequences.
 Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distribution for each experimental and simulated repertoire.
 \begin{figure}
     \includegraphics[width=\linewidth]{Figures/IgorScores/igor_freqpoly.pdf}
@@ -483,14 +483,14 @@ Observation-based summary scores were computed using the LRAD-data equation \eqr
     	\caption{LRAD-sim values for each relevant IGH statistic available from \partis.}
     	\label{fig:SimScoresBCR}
 	\end{subfigure}
-	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD,'' for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of functional IGH sequences.}
+	\caption{Summary scores, denoted as ``log(Relative average divergence)'' or ``LRAD,'' for each statistic in the \partis\ model validation experiment. For both cases, a high score indicates a well-replicated statistic by the simulations with respect to their corresponding experimental repertoires of productive IGH sequences.}
 	\label{fig:BCRScores}
 \end{figure}
 
 Like \igor, we see that \partis\ simulations also excelled at replicating gene usage and recombination statistics, while additionally replicating CDR3 length distributions well.
 However, \partis\ struggled to recapitulate VD and DJ insertion matrices, which it does not explicitly include in its model.
 This contrasts with \igor\ which incorporates these insertion matrices during model fitting, and thus recapitulates these matrices well.
-The other statistics yielded scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations and hot and cold spot counts being poorly-captured.
+The other statistics yielded scores ranging from slightly to very negative, with many mutation-related summaries like positional distance between mutations and hot and cold spot counts being poorly captured.
 
 %WDL poor capture of positional distance between mutations and pairwise distance may be related to the decision to select a single representative from each clonal family (or rather, the inability of partis to model clonal abundance, if I have got that right. I think this is an important limitation that is worth drawing out.
 
@@ -670,7 +670,7 @@ Since we were interested in many CDR3-based statistics and \igor\ does not curre
 For each sequence, we considered only the rearrangement scenario with the highest likelihood as determined by \igor.
 When a list of more than one potential genes was given as the gene call, we considered only the first gene in the list.
 Several fields were renamed to match the AIRR specification when the definitions align without ambiguity.
-As described in Results, we trained on productive sequences and restricted the data to productive sequences for simulation.
+As described in Results, we trained on productive sequences and restricted the simulation to productive sequences.
 
 We applied IGoR in this way to six datasets of TRB sequences from \cite{Britanova2016-iw}, which studied T cell repertoires from donors ranging from newborn children to centenarians.
 
@@ -682,7 +682,7 @@ Since \partis\ returns a list of the top most likely annotations scenarios for e
 We denote the \texttt{indel\_reversed\_seqs} field as \texttt{sequence\_alignment} and \texttt{naive\_seq} as \texttt{germline\_alignment} as they satisfy these definitions from the AIRR Rearrangement schema.
 Several other fields are renamed to match the AIRR specification when the definitions align without ambiguity.
 
-Before running summary comparisons, we downsample to one receptor per clonal family to get a dataset consisting of unique clonotypes, for both the observed and simulated datasets.
+Before running summary comparisons, we downsample to one receptor per clonal family to get a dataset consisting of unique clonotypes for both the observed and simulated datasets.
 We do this since \texttt{partis simulate} draws from distributions over clonal families for each rearrangement event as inferred from \texttt{partis partition}.
 While it is possible to simulate multiple leaves for each rearrangement, it is not obvious how to best synchronize this with the observed clonal family distributions.
 As an extreme example, if we had one clonal family with 1,000 members, and 99 singleton clonal families, we could try to coerce the simulator to produce on average a (roughly) size-1,000 clonal family for every 99 singletons.
