@@ -789,10 +789,11 @@ The \igor~\cite{Marcou2018-du} software features an algorithm for summarizing st
 %CAS - done TODO: Look for others.
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
-The tool can be also used to detect systemic biases between different library preparation protocols and control for batch effects that can confound meta-analysis of Rep-Seq data.
-Moreover, it would likely be useful to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
-%MS - some of the factors are already computed for CDR3 only, so better say extending the analysis to regions other than CDR3
+\texttt{sumrep} can be also used to detect systemic biases between different library preparation protocols and control for batch effects that can confound meta-analysis of Rep-Seq data.
+Moreover, while many of the summaries are applied to the CDR3 region by default, it would be interesting to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
+Finally, although \texttt{sumrep} already supports the AIRR rearrangement schema by default, we plan to thoroughly integrate \texttt{sumrep} as a downstream analysis tool for any AIRR-compliant software or workflow.
 %MS - maybe we should say that we plan to integrate with AIRR format and provide an easy-to-use R markdown template that only requires AIRR-format dataset with certain mandatory fields, so that sumrep can be in future used as a downstream analysis method for any AIRR-compliant software/workflow
+%BJO - not sure about the R markdown template, but we do plan to integrate sumrep as a downstream AIRR tool
 
 
 
