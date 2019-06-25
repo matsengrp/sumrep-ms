@@ -312,13 +312,11 @@ We outline a generic distribution approximation algorithm as well as a modified 
 
 \texttt{sumrep} additionally contains a plotting function for each univariate summary distribution.
 For example, the \texttt{getCDR3LengthDistribution} comes with a companion plotting function called \texttt{plotCDR3LengthDistribution}.
-%CAS probably not a big deal, but in the rendered PDF you sent around, `plotCDR3LengthDistribution` is sticking out into the margin for some reason.
 \texttt{sumrep} also includes a master plotting function, \texttt{plotUnivariateDistributions}, which shows a gridded figure of all univariate distribution plots relevant to the locus in question which can be computed from the input dataset.
 Currently, these plotting functions support frequency polygons and empirical cumulative distribution functions (ECDFs).
 Examples of these plots can be found throughout later sections of this report.
 
-\subsection*{Application of summary statistics to real data}
-%CAS I've reorganized this a bit, because it felt a bit sudden/unexplained. In trying to state more clearly why this is hear, it also felt natural to merge the T and B analyses into one section, but I don't feel strongly about that part.
+\subsection*{Application of summary statistics to experimental data}
 To examine the ability of various summary statistics to distinguish among real repertoires, we applied \texttt{sumrep} to TCR and BCR datasets performed a multidimensional scaling (MDS) analysis of summary divergences.
 In particular, we computed divergences of each summary between each pair of repertoires, stratified by covariates such as individual, timepoint, and cell subset to form a dissimilarity matrix.
 We then mapped these dissimilarity matrices to an abstract Cartesian space using MDS.
@@ -394,9 +392,8 @@ Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranke
 	\caption{Empirical cumulative distribution functions for the bottom-, middle-, and top-ranked statistics for \partis-annotated IGH repertoires, as determined by Figure~\ref{fig:PartisLassoScores}.}
 	\label{fig:LassoValidation}
 \end{figure}
-Visually, we see that the acidity curves do not vary much among donors or timepoints; the aromaticity curves have slightly more variation but are still highly similar; and the V 3' deletion length curves are more distinguished between some donors (e.g. FV and IB) as well as some donor-timepoint interactions (e.g. +1 and +7 timepoints for IB).
-%CAS I think ^ was a typo...
-Thus, there is some visual evidence that the lasso scores can identify some degree of informativeness among summaries.
+Visually, we see that the acidity curves do not vary much among donors or timepoints; the aromaticity curves have slightly more variation but are still highly similar; and the V 3' deletion length curves are more distinguished between some donors (e.g. FV and GMC) as well as some donor-timepoint interactions (e.g. +7d and +28d timepoints for IB).
+Thus, there is visual evidence that the lasso scores can identify some degree of informativeness among summaries.
 
 \subsection*{Comparing experimental observations to model simulations}
 \texttt{sumrep} can be used to validate BCR/TCR generative models, i.e.\ models from which one can generate (simulate) data, through the following approach.
@@ -446,6 +443,7 @@ We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC conte
 
 \igor\ simulations were able to recapitulate gene usage statistics of an empirical repertoire well, with J gene usage frequency being the most accurately replicated, followed by various recombination-based indel statistics.
 %CAS I can't help but notice that there seems to be a bit of correlation between LRAD-data and the lasso rankings. Based on Appendix D, I guess it might just be a coincidence, but perhaps something to add to the discussion?
+%BJO - Hm, that is definitely interesting, although there are some notable exceptions (e.g. basicity, DJ insertion length). I'm not sure if there is enough of a signal to make a sensible comment, but feel free to add something you feel is justified.
 V, D, and joint VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
 Conversely, the CDR3 length distribution was the least accurately replicated statistic among rearrangement statistics.
 The Kidera factors of the junction region were also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
@@ -455,8 +453,7 @@ We also computed simulation-based summary scores (LRAD-sim, defined in \eqref{eq
 The LRAD-sim score of a summary will be high when simulations look like their corresponding observations with respect to that summary, and low when simulations look more like other simulations than their corresponding observations.
 We still saw high scores for gene usage and indel statistics, although the CDR3 length distribution and various Kidera factor and GRAVY index distributions had much lower scores.
 This suggests that while the average \igor\ simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce more similar distributions to each other than to their observed counterparts.
-%CAS Isn't this kind of a big deal? If I understand correctly, it seems to suggest that IGoR's model is missing some dimension(s) along which real repertoires vary, causing its simulation to look generally more "average" than real life. I suppose it's probably a small effect, but still suggestive of avenues for future research, at least...
-
+In turn, this provides an avenue of future research for TCR generative models in which certain CDR3aa properties are incorporated and expressed in simulated data.
 
 
 \subsection*{Assessing summary statistic replication for \partis}
@@ -771,20 +768,19 @@ One can imagine many further applications of \texttt{sumrep}, as well as promisi
 \texttt{sumrep} could also be used to evaluate the extent to which artificial lymphocyte repertoires look like natural ones~\cite{Finlay2012}.
 
 There are several other packages dedicated to detailed summaries and visualization of immune receptor repertoires.
-The \texttt{tcR}~\cite{Nazarov2015-ok} and \texttt{bcRep}~\cite{Bischof2016-fn} packages for R includes methods for retrieving and comparing gene usage summaries, computing clonotype diversity indices, and visualizing various repertoire summaries.
+The \texttt{tcR}~\cite{Nazarov2015-ok} and \texttt{bcRep}~\cite{Bischof2016-fn} packages for R include methods for retrieving and comparing gene usage summaries, computing clonotype diversity indices, and visualizing various repertoire summaries.
 \texttt{VDJtools}~\cite{Shugay2015-ur} is a command line tool which performs similar repertoire summarization, comparison, and visualization tasks for TCR data.
 Desktop GUI-based programs include \texttt{ImmunExplorer}~\cite{Schaller2015-sw} and \texttt{Vidjil}~\cite{Duez2016-dt}.
 \texttt{Vidjil} is also available as a webserver, as is \texttt{ASAP}~\cite{Avram2018-aw}.
 \texttt{Antigen Receptor Galaxy}~\cite{IJspeert2017-iv} offers online access to many analysis tools. 
 These tools have a subset of the summary statistics described here, yet do not focus on building probabilistic models and performing comparative analysis for them.
-The \igor~\cite{Marcou2018-du} software features an algorithm for summarizing statistics of the V(D)J rearrangement process, however, the its main focus is on learning the basic model for non-productive T- and B-cell repertoire and it does not provide any built-in methods for comparing inferred models between datasets.
-%BJO - Erick, this was your todo, FYI. I could try but I'm sure you have a better idea of where to look than I do.
-%EM Let's open the question up to the group.
-%CAS - done TODO: Look for others.
+The \igor~\cite{Marcou2018-du} software features an algorithm for summarizing statistics of the V(D)J rearrangement process; however, its main focus is on learning the basic model for non-productive T- and B-cell repertoire and it does not provide any built-in methods for comparing inferred models between datasets.
+
 
 A natural extension of the model validation in this report would be to assess the performance of many competing repertoire analysis tools over a larger group of datasets.
 \texttt{sumrep} can be also used to detect systemic biases between different library preparation protocols and control for batch effects that can confound meta-analysis of AIRR-Seq data.
 Moreover, while many of the summaries are applied to the CDR3 region by default, it would be interesting to perform separate analyses restricted to different CDRs and framework regions, as physiochemical characteristics of these regions can differ greatly.
+
 Finally, although \texttt{sumrep} already supports the AIRR rearrangement schema by default, we plan to thoroughly integrate \texttt{sumrep} as a downstream analysis tool for any AIRR-compliant software or workflow.
 %MS - maybe we should say that we plan to integrate with AIRR format and provide an easy-to-use R markdown template that only requires AIRR-format dataset with certain mandatory fields, so that sumrep can be in future used as a downstream analysis method for any AIRR-compliant software/workflow
 %BJO - not sure about the R markdown template, but we do plan to integrate sumrep as a downstream AIRR tool
@@ -832,10 +828,12 @@ We see that the approximate distributions appear to converge to the full distrib
 Figure~\ref{fig:Divergences} displays the KL-divergence to the true distribution for each tolerance, again indicating convergence to the truth.
 Figure~\ref{fig:Times} displays the runtimes and log-runtimes for each tolerance as well as the true ``population'' runtime for the full dataset; while the runtime grows exponentially as $\varepsilon \to 0$, the approximation algorithm is still much faster than computing the full distribution for each considered value of $\varepsilon$.
 %CAS Is ^ the right syntax?
+%BJO - I think so... did you have a specific part in mind?
 
 Next we investigate the effect of dataset size on the performance of Algorithm~\ref{alg:DistributionAveraging}.
 For sample sizes $n \in \{\exp(6), \dotsc, \exp(10)\}$, we subsample \texttt{p\_f1} without replacement to $n$ sequences and compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset as well as those given by tolerances $\varepsilon \in \{0.1, 0.01, ..., 10^{-5} \}$.
 %CAS Are the sample sizes in powers of `e` or powers of 10? To me, exp(*) implies the former...
+%BJO - Sample sizes are in powers of `e`, but epsilon is in powers of 10. I did it this way since tolerances are often spoken of in powers of 10, whereas using exp(*) for sample sizes may be more arbitrary, but still sensible IMO. I tried to be careful about writing log vs log10 in the plots, but let me know if you find any mistakes.
 We perform this experiment 10 times for each $n$.
 Boxplots of the KL-divergence by $\log(n)$ and tolerance over all trials are displayed in Figure~\ref{fig:PDDivBySize}.
 We see no obvious trend in the effect of dataset size on the KL-divergence for any choice of tolerance for the pairwise distribution.
@@ -901,7 +899,7 @@ In particular, the approximation routine for hotspot and coldspot count distribu
 This is likely due to the fact that the full hotspot and coldspot count distributions is extremely fast to compute even for large datasets.
 
 These results suggest that convergence and efficiency will vary by summary, and the user should be aware of this fact when choosing whether to run the approximation routine as well as an appropriate tolerance.
-%CAS Yes, but what are the defaults? Do hot/cold spot distributions get the approximation unless the user says otherwise? Same question about Algorithm 2, below.
+By default, \texttt{sumrep} uses $\varepsilon = 0.001$ for arbitrary summary approximation routines, and retrieves approximate distributions by default only for \texttt{getPairwiseDistanceDistribution}, \texttt{getNearestNeighborDistribution}, and \texttt{getCDR3PairwiseDistanceDistribution}.
 
 \subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
 Here, we assess the modification of the distribution approximation routine for the nearest neighbor distribution.
@@ -1033,6 +1031,7 @@ In particular, choosing $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(
 While this may depend on the dataset in question, we recommend this as a good point of reference for general use.
 
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm~\ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
+By default, \texttt{sumrep} retrieves the approximate rather than full nearest neighbor distribution, and uses $\varepsilon = 10^{-4}$ unless otherwise modified.
 
 \subsection*{Appendix C: Multinomial lasso path plots}
 Figure~\ref{fig:LassoPaths} displays the lasso path plots which illustrate the coefficient values of each response vector utilized in Algorithm~\ref{alg:Lasso}.
@@ -1127,32 +1126,24 @@ Recall that for the standard \partis\ model validation procedure, \partis\ is us
 Here we examine the influence of using the same tool for inference and simulation by using \igblast\ for inference, and comparing the annotations dataset output from \igblast\ to the corresponding simulations from \partis.
 The workflow for this procedure is displayed in Figure~\ref{IgblastWorkflow}, which is essentially the diagram in Figure~\ref{fig:PartisWorkflow} with an additional path describing the \igblast/Change-O pipeline.
 %BJO - It might be worth also including a box called "IMGT database" as another input (along with "Fasta file")
-%CAS - I suggest striking the far left pathway for this version of the figure, since this appendix is only about the right hand comparison
 \begin{figure}
     \begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
         \begin{tikzpicture}
         \node[block](fasta){Fasta file};
-        \node[cloud, below left=0.5 cm and 1.2 cm of fasta, align=center](partis){\partis \\ \texttt{partition}};
-        \node[block, below left=0.75 cm and 0.1 cm of partis](partisdata){Annotated observations};
-        \node[block, below = 0.75 cm of partisdata](clones){Subsample to unique clones};
-        \node[block, below right=0.75 cm and 0.1 cm of partis](params){Model parameters};
+        \node[cloud, below left=0.75cm and 0.1 cm of fasta, align=center](partis){\partis \\ \texttt{partition}};
+        \node[block, below=0.75 cm  of partis](params){Model parameters};
         \node[cloud, below=0.75cm of params, align=center](simulate){\partis \\ \texttt{simulate}};
         \node[block, below = 0.75cm of simulate](sim){Annotated simulations};
         \node[block, below = 0.75cm of sim](simclones){Subsample to unique clones};
-        \node[block, below left=0.75 and 0.1cm of simclones](c1){Comparisons};
         \path[line](fasta) -- (partis);
-        \path[line] (partis) -- (partisdata);
         \path[line] (partis) -- (params);
         \path[line] (params) -- (simulate);
         \path[line] (simulate) -- (sim);
-        \path[line] (partisdata) -- (clones);
-        \path[line] (clones) -- (c1);
         \path[line] (sim) -- (simclones);
-        \path[line] (simclones) -- (c1);
-            \node[cloud, below right=0.5 cm and 1.2 cm of fasta, align=center](igblast){\igblast\ + \\ Change-O};
+            \node[cloud, below right=0.75 cm and 0.1 cm of fasta, align=center](igblast){\igblast\ + \\ Change-O};
             \node[block, below=0.6 cm of igblast](igblastdata){Annotated observations};
             \node[block, below = 0.75 cm of igblastdata](igblastclones){Subsample to unique clones};
-            \node[block, below right=0.75 and 0.1cm of simclones](c2){Comparisons};
+            \node[block, below right=0.75cm and -0.3cm of simclones](c2){Comparisons};
             \path[line](fasta) -- (igblast);
             \path[line] (igblast) -- (igblastdata);
             \path[line] (igblastdata) -- (igblastclones);
