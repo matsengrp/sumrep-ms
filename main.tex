@@ -83,7 +83,7 @@ The DNA sequences coding for these receptors arise by a complex recombination pr
 Although these datasets hold considerable promise for medical and public health applications, the complex structure of the resulting adaptive immune receptor repertoire sequencing (AIRR-seq) datasets makes analysis difficult.
 In this paper we introduce \texttt{sumrep}, an R package that efficiently performs a wide variety of repertoire summaries and comparisons, and show how \texttt{sumrep} can be used to perform model validation.
 We find that summaries vary in their ability to differentiate between datasets, although many are able to distinguish between covariates such as donor, timepoint, and cell type for BCR and TCR repertoires.
-We show that deletion and insertion lengths resulting from V(D)J recombination tend to be more discriminative characterizations of a repertoire than summaries that describe the amino acid composition of the junction region.
+We show that deletion and insertion lengths resulting from V(D)J recombination tend to be more discriminative characterizations of a repertoire than summaries that describe the amino acid composition of the CDR3 region.
 We also find that state-of-the-art generative models excel at recapitulating gene usage and recombination statistics in a given experimental repertoire, but struggle to capture many physiochemical properties of real repertoires.
 \end{abstract}
 
@@ -359,11 +359,11 @@ We formalize this approach in the Methods section (Algorithm~\ref{alg:Lasso}).
 One caveat to this approach is that we can only use sequence-level summary statistics as covariates in order to have a well-defined regression procedure.
 However, the majority of summaries considered in this report are applied at the sequence level.
 Thus, between the subset of informative sequence-level statistics and the remaining non-sequence-level statistics, we arrive at a considerably smaller set.
-Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analyses as these sets of statistics are orthogonal by construction according to particular measures.
+Besides non-sequence-level summaries, we also omit Kidera Factors and Atchley factors from our analyses as these sets of statistics are orthogonal by construction according to particular measures of amino acid composition in their respective original contexts.
 This also leads to a much smaller design matrix and a substantially decreased runtime.
 
 Figure \ref{fig:IgorLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to \igor\ annotations of TRB sequences from datasets A4\_i107, A4\_i194, A5\_S9, A5\_S10, A5\_S15, and A5\_S22 from Britanova et al, 2016~\cite{Britanova2016-iw}.
-We see that recombination-based deletion lengths comprise four of the top five summaries, with recombination-based insertion lengths, CDR3 length, and various physiochemical junction properties scattered over the remaining positions.
+We see that recombination-based deletion lengths comprise four of the top five summaries, with recombination-based insertion lengths, CDR3 length, and various physiochemical CDR3 properties scattered over the remaining positions.
 There appears to be high variability throughout the range of rankings, with the bottom three statistics all having a ranking of one for at least one coefficient vector.
 \begin{figure}
         \begin{subfigure}{\linewidth}
@@ -380,8 +380,8 @@ There appears to be high variability throughout the range of rankings, with the 
     \label{fig:LassoScores}
 \end{figure}
 
-Figure \ref{fig:PartisLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to \partis\ annotations of IGH sequences from donors FV, GMC, and IB at timepoints $-8$d and $-1$h from Gupta et al, 2017~\cite{Gupta2017-ve}.
-We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical junction properties mostly in the bottom half of rankings.
+Figure \ref{fig:PartisLassoScores} displays the results of applying Algorithm~\ref{alg:Lasso} to \partis\ annotations of IGH sequences from donors FV, GMC, and IB at timepoints $-8$d and $-1$h from Gupta et al, 2017~\cite{Gupta2017-ve}, downsampled to unique clonal families to avoid clonal abundance biases and decrease algorithmic runtime.
+We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical CDR3 properties mostly in the bottom half of rankings.
 In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
 
 While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, our intuition is that the nice properties of least-squares combined with the penalization of large coefficients leads to a subset of covariates that are generally informative.
@@ -423,7 +423,7 @@ Figure~\ref{fig:IgorFreqPolys} contains frequency polygons of each summary distr
 
 Observation-based summary scores are computed using a log ratio of average divergences (referred to as LRAD-data, and defined in \eqref{eq:ScoreObs}) for a variety of TRB-relevant summaries (Figure~\ref{fig:ObsScoresTCR}). 
 The LRAD-data score of a summary will be high when simulations look like their corresponding observations with respect to that summary, and low when observations look more like other observations than their corresponding simulations.
-We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC content  pairwise distance distributions) since they are likely confounded by differences in the read lengths of the query sequences versus the full variable region nucleotide sequences of the simulations, and \igor\ does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
+We exclude summaries based on \texttt{sequence\_alignment} values (e.g. pairwise distance distributions) since \igor\ does not currently have an option to output the full variable region nucleotide sequences for experimental reads.
 \begin{figure}
 	\begin{subfigure}{\textwidth}
     	\includegraphics[width=\linewidth]{Figures/IgorScores/obs_score_plot.pdf}
@@ -446,8 +446,8 @@ We exclude summaries based on \texttt{sequence\_alignment} values (e.g. GC conte
 %BJO - Hm, that is definitely interesting, although there are some notable exceptions (e.g. basicity, DJ insertion length). I'm not sure if there is enough of a signal to make a sensible comment, but feel free to add something you feel is justified.
 V, D, and joint VDJ gene usage are all also well-replicated, as well as both VD and DJ insertion matrices.
 Conversely, the CDR3 length distribution was the least accurately replicated statistic among rearrangement statistics.
-The Kidera factors of the junction region were also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
-Scores for other junction-based statistics besides Kidera factors ranged from mildly good to mildly bad, with the GRAVY index distribution being the best junction-based statistic (excluding Kidera factors) and charge distribution being the worst.
+The Kidera factors of the CDR3 region were also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
+Scores for other CDR3-based statistics besides Kidera factors ranged from mildly good to mildly bad, with the GRAVY index distribution being the best CDR3-based statistic (excluding Kidera factors) and charge distribution being the worst.
 
 We also computed simulation-based summary scores (LRAD-sim, defined in \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresTCR}).
 The LRAD-sim score of a summary will be high when simulations look like their corresponding observations with respect to that summary, and low when simulations look more like other simulations than their corresponding observations.
@@ -678,7 +678,7 @@ Since \partis\ returns a list of the top most likely annotations scenarios for e
 We denote the \texttt{indel\_reversed\_seqs} field as \texttt{sequence\_alignment} and \texttt{naive\_seq} as \texttt{germline\_alignment} as they satisfy these definitions from the AIRR Rearrangement schema.
 Several other fields are renamed to match the AIRR specification when the definitions align without ambiguity.
 
-Before running summary comparisons, we downsample to one receptor per clonal family to get a dataset consisting of unique clonotypes for both the observed and simulated datasets.
+Before running summary comparisons, we randomly downsample to one receptor per clonal family to get a dataset consisting of unique clonotypes for both the observed and simulated datasets.
 We do this since \texttt{partis simulate} draws from distributions over clonal families for each rearrangement event as inferred from \texttt{partis partition}.
 While it is possible to simulate multiple leaves for each rearrangement, it is not obvious how to best synchronize this with the observed clonal family distributions.
 A more involved analysis would attempt to mimic the clone size distribution in data as closely as possible, potentially with correlations between clone size and other rearrangement parameters, and assess sequence-level statistics within each clonal family.
@@ -796,7 +796,7 @@ We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pog
 
 \beginsupplement
 
-\section*{Appendix A: Performance of distribution subsampling algorithms}
+\section*{Appendix A: Performance analysis of Algorithm~\ref{alg:DistributionAveraging}}
 Here, we run Algorithm~\ref{alg:DistributionAveraging} on the \partis-annotated FV -1h dataset (henceforth referred to as \texttt{p\_f1}), subsampled without replacement to 10,000 sequences for tractability.
 We compute the pairwise distance distribution of CDR3 sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
 We replicate this experiment for 10 trials so that the subsampled dataset remains the same, but a new instance of the subsampling algorithm is run each time.
@@ -808,7 +808,7 @@ We replicate this experiment for 10 trials so that the subsampled dataset remain
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \includegraphics[width=\linewidth]{Figures/PairwiseDistance/ecdf_by_tol.pdf}
-    	\caption{Empirical c.d.f. of true and subsampled pairwise distance distributions by tolerance.}
+    	\caption{ECDF of true and subsampled pairwise distance distributions by tolerance.}
     	\label{fig:ECDF}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
@@ -901,7 +901,7 @@ This is likely due to the fact that the full hotspot and coldspot count distribu
 These results suggest that convergence and efficiency will vary by summary, and the user should be aware of this fact when choosing whether to run the approximation routine as well as an appropriate tolerance.
 By default, \texttt{sumrep} uses $\varepsilon = 0.001$ for arbitrary summary approximation routines, and retrieves approximate distributions by default only for \texttt{getPairwiseDistanceDistribution}, \texttt{getNearestNeighborDistribution}, and \texttt{getCDR3PairwiseDistanceDistribution}.
 
-\subsection*{Appendix B: Performance of nearest neighbor distribution subsampling algorithm}
+\subsection*{Appendix B: Performance analysis of Algorithm~\ref{alg:NNDistributionAveraging}}
 Here, we assess the modification of the distribution approximation routine for the nearest neighbor distribution.
 We run Algorithm~\ref{alg:NNDistributionAveraging} on \texttt{p\_f1} subsampled without replacement to 10,000 sequences for tractability.
 We compute the nearest neighbor distribution of CDR3 nt sequences for the full subsampled dataset, and approximate distributions with tolerances $\varepsilon \in \left\{0.1, 0.001, \dotsc, 10^{-7} \right\}$.
@@ -917,7 +917,7 @@ Figure~\ref{fig:NNDivergences} shows KL divergences of approximate distributions
     \end{subfigure}
     \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/CDR3/ecdf_by_tol.pdf}
-    	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
+    	\caption{ECDF of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDF}
     \end{subfigure}
     \begin{subfigure}{.49\textwidth}
@@ -952,7 +952,7 @@ Moreover, Figures~\ref{fig:NNDivergencesSequence} and \ref{fig:NNTimesSequence} 
     \end{subfigure}
     \begin{subfigure}{.49\textwidth}
         \includegraphics[width=\linewidth]{Figures/NearestNeighbor/Sequence/ecdf_by_tol.pdf}
-    	\caption{Empirical c.d.f. of true and subsampled nearest neighbor distance distributions by tolerance.}
+    	\caption{ECDF of true and subsampled nearest neighbor distance distributions by tolerance.}
     	\label{fig:NNECDFSequence}
     \end{subfigure}
     \begin{subfigure}{.49\textwidth}
@@ -1025,9 +1025,9 @@ Figures~\ref{fig:NNDivBySizeFull}, \ref{fig:NNTimeBySizeFull}, and \ref{fig:NNEf
      \caption{Performance of Algorithm~\ref{alg:NNDistributionAveraging} by sample size and tolerance applied to the nearest neighbor distribution of pairwise-aligned VDJ sequences.}
 \end{figure}
 There is evidence of a positive trend of the KL-divergence as sample size increases for $\varepsilon = 0.1$, although this trend seems to diminish for each other tolerance.
-Runtimes increase with given sample size and tolerance, and are generally higher than they are for \texttt{junction} sequences as expected.
-It turns out that the efficiencies follow the same rule of thumb we derived for the \texttt{junction} sequence situation.
-In particular, choosing $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$ will on average lead to an increase in efficiency with respect to the full distribution for \texttt{sequence\_alignment} sequences as well as \texttt{junction} sequences.
+Runtimes increase with given sample size and tolerance, and are generally higher than they are for CDR3 sequences as expected.
+It turns out that the efficiencies follow the same rule of thumb we derived for the CDR3 sequence situation.
+In particular, choosing $\varepsilon > \frac{1}{10^{k - 4}} = \frac{1}{10^{\log(n) - 4}}$ will on average lead to an increase in efficiency with respect to the full distribution for \texttt{sequence\_alignment} sequences as well as CDR3 sequences.
 While this may depend on the dataset in question, we recommend this as a good point of reference for general use.
 
 The user should use these results as well as problem-specific considerations when deciding whether or not to use Algorithm~\ref{alg:NNDistributionAveraging} instead of computing the full distribution, and if so, which tolerance to use.
