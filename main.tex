@@ -34,6 +34,7 @@
 }
 
 \pgfplotsset{every tick label/.append style={font=\small}}
+\pgfplotsset{compat=1.12}
 
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -230,7 +231,7 @@ We outline a generic distribution approximation algorithm as well as a modified 
       xticklabels={GC content},
       tick style={draw=none},
       axis line style={draw=none},
-      height=3cm, width=3cm,
+      height=2.8cm, width=3cm,
       enlargelimits=false, clip=false, axis on top
       ]
       \addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
@@ -266,7 +267,7 @@ We outline a generic distribution approximation algorithm as well as a modified 
     		\begin{axis}[
       		domain=0:8, samples=100,
           	axis lines=none,
-          	height=3cm, width=3cm,
+          	height=2.8cm, width=3cm,
           	enlargelimits=false, clip=false, axis on top
           	]
           	\addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
