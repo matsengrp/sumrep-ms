@@ -387,7 +387,8 @@ We see that deletion lengths, insertion lengths, and CDR3 length comprise the to
 In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
 
 %EM seems strange to say that good things come from lasso when we penalize large coefficients in the following sentence. I'd say the goodness concerns the small coefficients.
-While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, our intuition is that the nice properties of least-squares combined with the penalization of large coefficients leads to a subset of covariates that are generally informative.
+%BJO How does this sound? vvv
+While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, our intuition is that the nice properties of least-squares combined with the lasso's ability to diminish less relevant coefficients leads to a subset of covariates that are generally informative.
 To validate this intuition, we can examine distributions of particularly ranked summaries applied to a test set of annotated repertoires not used in the model fitting.
 Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranked), aromaticity (middle-ranked), and V 3' deletion length (top-ranked) distributions for the FV, GMC, and IB donors at timepoints +1h, +7d, and +28d following an influenza vaccination (which differ from the $-$1h and $-$8d timepoints used for fitting), where the ranks are as determined by Figure~\ref{fig:PartisLassoScores} for \partis-annotated IGH repertoires.
 \begin{figure}
