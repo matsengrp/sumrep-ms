@@ -386,9 +386,7 @@ Figure \ref{fig:PartisLassoScores} displays the results of applying Algorithm~\r
 We see that deletion lengths, insertion lengths, and CDR3 length comprise the top six summaries, with physiochemical CDR3 properties mostly in the bottom half of rankings.
 In contrast to the TCR result, there appears to be less overall variability throughout the range of rankings, with variability highest for the moderate ranking positions and notably lower for the top and bottom positions.
 
-%EM seems strange to say that good things come from lasso when we penalize large coefficients in the following sentence. I'd say the goodness concerns the small coefficients.
-%BJO How does this sound? vvv
-While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, our intuition is that the nice properties of least-squares combined with the lasso's ability to diminish less relevant coefficients leads to a subset of covariates that are generally informative.
+While it's difficult to say exactly the level of correlation of each summary by the lasso result alone, since the lasso is a regularized version of least-squares, our intuition is that the nice properties of least-squares combined with the lasso's ability to eliminate less relevant coefficients leads to a subset of covariates that are generally informative.
 To validate this intuition, we can examine distributions of particularly ranked summaries applied to a test set of annotated repertoires not used in the model fitting.
 Figure~\ref{fig:LassoValidation} displays ECDFs of the the acidity (bottom-ranked), aromaticity (middle-ranked), and V 3' deletion length (top-ranked) distributions for the FV, GMC, and IB donors at timepoints +1h, +7d, and +28d following an influenza vaccination (which differ from the $-$1h and $-$8d timepoints used for fitting), where the ranks are as determined by Figure~\ref{fig:PartisLassoScores} for \partis-annotated IGH repertoires.
 \begin{figure}
@@ -1060,9 +1058,6 @@ Figure~\ref{fig:IgorWorkflow} illustrates the \igor\ model validation workflow.
 We employ \igblast\ to obtain CDR3 sequences for the observed sequences, which \igor\ only outputs for generated sequences.
 Moreover, because we fit \igor\ models on predominantly productive TRB sequences, we consider only \igor-generated sequences whose V and J segments are in-frame.
 
-%EM Hm, isn't CDR3 pretty obvious? (I'm not sure but that was my impression)
-%BJO - That was my thought too, but I'm not 100% sure these two tools would always infer the same CDR3.
-% Hence, the resultant analysis can be thought to validate a joint modeling effort between \texttt{igor} and IgBlast to whatever extent IgBlast introduces bias in CDR3 inferences.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
         \begin{adjustbox}{max totalsize={\textwidth}{.5\textheight},center}
