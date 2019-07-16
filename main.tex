@@ -221,9 +221,9 @@ We outline a generic distribution approximation algorithm as well as a modified 
 
 %BJO I tried aligning the captions nicely to no avail.
 \begin{figure}
-    \begin{subfigure}[c]{0.49\linewidth}
+    \begin{subfigure}[b]{0.49\linewidth}
     \begin{align*}
-    s(R_1) & =
+    s(R_1)  =
     \begin{tikzpicture}[baseline={(0.5, 0.5)}]
     \begin{axis}[
       domain=0:8, samples=100,
@@ -239,9 +239,8 @@ We outline a generic distribution approximation algorithm as well as a modified 
       \addplot [very thick,orange!90!black, fill=orange!20!] {multimodal(3,5.5)};
     \end{axis}
     \end{tikzpicture}
-    \\
     \hspace{1em}
-    s(R_2) & =
+    s(R_2)  =
     \begin{tikzpicture}[baseline={(0.5, 0.5)}]
     \begin{axis}[
       no markers, domain=0:11, samples=100,
@@ -261,7 +260,8 @@ We outline a generic distribution approximation algorithm as well as a modified 
     \caption{Most summary statistics $s$, e.g.\ GC content, yield a distribution of values when applied to each of the sequences in a given repertoire $R$.}
     \label{fig:SummaryCartoon}
     \end{subfigure}
-    \begin{subfigure}[c]{0.49\linewidth}
+    \begin{subfigure}[b]{0.49\linewidth}
+    \centering
     $
     \mathcal D_\text{GC-content}
     \left(
@@ -288,13 +288,13 @@ We outline a generic distribution approximation algorithm as well as a modified 
     \end{tikzpicture}
     \right)
     = 0.05
-    $
+    $ \vspace{1.5em}
     \caption{
     We can compare summary distributions using a statistical divergence $\mathcal D$, which takes two distributions and outputs a nonnegative scalar.
     }
     \label{fig:DivergenceCartoon}
     \end{subfigure}
-    \begin{subfigure}[c]{0.49\linewidth}
+    \begin{subfigure}[t]{0.49\linewidth}
     	\begin{center}
     	\includegraphics[width=\linewidth]{Figures/data_sim.pdf}
 		\end{center}
@@ -302,9 +302,9 @@ We outline a generic distribution approximation algorithm as well as a modified 
 		\label{fig:DataSim}
     \end{subfigure}
     \;
-    \begin{subfigure}[c]{0.49\linewidth}
+    \begin{subfigure}[t]{0.49\linewidth}
     	\begin{center}
-     	\includegraphics[width=0.8\linewidth]{Figures/paired_summaries.pdf}
+     	\includegraphics[width=0.6\linewidth]{Figures/paired_summaries.pdf}
 		\end{center}
 		\caption{We can compute many summaries of these repertoires yielding distributions for comparison.}
 		\label{fig:DataSimSummary}
