@@ -1,0 +1,91 @@
+> In this study, Olsen et al. describe the development and application
+> of sumrep, an R package that generates a variety of summaries of the
+> features of different adaptive immune receptor sequence datasets, and
+> that compares different datasets according to these summaries. The
+> package is applied to empirical and simulated data, and demonstrated
+> to be able to distinguish datasets that differ by major covariates
+> such as twin relationships or research subject identity.
+
+> The repertoire summary measures are produced by using a variety of
+> well-known and already published packages, such as ape, alakazam and
+> shazam, as well as new R functions. The package includes estimates of
+> computationally intensive summaries, via subsampling and testing of
+> estimate stability. Although the novelty of the biological findings in
+> the manuscript is modest, (for example, showing that members of a pair
+> of twins have more similar AIRR data to each other than to unrelated
+> individuals) the wrapping of all of the disparate analysis approaches
+> under one convenient R package umbrella will likely be of use and
+> interest to other researchers in this specialized field within
+> immunology. A consistent, relatively comprehensive tool of this kind
+> could help to standardize analyses of complex AIRR data within the
+> field. The authors' discussion of other tools in the literature is
+> balanced.
+
+> One major question is whether the kinds of AIRR summaries and
+> comparisons in sumrep are able to provide meaningful insights into
+> immunological questions that are less overt and dramatic than, for
+> example, repertoire differences between identical twins compared to
+> individuals with different germline genome sequences. For example, in
+> Fig. 2, the overall differences between individuals in Coordinate 1 of
+> the sumrep comparison are clear, but it is much less apparent whether
+> the data from different timepoints before and after vaccination (when
+> biologically important events are happening in T cell and B cell
+> populations, but not necessarily ones that would perturb the entire
+> repertoire) show any consistent trend with this kind of analysis.
+
+Sometimes they will be, sometimes they won't. This is a software paper.
+
+> Additional Comments:
+> Page 2: "In addition to enabling comparison of different sequencing
+> datasets, summary statistics can also be used to compare sequencing
+> datasets to probabilistic models to which they have been fitted." and
+> "Such generative models are used to simulate sequences as a 'ground
+> truth' for benchmarking inferential software".
+> The authors should consider expanding on the kinds of biological
+> findings or hypothesis testing that could be enabled by more accurate
+> modeling of AIRR sequence datasets, to increase the appeal of this
+> aspect of the study to a broader immunology audience. If an accurate
+> model is a black box that cannot be related to, for example, cellular
+> processes and their regulation during VDJ recombination, or selective
+> forces acting on B cells or T cells during the life of the organism,
+> the appeal of this aspect of the project may be restricted to
+> sub-specialists within this already specialized field.
+
+I think that we can talk about how model -> sequences -> sumrep comparison -> model refinement. Model fitting is beyond the scope.
+
+> For the experimental datasets used, it would be useful to know if the
+> investigators have tested for other experimental covariates that could
+> result in batch effects, for example, if different subjects' samples,
+> or samples from different timepoints, were sequenced in different
+> sequencer runs.
+
+Testing for experimental covariates-- not sure what that means.
+
+> Table 1: Some further analysis and discussion of the degree of
+> correlation between the different summary measures calculated from an
+> AIRR dataset (beyond the mention on page 5 that such correlations
+> exist), and how any such correlations could affect comparison between
+> two different AIRR datasets, would help to put the analyses in
+> perspective.
+
+Isn't this addressed by the LASSO path stuff?
+
+> Levenshtein distance: The authors could discuss whether insertions and
+> deletions should be considered as comparable edit events in comparison
+> to substitutions, when they are more rare in empirical AIRR data.
+
+OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are common, but that things get filtered out.
+
+Sequence-wise GC content: how useful is this summary? It seems like a measure imported from organismal phylogenetics, rather than something that would be often used in AIRR analysis
+
+> One puzzling aspect is that the dataset availability statement for the
+> manuscript states: "Generated Statement: The datasets analyzed in this
+> manuscript are not publicly available. Requests to access the datasets
+> should be directed to Branden Olson, branden.olson@gmail.com." This
+> seems not to be the case. Many of the datasets referenced do appear to
+> be in the SRA repository, such as those in references 6, 12, 29 and 32
+> Lack of data sharing would make it impossible for other researchers to
+> independently evaluate the reported results of the study and carry out
+> additional analyses.
+
+OK, we should fix that.

@@ -1,0 +1,112 @@
+> Major comments:
+
+> 1) The detailed examples in the “Examples” section of the “Usage" page
+> on Github are only for what seems to be a secondary application of
+> sumrep – comparing the statistics of observed and simulated
+> repertoires. I couldn’t go through the first one using the Docker
+> image. File "data/test_dat.fa” (l. 10 of the R script) does not exist
+> (the actual file is named “test_data.fa”). After I corrected the file
+> name, I got an error at the next command (l. 17): "Error in fread(.,
+> stringsAsFactors = FALSE) : File 'tmp_output/simu.csv' does not exist
+> or is non-readable. getwd()=='/sumrep'"
+
+> 2) The “Usage" page on Github is missing a fully workable example of
+> the main application of sumrep, which is to compare and plot different
+> datasets in terms of a chosen statistic. It shows how to get a
+> distribution for a single dataset and shows the commands for computing
+> divergence given a second dataset, but only a single dataset is
+> provided (there’s only dat, we need dat_a and dat_b to run the
+> ‘divergence’ and ‘compareRepertoires’ commands). Why not include two
+> example datasets and commands for not only calculating the divergence
+> of the two distributions but also plotting them? Even better would be
+> commands to load a few datasets, estimate and plot some summary
+> distribution for each dataset, calculate their divergences with
+> respect to some summary and plot the datasets using MDS, as shown in
+> the paper.
+
+> 3) How does sumrep calculate per-gene and per-gene-per-position
+> substitution rates? Table 1 says the implementation of those
+> quantities is “tool-provided + sumrep”. What does that mean? Are they
+> actual substitution rates (i.e., in units of subst. / unit time, which
+> would require time-stamped data) or are they genetic distances from
+> the ancestor? It might be worth explaining in a footnote or appendix.
+> It might also be worth mentioning selection was estimated using the
+> statistic from Baseline (Uduman et al. 2011, Yaari et al. 2012) (which
+> is what’s implemented in Shazam).
+
+> Minor comments:
+
+> 5) The third paragraph of the Introduction may be hard to follow for
+> less statistically-minded readers. Its very point is that many of the
+> dimensionality reductions used to simplify the analysis of repertoires
+> often do so at the cost of biological interpretability, but is there a
+> way to explain what those techniques are doing with less jargon
+> (“string metric”, “positional information”, etc.)? One or two examples
+> of biologically interpretable summaries and how they’ve been used
+> would strengthen the following paragraph, which says that the goal of
+> the present work is to facilitate the computation of such
+> interpretable summaries.
+
+> 6) I understand that the results in Figure 3 are just meant to
+> illustrate the method, but it would be good to cite previous studies
+> showing biochemical differences in the repertoires of different B cell
+> subpopulations (e.g. Wu et al. 2010).
+
+> 7) Line 93 - "The first group of statistics only requires the input or
+> query sequences to be aligned to their inferred germline sequences
+> (e.g. IMGT-aligned) and constrained to the variable region.” Is
+> alignment to the germline sequence necessary to calculate GC content
+> and hot and cold spots?
+
+> 8) Does “tool-provided” in Table 1 mean that the summary statistic was
+> provided by the annotation tool?
+
+> 9) Figures 2 and 3 could use better panel names (and names consistent
+> between them when the same statistic is present in both figures).
+
+> 10) Many readers (myself included) may not be familiar with Kidera
+> factors. A brief sentence explaining them in the main text (and
+> potentially more informative labels for each factor in Figs. 2 and 3)
+> would be useful.
+
+> 11) The Github page could give instructions for starting a Docker
+> container interactively.
+
+> 12) The datasets analyzed were published previously, but have they
+> been deposited in a data repository? If so, links could be provided.
+
+> 13) Line 251. Better to write “Eq. (9)” than just “(9)”. For a while I
+> thought this was a reference.
+
+> 14) Line 308. Define “d” (distribution?).
+
+> 15) Algorithm 3. Is rows(d_i) the number of bins the distribution has
+> been discretized into?
+
+> 16) Line 414. Shouldn’t it be Appendix E instead of C? Could the main
+> conclusion of that appendix be stated succinctly here?
+
+> 17) Line 628 in Appendix A says approximate distributions are used by
+> default only for pairwise distances and nearest neighbor
+> distributions. This should be pointed out in the main text, too.
+
+> 18) Not all summary statistics in Table 1 have corresponding functions
+> listed in the Extended Documentation page on Github. Are all
+> statistics in Table 1 going to be available in the first release of
+> sumrep?
+
+
+> Suggestion:
+
+> 19) Does the package include functions for testing if repertoires are
+> clustered according to a chosen covariate in MDS space? The instances
+> of clustering in the manuscript (Figs. 2 and 3) are simply meant to
+> illustrate method and so they were not formally tested, but users may
+> want to test the significance of clustering identified visually. Given
+> there are many statistics to compare, it is easy for users to run into
+> the problem of multiple testing. The package is already a useful tool
+> as it is, but, as a suggestion, I think it might do a great service to
+> the community by getting ahead of the curve on this issue and
+> providing tools for testing the significance of repertoire clustering
+> while accounting for multiple testing.
+
