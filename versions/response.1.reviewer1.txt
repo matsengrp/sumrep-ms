@@ -58,8 +58,21 @@
 > alignment to the germline sequence necessary to calculate GC content
 > and hot and cold spots?
 
+It's not strictly necessary; however, we wish to encourage meaningful
+analyses and comparisons over well-defined regions, and comparison of
+these statistics over non-aligned sequences may lead to polluted
+summaries. For example, non-aligned sequences could vary considerably 
+in length, with some extending potentially into the UTRs and others 
+into the constant region.
+# TODO: Make a note of this in the manuscript
+
 > 8) Does “tool-provided” in Table 1 mean that the summary statistic was
 > provided by the annotation tool?
+
+Yes, more specifically, the summary can be directly computed from the
+output of an annotation tool. For example, the CDR3 length distribution 
+is exactly the frequencies of values in the \texttt{junction} column of
+the annotated dataset. We have clarified this in the Table 1 caption.
 
 > 9) Figures 2 and 3 could use better panel names (and names consistent
 > between them when the same statistic is present in both figures).
@@ -78,13 +91,24 @@
 > 13) Line 251. Better to write “Eq. (9)” than just “(9)”. For a while I
 > thought this was a reference.
 
+This has been fixed; thank you for catching this.
+
 > 14) Line 308. Define “d” (distribution?).
+
+Yes, this refers to the full distribution over a repertoire. We have
+clarified this in the text as well as in the algorithm descriptions.
 
 > 15) Algorithm 3. Is rows(d_i) the number of bins the distribution has
 > been discretized into?
 
+rows(d_i) is the number of receptor sequences belonging to the ith
+dataset. We have clarified this in the text.
+
 > 16) Line 414. Shouldn’t it be Appendix E instead of C? Could the main
 > conclusion of that appendix be stated succinctly here?
+
+Yes, we have changed this to Appendix E, and summarized our findings in
+the main text.
 
 > 17) Line 628 in Appendix A says approximate distributions are used by
 > default only for pairwise distances and nearest neighbor
@@ -110,3 +134,8 @@
 > providing tools for testing the significance of repertoire clustering
 > while accounting for multiple testing.
 
+Unfortunately, the MDS applications were done on top of sumrep and 
+general MDS analyses are not currently available. This is something
+that might be available down the road. Getting significance estimates
+could very well be its own separate project built on top of sumrep's
+core.
