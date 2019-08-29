@@ -47,6 +47,12 @@
 > the present work is to facilitate the computation of such
 > interpretable summaries.
 
+We have attempted to reduce the jargon of this paragraph. Given that the
+remainder of the manuscript discusses a large number of biologically
+interpretable summaries in detail, we believe isolating and discussing 
+one or two of them here might convolute the introduction more than 
+necessary.
+
 > 6) I understand that the results in Figure 3 are just meant to
 > illustrate the method, but it would be good to cite previous studies
 > showing biochemical differences in the repertoires of different B cell

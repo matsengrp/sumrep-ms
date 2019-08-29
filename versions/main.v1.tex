@@ -105,10 +105,14 @@ After annotation one can compare gene usage \cite{Hou2016-qc, Martin2015-ho, Cor
 This can be a highly involved task, and so it is common to simply compare the gene usage frequencies and CDR3 length distributions of repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of the CDR3 sequence and potentially interesting aspects of the germline-encoded regions unanalyzed.
 
 
-An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
-For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
-These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
+An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some distance.
+For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}, where a $k$mer is a nucleotide sequence motif of size $k$.
+These $k$mer distributions can then be compared via sequence-based distances, but still comprise a large space and lose important positional information along the sequence.
 One can perform other dimension reduction techniques such as t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also discard a lot of information and can be difficult to interpret biologically.
+
+%BJO - TODO: Not sure where exactly to put this yet.
+While many biologically interpretable summaries such as biophysiochmical properties exist and have been widely applied \cite{Chowell2015-gj, Ostmeyer2019-vf, Wu2011-es, Wu2010-dcc}, these are often examined at the sequence level rather than the repertoiree level.
+
 
 We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of AIRR-seq data.
 In addition to enabling comparison of different sequencing datasets, summary statistics can also be used to compare sequencing datasets to probabilistic models to which they have been fitted.
