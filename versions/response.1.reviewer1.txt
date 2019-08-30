@@ -34,6 +34,21 @@
 > statistic from Baseline (Uduman et al. 2011, Yaari et al. 2012) (which
 > is what’s implemented in Shazam).
 
+We apologize for the lack of clarity here. Per-gene substitution rate is 
+defined to be the number of observed mutations in sequences assigned to 
+that gene, in the segment of the sequence assigned to that gene's 
+region, divided by the length of the segment. Per-gene-per-position 
+substitution rate is similarly defined, but with segment of length 1, 
+and separately computed for each position in the sequence. We have 
+included these definitions in the Table 1 caption. These rates can be
+computed using tools such as partis, and sumrep then does further 
+processing when computing summaries and comparisons. The particular data
+structure specification can be found in the "Running a full comparison" 
+subsection of the Usage section on the GitHub repo.
+
+We have also clarified that we are using the BASELINe method in Table
+1.
+
 > Minor comments:
 
 > 5) The third paragraph of the Introduction may be hard to follow for
@@ -57,6 +72,8 @@ necessary.
 > illustrate the method, but it would be good to cite previous studies
 > showing biochemical differences in the repertoires of different B cell
 > subpopulations (e.g. Wu et al. 2010).
+
+We have referenced some relevant studies, including that of Wu 2010.
 
 > 7) Line 93 - "The first group of statistics only requires the input or
 > query sequences to be aligned to their inferred germline sequences
