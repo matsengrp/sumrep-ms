@@ -208,11 +208,17 @@ It is open-source, unit-tested, and extensively documented, and uses default dat
 A reproducible installation procedure of \texttt{sumrep} is available using Docker \cite{Boettiger2015-ya}.
 
 Table~\ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed degree of annotation, clustering, and phylogenetic inference for each summary.
-The first group of statistics only requires the input or query sequences to be  aligned to their inferred germline sequences (e.g. IMGT-aligned) and constrained to the variable region; this coincides with the presence of the \texttt{sequence\_alignment} and \texttt{germline\_alignment} fields in the AIRR schema.
+The first group of statistics only requires the input or query sequences to be  aligned to their inferred germline sequences (e.g. IMGT-aligned) and constrained to the variable region; this coincides with the presence of the \texttt{sequence\_alignment} and \texttt{germline\_alignment} fields in the AIRR schema.	
 The second group requires standard sequence annotations, such as inferred germline ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 The third group requires clonal family cluster assignments.
 The fourth group requires a inferred phylogeny for each clonal family of an Ig dataset.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
+
+%BJO - Tried to use as little jargon as possible while accurately describing some of these statistics. Please hack away as necessary.
+\texttt{sumrep} contains many types of summaries, including nucleotide sequence-level summaries (pairwise distances, hotspot motif counts, etc.), rearrangement summaries like insertion and deletion lengths, and many biophysiochemical properties applicable to the amino acid sequences of particular receptor regions.
+The Atchley factors are a set of five functions of an amino acid sequence derived using a statistical technique called factor analysis \cite{Atchley05-hj}.
+The Kidera factors are a similarly-constructed set of ten functions of amino acid sequences, which were derived using dimension reduction techniques of a large multivariate analysis of amino acid properties \cite{Kidera85-ss}.
+\texttt{sumrep} also includes summaries to be applied at the clonal family level (e.g. cluster size distribution) and the phylogenetic level in the case of BCR sequences (e.g. Sackin index distribution).
 
 \texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate divergence, or measure of dissimilarity, between instances of a summary.
 For example, the \texttt{getCDR3LengthDistribution} function returns a vector of each sequence's CDR3 length, and the corresponding \texttt{compareCDR3LengthDistributions} function takes two repertoires and returns a numerical summary of the dissimilarity between these two length distributions.

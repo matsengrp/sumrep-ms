@@ -106,6 +106,9 @@ the annotated dataset. We have clarified this in the Table 1 caption.
 > 9) Figures 2 and 3 could use better panel names (and names consistent
 > between them when the same statistic is present in both figures).
 
+We have improved and standardized the summary names across the two
+figures.
+
 > 10) Many readers (myself included) may not be familiar with Kidera
 > factors. A brief sentence explaining them in the main text (and
 > potentially more informative labels for each factor in Figs. 2 and 3)
