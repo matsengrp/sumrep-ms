@@ -10,6 +10,12 @@
 > stringsAsFactors = FALSE) : File 'tmp_output/simu.csv' does not exist
 > or is non-readable. getwd()=='/sumrep'"
 
+We apologize for the difficulties faced here. The error resulted from
+an outdated version of partis that was not updated in the latest Docker
+build. We have pushed an updated container to Dockerhub, as well as
+uploaded a larger test dataset to ensure partis can find enough events
+for proper annotations.
+
 > 2) The “Usage" page on Github is missing a fully workable example of
 > the main application of sumrep, which is to compare and plot different
 > datasets in terms of a chosen statistic. It shows how to get a
