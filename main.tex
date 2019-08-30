@@ -105,10 +105,14 @@ After annotation one can compare gene usage \cite{Hou2016-qc, Martin2015-ho, Cor
 This can be a highly involved task, and so it is common to simply compare the gene usage frequencies and CDR3 length distributions of repertoire \cite{Miqueu2007-lk,Larimore2012-lo}, leaving the full richness of the CDR3 sequence and potentially interesting aspects of the germline-encoded regions unanalyzed.
 
 
-An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some metric.
-For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}.
-These $k$mer distributions can then be compared via a string metric, but still comprise a large space and lose important positional information.
+An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some distance.
+For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}, where a $k$mer is a nucleotide sequence motif of size $k$.
+These $k$mer distributions can then be compared via sequence-based distances, but still comprise a large space and lose important positional information along the sequence.
 One can perform other dimension reduction techniques such as t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also discard a lot of information and can be difficult to interpret biologically.
+
+%BJO - TODO: Not sure where exactly to put this yet.
+While many biologically interpretable summaries such as biophysiochmical properties exist and have been widely applied \cite{Chowell2015-gj, Ostmeyer2019-vf, Wu2011-es, Wu2010-dc}, these are often examined at the sequence level rather than the repertoire level.
+
 
 We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of AIRR-seq data.
 In addition to enabling comparison of different sequencing datasets, summary statistics can also be used to compare sequencing datasets to probabilistic models to which they have been fitted.
@@ -187,7 +191,7 @@ Colless-like index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 Cophenetic index distribution & Yes & Yes & Yes & \texttt{CollessLike} \\
 \end{tabular}
 }
-\caption{Currently supported summary statistics grouped by their respective degrees of assumed post-processing. Annotation denotes whether annotation of the V(D)J germline segment is required, Clustering denotes whether clonal clustering is required, and Phylogeny denotes whether lineage tree inference is required.}
+    \caption{Currently supported summary statistics grouped by their respective degrees of assumed post-processing. Annotation denotes whether annotation of the V(D)J germline segment is required, Clustering denotes whether clonal clustering is required, and Phylogeny denotes whether lineage tree inference is required. ``Tool-provided'' means that the summary can be directly computed from the output of an annotation tool; for example, the CDR3 length distribution is exactly the frequencies of values in the \texttt{junction} column of the annotated dataset.}
 \label{tab:SummaryStatistics}
 \end{table}
 
@@ -452,7 +456,7 @@ Conversely, the CDR3 length distribution was the least accurately replicated sta
 The Kidera factors of the CDR3 region were also replicated well, despite CDR3 length being one of the least accurately replicated statistics.
 Scores for other CDR3-based statistics besides Kidera factors ranged from mildly good to mildly bad, with the GRAVY index distribution being the best CDR3-based statistic (excluding Kidera factors) and charge distribution being the worst.
 
-We also computed simulation-based summary scores (LRAD-sim, defined in \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresTCR}).
+We also computed simulation-based summary scores (LRAD-sim, defined in Equation \eqref{eq:ScoreSim}) for the same datasets and simulations (Figure~\ref{fig:SimScoresTCR}).
 The LRAD-sim score of a summary will be high when simulations look like their corresponding observations with respect to that summary, and low when simulations look more like other simulations than their corresponding observations.
 We still saw high scores for gene usage and indel statistics, although the CDR3 length distribution and various Kidera factor and GRAVY index distributions had much lower scores.
 This suggests that while the average \igor\ simulation yields Kidera factor and GRAVY index distributions that look more like the observed repertoire's distributions than other observed repertoires do, these simulated repertoires still tend to produce more similar distributions to each other than to their observed counterparts.
@@ -538,13 +542,13 @@ Note that we can normalize the counts to become relative frequencies and apply \
 \subsection*{Approximating distributions via subsampling and averaging}
 Computing full summary distributions over large datasets can be intractable.
 However, we can compute a Monte Carlo distribution estimate by repeatedly subsampling and aggregating summary values until convergence.
-Algorithm~\ref{alg:DistributionAveraging} formalizes this idea, appending batch samples of $d$ to a rolling approximate distribution and terminating when successive distribution iterates have a JS divergence smaller than tolerance $\varepsilon$.
+Algorithm~\ref{alg:DistributionAveraging} formalizes this idea, appending batch samples of the full distribution $d$ to a rolling approximate distribution and terminating when successive distribution iterates have a JS divergence smaller than tolerance $\varepsilon$.
 Note that continually appending values to a rolling vector is analogous to computing a rolling average, where the subject of the averaging is an empirical distribution rather than a scalar.
 %BJO Should we make the algorithms figures?
 \begin{algorithm}
     \caption{Compute automatic approximate distribution \\
         \textbf{Input:} repertoire $R$, summary $s$, batch size $m$, convergence tolerance $\varepsilon$\\
-        \textbf{Output:} subsampled approximation to $d$}
+        \textbf{Output:} subsampled approximation to the full distribution $d$ of $R$}
     \label{alg:DistributionAveraging}
     \begin{algorithmic}
         \State $R_0 \gets \text{subsample}(R, m)$
@@ -590,7 +594,7 @@ Nonetheless, we empirically demonstrate in Appendix B that in the case of typica
 \begin{algorithm}
     \caption{Compute automatic approximate nearest neighbor distance distribution\\
         \textbf{Input:} repertoire $R$, distance $d$, batch size $m$, convergence tolerance $\varepsilon$\\
-        \textbf{Output:} subsampled approximation to $d_\text{NN}$}
+        \textbf{Output:} subsampled approximation to the full nearest neighbor distribution $d_\text{NN}$ of $R$}
     \label{alg:NNDistributionAveraging}
     \begin{algorithmic}
         \State $d_0 \gets \Call{doBatchStep}{R, m}$
@@ -637,7 +641,7 @@ Detailed pseudocode is provided in Algorithm \ref{alg:Lasso}.
 			\text{rep}(1, \text{rows}(d_1))^\mathsf{T}
 			\\ \vdots \\
 			\text{rep}(D, \text{rows}(d_D))^\mathsf{T}
-		\end{bmatrix}$
+        \end{bmatrix}$ \Comment{rows$(d_i)$ is the number of sequences in the $i$th dataset}
         \For{$\lambda = \lambda_1, \dotsc, \lambda_\Lambda$}:
         	\State $(\boldsymbol \beta_{d_1}^\lambda, \dotsc, \boldsymbol \beta_{d_D}^\lambda) \gets \text{MultinomialLasso}(\mathbf X, \mathbf y; \lambda)$
         \EndFor
@@ -740,8 +744,8 @@ However, this framework can be used to validate any immune receptor repertoire s
 
 A feature of our methodology is that we use the same tool to produce simulations that we used to produce the annotations.
 To examine the sensitivity of this method, we performed a separate analysis by obtaining dataset annotations from standalone \igblast~\cite{Ye2013-kl}, and comparing these to simulations based on \partis\ annotations using IMGT germline databases.
+This is discussed in detail in Appendix E; in particular, we find that scores differ to varying extents between the tools, and argue that while there are probably some biases when using a common tool for annotations and simulations, this is also driven by the differences in the nature of the tools' specifications.
 We did not perform a similar analysis for \igor\ annotations since \igblast\ was used to infer CDR3s within the \igor\ workflow.
-This is discussed in detail in Appendix C.
 
 
 \subsection*{Materials}
@@ -785,8 +789,9 @@ Finally, although \texttt{sumrep} already supports the AIRR rearrangement schema
 We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pogorelyy2018-ak} and Quentin Marcou for help running \igor.
 We also thank the other members of the Software WG for early stage discussion, especially Christian Busse, Enkelejda Miho, Inimary Toby, and Jian Ye.
 
-\section*{Author Contributions}
-BJO, PM, CS, DKR, JAVH, MS, AS, WL, and FAM conceived of the project and guided the overall design of the software and analyses; BJO designed and implemented the main software package; BJO, PM, CS, and AO performed computational analyses; BJO and FAM wrote the first draft of the manuscript; All authors contributed to manuscript revision, read and approved the submitted version.
+\section*{Conflicts of Interest}
+Author Jason A. Vander Heiden was employed by company Genentech Inc.
+All other authors declare no competing interests.
 
 
 \bibliographystyle{plain}
