@@ -600,8 +600,11 @@ The gain in efficiency stems from the fact that we only compute this true $d_\te
 Thus, appending batches to a running distribution until convergence as in Algorithm~\ref{alg:DistributionAveraging} will produce increasingly refined, unbiased approximations as the tolerance decreases.
 Algorithm~\ref{alg:NNDistributionAveraging} explicates this procedure.
 
-Algorithm~\ref{alg:NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance is small.
+Algorithm~\ref{alg:NNDistributionAveraging} may yield a high runtime if $R$ is large, the sequences in $R$ are long, or the tolerance $\varepsilon$ is small.
 Nonetheless, we empirically demonstrate in Appendix B that in the case of typical BCR sequence reads, even very small tolerances incur reasonable runtimes, and when $R$ is large, the algorithm is orders of magnitude faster than computing the full distribution over $R$.
+We show that the efficiency and accuracy varies by summary statistic in Appendix B, and identify appropriate defaults accordingly.
+Specifically, \texttt{sumrep} uses $\varepsilon = 0.001$ for arbitrary summary approximation routines and $\varepsilon = 10^{-4}$ for \texttt{getNearestNeighborDistribution}.
+Moreover, \texttt{sumrep} retrieves approximate distributions by default only for \texttt{getPairwiseDistanceDistribution}, \texttt{getNearestNeighborDistribution}, and \texttt{getCDR3PairwiseDistanceDistribution}.
 
 \begin{algorithm}
     \caption{Compute automatic approximate nearest neighbor distance distribution\\

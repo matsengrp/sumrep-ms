@@ -114,8 +114,18 @@ figures.
 > potentially more informative labels for each factor in Figs. 2 and 3)
 > would be useful.
 
+We have elaborated on both Atchley and Kidera factors in the text, as
+well as including a new paragraph explaining the different types of
+summaries which sumrep provides. We choose to leave the labels in terms
+of Kidera factors to avoid confusion (and we believe that including 
+parentheticals would convolute the figure).
+
 > 11) The Github page could give instructions for starting a Docker
 > container interactively.
+
+We have added a page on the Github repo which provides extensive 
+instructions on using Docker either from the Dockerhub build or building
+the image manually.
 
 > 12) The datasets analyzed were published previously, but have they
 > been deposited in a data repository? If so, links could be provided.
@@ -146,6 +156,10 @@ the main text.
 > default only for pairwise distances and nearest neighbor
 > distributions. This should be pointed out in the main text, too.
 
+We have elaborated on this in the main text, as well as the default
+tolerances for arbitrary distributions as well as the nearest neighbor
+distribution.
+
 > 18) Not all summary statistics in Table 1 have corresponding functions
 > listed in the Extended Documentation page on Github. Are all
 > statistics in Table 1 going to be available in the first release of
@@ -166,8 +180,10 @@ the main text.
 > providing tools for testing the significance of repertoire clustering
 > while accounting for multiple testing.
 
-Unfortunately, the MDS applications were done on top of sumrep and 
+Unfortunately, the MDS applications were done on top of core sumrep and 
 general MDS analyses are not currently available. This is something
-that might be available down the road. Getting significance estimates
-could very well be its own separate project built on top of sumrep's
-core.
+that we think could be available down the road, although this would be
+beyond the scope of the first release of sumrep and the current 
+manuscript. Getting significance estimates could very well be its own 
+separate project for a future release of sumrep and a separate
+manuscript.
