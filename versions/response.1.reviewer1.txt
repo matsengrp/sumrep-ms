@@ -12,9 +12,7 @@
 
 We apologize for the difficulties faced here. The error resulted from
 an outdated version of partis that was not updated in the latest Docker
-build. We have pushed an updated container to Dockerhub, as well as
-uploaded a larger test dataset to ensure partis can find enough events
-for proper annotations.
+build. We have pushed an updated, working container to Dockerhub.
 
 > 2) The “Usage" page on Github is missing a fully workable example of
 > the main application of sumrep, which is to compare and plot different
@@ -29,6 +27,16 @@ for proper annotations.
 > distribution for each dataset, calculate their divergences with
 > respect to some summary and plot the datasets using MDS, as shown in
 > the paper.
+
+We have included a second dataset in the Usage page, as well as
+elaborated on comparisons and built-in plotting functionality.
+
+Moreover, we have uploaded a new script Examples/MDS.R which downloads
+many post-processed IgH datasets from Gupta et al. (2017), computes
+divergences of each pairwise CDR3 length distribution, performs an
+MDS in a similar manner as the manuscript examples, and plots the first
+2 coordinates. This script should serve as a solid example to anyone 
+who wishes to perform a similar MDS analysis on their data.
 
 > 3) How does sumrep calculate per-gene and per-gene-per-position
 > substitution rates? Table 1 says the implementation of those
@@ -132,7 +140,7 @@ the image manually.
 
 Yes, the four datasets (refs 6, 12, 29, and 32) analyzed in the
 case studies are all available via SRA. We will include these SRA #s
-in the revision
+in the revision.
 
 > 13) Line 251. Better to write “Eq. (9)” than just “(9)”. For a while I
 > thought this was a reference.
