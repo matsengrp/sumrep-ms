@@ -81,6 +81,8 @@ repertoires of nucleotide sequences.
 > sequencer runs.
 
 Testing for experimental covariates-- not sure what that means.
+%BJO Perhaps Chaim and Mikhail can chime in here? I'm inclined to 
+believe that the datasets were collected in a rigorous manner.
 
 > Table 1: Some further analysis and discussion of the degree of
 > correlation between the different summary measures calculated from an
@@ -102,6 +104,11 @@ validate the method on a set of test datasets.
 > to substitutions, when they are more rare in empirical AIRR data.
 
 OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are common, but that things get filtered out.
+%BJO I will say that Levenshtein distance is not used for indels in
+sumrep as much as comparing different sequences, e.g. when computing
+pairwise distances or nearest neighbors. In this light, I argue
+Levenshtein really is sensible, especially considering the lack of 
+alternatives.
 
 > Sequence-wise GC content: how useful is this summary? It seems like a 
 > measure imported from organismal phylogenetics, rather than something 
