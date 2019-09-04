@@ -108,7 +108,7 @@ OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are commo
 > that would be often used in AIRR analysis
 
 You're right that sequence-wise GC content is quite simple and not
-necessarily an important immunological quantity. But if two different
+a classically important immunological quantity. But if two different
 repertoires have significantly different GC content distributions, this
 indicates that they are significantly different in some more 
 sophisticated characteristic. Since GC content is very easy to compute,
@@ -126,3 +126,12 @@ analysis on new datasets.
 > additional analyses.
 
 OK, we should fix that.
+
+The reason I chose this option is because there was post-processing of
+the raw SRA datasets for each analysis, by Chaim, Mikhail/Anna and I.
+I guess we might be happy to just point folks to the SRA numbers?
+
+The Britanova et al. 2016 data (ref 6) -- SRA accession # PRJNA316572
+The Gupta et al. 2017 data (ref 12) -- SRA accession # PRJNA349143
+The Prgorelyy et al. 2018 data (ref 29) -- SRA accession # PRJNA493983
+The Rubelt et al. 202016 data (ref 32) -- SRA accession # SRP065626

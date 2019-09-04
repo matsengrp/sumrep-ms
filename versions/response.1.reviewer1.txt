@@ -130,6 +130,10 @@ the image manually.
 > 12) The datasets analyzed were published previously, but have they
 > been deposited in a data repository? If so, links could be provided.
 
+Yes, the four datasets (refs 6, 12, 29, and 32) analyzed in the
+case studies are all available via SRA. We will include these SRA #s
+in the revision
+
 > 13) Line 251. Better to write “Eq. (9)” than just “(9)”. For a while I
 > thought this was a reference.
 
