@@ -10,7 +10,10 @@
 > stringsAsFactors = FALSE) : File 'tmp_output/simu.csv' does not exist
 > or is non-readable. getwd()=='/sumrep'"
 
-%EM We don't address the first sentence of the comment, right?
+We have extended the Usage/Examples section to perform a basic "primary" application of sumrep.
+In particular, we now read in a second dataset, perform a couple of summary-specific comparisons, perform a full repertoire comparison, and create a couple of distribution plots.
+We have also condensed these commands into a standalone script "BasicUsage.R" in the Examples folder.
+
 We apologize for the difficulties faced here. The error resulted from
 an outdated version of partis that was not updated in the latest Docker
 build. We have pushed an updated, working container to Dockerhub and
@@ -30,10 +33,10 @@ have verified that all the examples work.
 > respect to some summary and plot the datasets using MDS, as shown in
 > the paper.
 
-This is a good idea, thanks. We have included a second dataset in the Usage
-page, as well as elaborated on comparisons and built-in plotting functionality.
+This is a good idea, thanks.
+As discussed in the previous comment, we have elaborated on comparisons and built-in plotting functionality by reading in a second datset.
 
-Moreover, we have uploaded a new script Examples/MDS.R which downloads
+Moreover, we have uploaded another new script Examples/MDS.R which downloads
 many post-processed IgH datasets from Gupta et al. (2017), computes
 divergences of each pairwise CDR3 length distribution, performs an
 MDS in a similar manner as the manuscript examples, and plots the first
