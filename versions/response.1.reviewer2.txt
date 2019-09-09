@@ -33,18 +33,10 @@
 > populations, but not necessarily ones that would perturb the entire
 > repertoire) show any consistent trend with this kind of analysis.
 
-The point of sumrep isn't that every summary we provide is useful for every
-application, but that we have summaries available for whatever application you
-have in mind, and that it is important to analyze the effectiveness of the
-summaries within the given context. We do our best to analyze the
-informativeness of each summary using a few case studies, but it is difficult
-to make general conclusions about the summaries when there are so many
-different biological covariates each with different biological and
-physiochemical implications.
+The point of sumrep isn't that every summary we provide is useful for every application, but that we have summaries available for whatever application you have in mind, and that it is important to analyze the effectiveness of the summaries within the given context.
+We do our best to analyze the informativeness of each summary using a few case studies, but it is difficult to make general conclusions about the summaries when there are so many different biological covariates each with different biological and physiochemical implications.
 
-As for Figure 2, there is at least some signal in coordinate 2 with respect to
-donor-timepoint interactions for some summaries, for example, CDR3 lengths, D
-gene usage, DJ insertions, Hill numbers, V gene usage.
+As for Figure 2, there is at least some signal in coordinate 2 with respect to donor-timepoint interactions for some summaries, for example, CDR3 lengths, D gene usage, DJ insertions, Hill numbers, V gene usage.
 
 
 > Additional Comments:
@@ -63,14 +55,9 @@ gene usage, DJ insertions, Hill numbers, V gene usage.
 > the appeal of this aspect of the project may be restricted to
 > sub-specialists within this already specialized field.
 
-The sort of summary-based model validation we introduce here is not
-only more widely applicable to other areas of immunology and biology,
-but the black-box nature of certain forms of statistical modeling is
-why we need this sort of model validation in the first place.
-Understanding which summaries are, and, perhaps more importantly, are
-not captured, by a model gives insight into how the black box works.
-Moreover, many of the summaries here can be applied to other
-repertoires of nucleotide sequences.
+The sort of summary-based model validation we introduce here is not only more widely applicable to other areas of immunology and biology, but the black-box nature of certain forms of statistical modeling is why we need this sort of model validation in the first place.
+Understanding which summaries are, and, perhaps more importantly, are not captured, by a model gives insight into how the black box works.
+Moreover, many of the summaries here can be applied to other repertoires of nucleotide sequences.
 
 > For the experimental datasets used, it would be useful to know if the
 > investigators have tested for other experimental covariates that could
@@ -88,11 +75,7 @@ Testing for experimental covariates-- not sure what that means.
 > two different AIRR datasets, would help to put the analyses in
 > perspective.
 
-In fact, we do address the correlation between summaries via the
-"Ranking summary statistic informativeness" section, in which we employ
-a regularized least-squares approach to identify which summaries are
-most informative while controlling for correlation among summaries, and
-validate the method on a set of test datasets.
+In fact, we do address the correlation between summaries via the "Ranking summary statistic informativeness" section, in which we employ a regularized least-squares approach to identify which summaries are most informative while controlling for correlation among summaries, and validate the method on a set of test datasets.
 
 
 > Levenshtein distance: The authors could discuss whether insertions and
@@ -111,13 +94,11 @@ alternatives.
 > measure imported from organismal phylogenetics, rather than something
 > that would be often used in AIRR analysis
 
-You're right that sequence-wise GC content is quite simple, which we enjoy having as a statistic that requires minimal processing. Also, recall that SHM hotspots preferentially mutate at C/G bases.
+You're right that sequence-wise GC content is quite simple, which we enjoy having as a statistic that requires minimal processing.
+Also, recall that SHM hotspots preferentially mutate at C/G bases.
 
-In any case, if two different repertoires have significantly different GC
-content distributions, this hints that they may be significantly different in
-some more sophisticated characteristic. Since GC content is very easy to
-compute, this seems like a good place to start when doing some exploratory data
-analysis on new datasets.
+In any case, if two different repertoires have significantly different GC content distributions, this hints that they may be significantly different in some more sophisticated characteristic.
+Since GC content is very easy to compute, this seems like a good place to start when doing some exploratory data analysis on new datasets.
 
 > One puzzling aspect is that the dataset availability statement for the
 > manuscript states: "Generated Statement: The datasets analyzed in this
@@ -129,13 +110,10 @@ analysis on new datasets.
 > independently evaluate the reported results of the study and carry out
 > additional analyses.
 
-OK, we should fix that.
+You are correct; the datasets from these four studies are all available via SRA.
+We will include these SRA accession numbers, laid out in detail below, in the revision.
 
-The reason I chose this option is because there was post-processing of
-the raw SRA datasets for each analysis, by Chaim, Mikhail/Anna and I.
-I guess we might be happy to just point folks to the SRA numbers?
-
-The Britanova et al. 2016 data (ref 6) -- SRA accession # PRJNA316572
-The Gupta et al. 2017 data (ref 12) -- SRA accession # PRJNA349143
-The Prgorelyy et al. 2018 data (ref 29) -- SRA accession # PRJNA493983
-The Rubelt et al. 202016 data (ref 32) -- SRA accession # SRP065626
+Britanova et al. 2016 (ref 6) -- SRA accession # PRJNA316572
+Gupta et al. 2017 (ref 12) -- SRA accession # PRJNA349143
+Prgorelyy et al. 2018 (ref 29) -- SRA accession # PRJNA493983
+Rubelt et al. 202016 (ref 32) -- SRA accession # SRP065626
