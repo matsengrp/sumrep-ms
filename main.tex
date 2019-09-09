@@ -106,12 +106,12 @@ This can be a highly involved task, and so it is common to simply compare the ge
 
 
 An alternative strategy is to transform a repertoire to a more convenient space and compare the transformed quantities according to some distance.
-For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}, where a $k$mer is a nucleotide sequence motif of size $k$.
-These $k$mer distributions can then be compared via sequence-based distances, but still comprise a large space and lose important positional information along the sequence.
+For example, several studies reduce a set of nucleotide sequences to $k$mer distributions for classification of immunization status or disease exposure \cite{Madi2014-lt, Ostmeyer2017-xg, Heather2017pf}, where a $k$mer is a nucleotide subsequence of size $k$.
+These $k$mer distributions can then be compared via sequence-based distances, but still comprise a large space and lose important information about where the $k$mer appears along the sequence.
 One can perform other dimension reduction techniques such as t-SNE to project repertoires down to an even smaller space \cite{Yokota2017-zm}, but these projections also discard a lot of information and can be difficult to interpret biologically.
 
 %BJO - TODO: Not sure where exactly to put this yet.
-While many biologically interpretable summaries such as biophysiochmical properties exist and have been widely applied \cite{Chowell2015-gj, Ostmeyer2019-vf, Wu2011-es, Wu2010-dc}, these are often examined at the sequence level rather than the repertoire level.
+While many biologically interpretable summaries such as physiochemical properties exist and have been widely applied \cite{Chowell2015-gj, Ostmeyer2019-vf, Wu2011-es, Wu2010-dc}, these are often examined at the sequence level rather than the repertoire level.
 
 
 We wish to facilitate the use of biologically interpretable summary statistics to capture many different aspects of AIRR-seq data.
@@ -196,6 +196,7 @@ Currently supported summary statistics grouped by their respective degrees of as
 Annotation denotes whether annotation of the V(D)J germline segment is required, Clustering denotes whether clonal clustering is required, and Phylogeny denotes whether lineage tree inference is required.
 ``Tool-provided'' means that the summary can be directly computed from the output of an annotation tool; for example, the CDR3 length distribution is exactly the frequencies of values in the \texttt{junction} column of the annotated dataset.
 Per-gene substitution rate is defined to be the number of observed mutations in sequences assigned to that gene, in the segment of the sequence assigned to that gene's region, divided by the length of the segment.
+%EM Are the last two phrases here redundant? The "segment of length one" is I think cute, but the second is more clear.
 Per-gene-per-position substitution rate is similarly defined, but with segment of length 1, and separately computed for each position in the sequence.
 }
 \label{tab:SummaryStatistics}
@@ -208,16 +209,17 @@ It is open-source, unit-tested, and extensively documented, and uses default dat
 A reproducible installation procedure of \texttt{sumrep} is available using Docker \cite{Boettiger2015-ya}.
 
 Table~\ref{tab:SummaryStatistics} lists the summary statistics currently supported by \texttt{sumrep}, and includes the default assumed degree of annotation, clustering, and phylogenetic inference for each summary.
-The first group of statistics only requires the input or query sequences to be  aligned to their inferred germline sequences (e.g. IMGT-aligned) and constrained to the variable region; this coincides with the presence of the \texttt{sequence\_alignment} and \texttt{germline\_alignment} fields in the AIRR schema.	
+The first group of statistics only requires the input or query sequences to be aligned to their inferred germline sequences (e.g. IMGT-aligned) and constrained to the variable region; this coincides with the presence of the \texttt{sequence\_alignment} and \texttt{germline\_alignment} fields in the AIRR schema.
+(We note that some of these statistics, such as GC content, do not require an alignment in principle.
+However, we wished to encourage meaningful analyses and comparisons with our software, and thus require an alignment to avoid accidental comparison of non-corresponding sequence regions.)
 The second group requires standard sequence annotations, such as inferred germline ancestor sequences for Ig loci, germline gene assignments, and indel statistics.
 The third group requires clonal family cluster assignments.
 The fourth group requires a inferred phylogeny for each clonal family of an Ig dataset.
 \texttt{sumrep} itself does not perform any annotation, clustering, or phylogenetic inference, but rather assumes such metadata are present in the given dataset; in principle, one can use any tool which performs these tasks as expected.
 
-%BJO - Tried to use as little jargon as possible while accurately describing some of these statistics. Please hack away as necessary.
-\texttt{sumrep} contains many types of summaries, including nucleotide sequence-level summaries (pairwise distances, hotspot motif counts, etc.), rearrangement summaries like insertion and deletion lengths, and many biophysiochemical properties applicable to the amino acid sequences of particular receptor regions.
-The Atchley factors are a set of five functions of an amino acid sequence derived using a statistical technique called factor analysis \cite{Atchley05-hj}.
-The Kidera factors are a similarly-constructed set of ten functions of amino acid sequences, which were derived using dimension reduction techniques of a large multivariate analysis of amino acid properties \cite{Kidera85-ss}.
+\texttt{sumrep} contains many types of summaries, including nucleotide sequence-level summaries (pairwise distances, hotspot motif counts, etc.), rearrangement summaries like insertion and deletion lengths, and many physiochemical properties applicable to the amino acid sequences of particular receptor regions.
+The Atchley factors are a set of five numerical descriptions of amino acids derived using a statistical technique called factor analysis from a larger pool of 494 descriptors of amino acid biochemical properties \cite{Atchley05-hj}.
+The Kidera factors are a similarly-constructed set of ten numerical descriptions of amino acids, which were derived using dimension reduction techniques \cite{Kidera85-ss}.
 \texttt{sumrep} also includes summaries to be applied at the clonal family level (e.g. cluster size distribution) and the phylogenetic level in the case of BCR sequences (e.g. Sackin index distribution).
 
 \texttt{sumrep} makes it easy to compare summary statistics between two repertoires by equipping each summary with an appropriate divergence, or measure of dissimilarity, between instances of a summary.
@@ -805,7 +807,7 @@ We thank Misha Pogorelyy for kindly providing post-processed data from \cite{Pog
 We also thank the other members of the Software WG for early stage discussion, especially Christian Busse, Enkelejda Miho, Inimary Toby, and Jian Ye.
 
 \section*{Conflicts of Interest}
-Author Jason A. Vander Heiden was employed by company Genentech Inc.
+Author Jason A. Vander Heiden is employed by Genentech Inc.
 All other authors declare no competing interests.
 
 
