@@ -33,20 +33,19 @@
 > populations, but not necessarily ones that would perturb the entire
 > repertoire) show any consistent trend with this kind of analysis.
 
-Sometimes they will be, sometimes they won't. This is a software paper.
-
-As for Figure 2, there is at least some signal in coordinate 2 with
-respect to donor-timepoint interactions for some summaries, for 
-example, CDR3 lengths, D gene usage, DJ insertions, Hill numbers, V 
-gene usage. The point of sumrep isn't that every summary we provide
-is useful for every application, but that we have summaries
-available for whatever application you have in mind, and that it is
-important to analyze the effectiveness of the summaries within the
-given context. We do our best to analyze the informativeness of each
-summary using a few case studies, but it is difficult to make
-general conclusions about the summaries when there are so many
+The point of sumrep isn't that every summary we provide is useful for every
+application, but that we have summaries available for whatever application you
+have in mind, and that it is important to analyze the effectiveness of the
+summaries within the given context. We do our best to analyze the
+informativeness of each summary using a few case studies, but it is difficult
+to make general conclusions about the summaries when there are so many
 different biological covariates each with different biological and
 physiochemical implications.
+
+As for Figure 2, there is at least some signal in coordinate 2 with respect to
+donor-timepoint interactions for some summaries, for example, CDR3 lengths, D
+gene usage, DJ insertions, Hill numbers, V gene usage.
+
 
 > Additional Comments:
 > Page 2: "In addition to enabling comparison of different sequencing
@@ -64,14 +63,13 @@ physiochemical implications.
 > the appeal of this aspect of the project may be restricted to
 > sub-specialists within this already specialized field.
 
-I think that we can talk about how model -> sequences -> sumrep comparison -> model refinement. Model fitting is beyond the scope.
 The sort of summary-based model validation we introduce here is not
 only more widely applicable to other areas of immunology and biology,
-but the black-box nature of certain forms of statistical modeling is 
-why we need this sort of model validation in the first place. 
-Understanding which summaries are, and, perhaps more importantly, are 
+but the black-box nature of certain forms of statistical modeling is
+why we need this sort of model validation in the first place.
+Understanding which summaries are, and, perhaps more importantly, are
 not captured, by a model gives insight into how the black box works.
-Moreover, many of the summaries here can be applied to other 
+Moreover, many of the summaries here can be applied to other
 repertoires of nucleotide sequences.
 
 > For the experimental datasets used, it would be useful to know if the
@@ -81,8 +79,7 @@ repertoires of nucleotide sequences.
 > sequencer runs.
 
 Testing for experimental covariates-- not sure what that means.
-%BJO Perhaps Chaim and Mikhail can chime in here? I'm inclined to 
-believe that the datasets were collected in a rigorous manner.
+%BJO Perhaps Chaim and Mikhail can chime in here? I'm inclined to believe that the datasets were collected in a rigorous manner.
 
 > Table 1: Some further analysis and discussion of the degree of
 > correlation between the different summary measures calculated from an
@@ -91,7 +88,6 @@ believe that the datasets were collected in a rigorous manner.
 > two different AIRR datasets, would help to put the analyses in
 > perspective.
 
-# Isn't this addressed by the LASSO path stuff?
 In fact, we do address the correlation between summaries via the
 "Ranking summary statistic informativeness" section, in which we employ
 a regularized least-squares approach to identify which summaries are
@@ -107,20 +103,21 @@ OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are commo
 %BJO I will say that Levenshtein distance is not used for indels in
 sumrep as much as comparing different sequences, e.g. when computing
 pairwise distances or nearest neighbors. In this light, I argue
-Levenshtein really is sensible, especially considering the lack of 
+Levenshtein really is sensible, especially considering the lack of
 alternatives.
+%EM I don't completely get your response. I think that the reviewer is pointing out that in levenstein the indels are scored equally with point substitutions.
 
-> Sequence-wise GC content: how useful is this summary? It seems like a 
-> measure imported from organismal phylogenetics, rather than something 
+> Sequence-wise GC content: how useful is this summary? It seems like a
+> measure imported from organismal phylogenetics, rather than something
 > that would be often used in AIRR analysis
 
-You're right that sequence-wise GC content is quite simple and not
-a classically important immunological quantity. But if two different
-repertoires have significantly different GC content distributions, this
-indicates that they are significantly different in some more 
-sophisticated characteristic. Since GC content is very easy to compute,
-this seems like a good place to start when doing some exploratory data
-analysis on new datasets. 
+You're right that sequence-wise GC content is quite simple, which we enjoy having as a statistic that requires minimal processing. Also, recall that SHM hotspots preferentially mutate at C/G bases.
+
+In any case, if two different repertoires have significantly different GC
+content distributions, this hints that they may be significantly different in
+some more sophisticated characteristic. Since GC content is very easy to
+compute, this seems like a good place to start when doing some exploratory data
+analysis on new datasets.
 
 > One puzzling aspect is that the dataset availability statement for the
 > manuscript states: "Generated Statement: The datasets analyzed in this
