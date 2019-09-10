@@ -82,13 +82,12 @@ In fact, we do address the correlation between summaries via the "Ranking summar
 > deletions should be considered as comparable edit events in comparison
 > to substitutions, when they are more rare in empirical AIRR data.
 
-OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are common, but that things get filtered out.
-%BJO I will say that Levenshtein distance is not used for indels in
-sumrep as much as comparing different sequences, e.g. when computing
-pairwise distances or nearest neighbors. In this light, I argue
-Levenshtein really is sensible, especially considering the lack of
-alternatives.
-%EM I don't completely get your response. I think that the reviewer is pointing out that in levenstein the indels are scored equally with point substitutions.
+%EM OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are common, but that things get filtered out.
+
+According to the Yeap et al. paper above, insertions and deletions are common, but often lead to sequences getting filtered out of the productive repertoire.
+This makes it difficult to assess the exact level of rarity, and how this might impact distances between sequences.
+Nonetheless, it is not obvious to us how best to modify the Levenshtein (or similar) distance to account for relative rarity of  insertions/deletions vs substitutions, in particular how to choose appropriate weights for the respective event types.
+To us it seems more principled to use an established, common metric versus attempting to construct an alteration based on rarity of events.
 
 > Sequence-wise GC content: how useful is this summary? It seems like a
 > measure imported from organismal phylogenetics, rather than something
