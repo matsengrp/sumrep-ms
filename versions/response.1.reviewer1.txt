@@ -158,6 +158,7 @@ We have elaborated on this in the main text, as well as the default tolerances f
 > sumrep?
 
 We have gone through the tables and clarified any discrepancies between them.
+Each statistic in Table 1 is currently available in sumrep.
 
 While we do have comparison functions for gene usages (compareVGeneDistributions, compareVDJDistributions, etc.), we do not have corresponding getXDistribution functions, as the logic to compute these divergences rely on contigency tables (i.e. tables of counts) rather than distribution vectors like the rest of the summaries.
 We have added a section explaining this in the Extended Documentation.
