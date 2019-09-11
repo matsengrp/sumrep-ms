@@ -82,10 +82,8 @@ In fact, we do address the correlation between summaries via the "Ranking summar
 > deletions should be considered as comparable edit events in comparison
 > to substitutions, when they are more rare in empirical AIRR data.
 
-%EM OK, we can do that. https://paperpile.com/shared/bRJKpU says that they are common, but that things get filtered out.
-
-According to the Yeap et al. paper above, insertions and deletions are common, but often lead to sequences getting filtered out of the productive repertoire.
-This makes it difficult to assess the exact level of rarity, and how this might impact distances between sequences.
+According to Yeap et al. (2015) (https://doi.org/10.1016/j.cell.2015.10.042), insertions and deletions are common, but often lead to sequences getting filtered out of the productive repertoire.
+This makes it difficult to assess the exact level of rarity of indels, and how this might impact distances between sequences.
 Nonetheless, it is not obvious to us how best to modify the Levenshtein (or similar) distance to account for relative rarity of  insertions/deletions vs substitutions, in particular how to choose appropriate weights for the respective event types.
 To us it seems more principled to use an established, common metric versus attempting to construct an alteration based on rarity of events.
 
