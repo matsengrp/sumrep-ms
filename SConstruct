@@ -10,8 +10,8 @@ main, = env.PDF(target='_build/main.pdf',source='main.tex')
 #supp, = env.PDF(target='_build/supp.pdf', source='supp.tex')
 Default([main])
 
-#env.Latexdiff(target='diff.tex',source=['stored_main.tex','main.tex'])
-#diff = env.PDF(target='diff.pdf',source='diff.tex')
+env.Latexdiff(target='diff.tex',source=['versions/main.v1.tex','main.tex'])
+diff = env.PDF(target='diff.pdf',source='diff.tex')
 
 Depends(Flatten([main]),
         Flatten(['main.bib'])) #, 'defs.tex'
