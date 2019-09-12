@@ -115,5 +115,5 @@ We will include these SRA accession numbers, laid out in detail below, in the re
 
 Britanova et al. 2016 (ref 6) -- SRA accession # PRJNA316572
 Gupta et al. 2017 (ref 12) -- SRA accession # PRJNA349143
-Prgorelyy et al. 2018 (ref 29) -- SRA accession # PRJNA493983
+Pogorelyy et al. 2018 (ref 29) -- SRA accession # PRJNA493983
 Rubelt et al. 202016 (ref 32) -- SRA accession # SRP065626
