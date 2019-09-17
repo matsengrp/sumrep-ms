@@ -65,11 +65,15 @@ Moreover, many of the summaries here can be applied to other repertoires of nucl
 > or samples from different timepoints, were sequenced in different
 > sequencer runs.
 
-Testing for experimental covariates-- not sure what that means.
+%EM Testing for experimental covariates-- not sure what that means.
 %MS It means whether protocol parameters, # of input cells/RNA, sequencing depts, etc can explain differences between samples
 %BJO Perhaps Chaim and Mikhail can chime in here? I'm inclined to believe that the datasets were collected in a rigorous manner.
 
-%MS: Repertoires for both donors (yellow fever vaccination dataset) were sequenced on the same lane, except for time point 0 which was sequenced separately for both donors. As Figure 2 shows clear separation of replicas for all time points, it is unlikely that any major bias was introduced by sequencing time point 0 separately. In our experience, lane-specific biases are related to cross-sample contamination and, as we have not computed repertoire overlaps for Figure 2, it is unlikely that any of such biases are present. On the other hand, biases related to V/D/J usage, spectratype, etc are quite common in cases when different library preparation and sequencing protocols are applied. However, yellow fever vaccination dataset was obtained using exactly the same protocol for all donors and time points.
+For the yellow fever dataset, repertoires for both donors were sequenced on the same lane, except for time point 0 which was sequenced separately for both donors.
+As Figure 2 shows clear separation of replicas for all time points, it is unlikely that any major bias was introduced by sequencing time point 0 separately.
+In our experience, lane-specific biases are related to cross-sample contamination and, as we have not computed repertoire overlaps for Figure 2, it is unlikely that any of such biases are present.
+On the other hand, biases related to V/D/J usage, spectratype, etc are quite common in cases when different library preparation and sequencing protocols are applied.
+However, these datasets were obtained using exactly the same protocol for all donors and time points.
 
 > Table 1: Some further analysis and discussion of the degree of
 > correlation between the different summary measures calculated from an
