@@ -66,7 +66,10 @@ Moreover, many of the summaries here can be applied to other repertoires of nucl
 > sequencer runs.
 
 Testing for experimental covariates-- not sure what that means.
+%MS It means whether protocol parameters, # of input cells/RNA, sequencing depts, etc can explain differences between samples
 %BJO Perhaps Chaim and Mikhail can chime in here? I'm inclined to believe that the datasets were collected in a rigorous manner.
+
+%MS: Repertoires for both donors (yellow fever vaccination dataset) were sequenced on the same lane, except for time point 0 which was sequenced separately for both donors. As Figure 2 shows clear separation of replicas for all time points, it is unlikely that any major bias was introduced by sequencing time point 0 separately. In our experience, lane-specific biases are related to cross-sample contamination and, as we have not computed repertoire overlaps for Figure 2, it is unlikely that any of such biases are present. On the other hand, biases related to V/D/J usage, spectratype, etc are quite common in cases when different library preparation and sequencing protocols are applied. However, yellow fever vaccination dataset was obtained using exactly the same protocol for all donors and time points.
 
 > Table 1: Some further analysis and discussion of the degree of
 > correlation between the different summary measures calculated from an
@@ -112,5 +115,5 @@ We will include these SRA accession numbers, laid out in detail below, in the re
 
 Britanova et al. 2016 (ref 6) -- SRA accession # PRJNA316572
 Gupta et al. 2017 (ref 12) -- SRA accession # PRJNA349143
-Prgorelyy et al. 2018 (ref 29) -- SRA accession # PRJNA493983
-Rubelt et al. 202016 (ref 32) -- SRA accession # SRP065626
+Pogorelyy et al. 2018 (ref 29) -- SRA accession # PRJNA493983
+Rubelt et al. 2016 (ref 32) -- SRA accession # SRP065626
