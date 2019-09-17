@@ -75,6 +75,10 @@ In our experience, lane-specific biases are related to cross-sample contaminatio
 On the other hand, biases related to V/D/J usage, spectratype, etc are quite common in cases when different library preparation and sequencing protocols are applied.
 However, these datasets were obtained using exactly the same protocol for all donors and time points.
 
+Rubelt et al did not report which samples were processed and sequenced together, so technincal/batch effects cannot be strictly ruled out for this dataset.
+However, as with the TCR data from Pogorelyy et al, all samples were subjected to the same amplification protocol and lane-specific sequencing effects are not expected to be relevant to the comparisons shown.
+Moreover, the differences observed between naive and memory repertoires are consistent with other reports in the literature, eg Elhanati et al 2015 (https://doi.org/10.1098/rstb.2014.0243).
+
 > Table 1: Some further analysis and discussion of the degree of
 > correlation between the different summary measures calculated from an
 > AIRR dataset (beyond the mention on page 5 that such correlations
