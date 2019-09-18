@@ -65,10 +65,6 @@ Moreover, many of the summaries here can be applied to other repertoires of nucl
 > or samples from different timepoints, were sequenced in different
 > sequencer runs.
 
-%EM Testing for experimental covariates-- not sure what that means.
-%MS It means whether protocol parameters, # of input cells/RNA, sequencing depts, etc can explain differences between samples
-%BJO Perhaps Chaim and Mikhail can chime in here? I'm inclined to believe that the datasets were collected in a rigorous manner.
-
 For the yellow fever dataset, repertoires for both donors were sequenced on the same lane, except for time point 0 which was sequenced separately for both donors.
 As Figure 2 shows clear separation of replicas for all time points, it is unlikely that any major bias was introduced by sequencing time point 0 separately.
 In our experience, lane-specific biases are related to cross-sample contamination and, as we have not computed repertoire overlaps for Figure 2, it is unlikely that any of such biases are present.
